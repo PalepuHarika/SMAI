@@ -37,6 +37,8 @@ class VerifiedVulnerability(BaseModel):
     fixed_code: str
     static_evidence: str
     original_code: str
+    fallback_used: bool = Field(False)
+    fallback_reason: Optional[str] = Field(None)
     retrieved_knowledge: List[Dict[str, Any]] = Field(default_factory=list)
 
 class VulnerabilityReportPayload(BaseModel):
