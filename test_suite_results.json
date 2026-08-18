@@ -1,0 +1,273 @@
+{
+  "TC12_CleanContract.sol": {
+    "is_vulnerable": false,
+    "total_findings": 0,
+    "findings": []
+  },
+  "TC13_Decoy.sol": {
+    "is_vulnerable": true,
+    "total_findings": 1,
+    "findings": [
+      {
+        "finding_id": "finding-da9cac67",
+        "is_vulnerable": true,
+        "vulnerability": "tx-origin",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          4
+        ],
+        "evidence": [
+          {
+            "function": "unknown",
+            "lines": [
+              4
+            ]
+          }
+        ],
+        "explanation": "tx.origin returns the original sender of the entire transaction transaction call chain. If used for authorization (require(tx.origin == owner)), an attacker can trick the owner into interacting with a malicious intermediary contract that calls the target contract on their behalf.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "Always use msg.sender instead of tx.origin for access control and authentication checks.",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Authorization through tx.origin (SWC-115): Use of tx.origin for authorization makes the contract vulnerable to phishing attacks.",
+        "original_code": "pragma solidity ^0.8.0;\ncontract Decoy {\n    // vulnerable reentrancy example\n    string public vulnerability = \"tx.origin\";\n    \n    function doNothing() external pure returns (uint256) {\n        return 42;\n    }\n}",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: 1 validation error for VerifiedVulnerability\nis_vulnerable\n  Field required [type=missing, input_value={'finding_id': 'finding-d...'fallback_reason': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+        "retrieved_knowledge": []
+      }
+    ]
+  },
+  "TC14_MultiFunction.sol": {
+    "is_vulnerable": true,
+    "total_findings": 1,
+    "findings": [
+      {
+        "finding_id": "finding-21dd4567",
+        "is_vulnerable": true,
+        "vulnerability": "reentrancy",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          14,
+          15,
+          16
+        ],
+        "evidence": [
+          {
+            "function": "vulnerableWithdraw",
+            "lines": [
+              14,
+              15,
+              16
+            ]
+          }
+        ],
+        "explanation": "Reentrancy occurs when a contract makes an external call to an untrusted contract before resolving its internal state. The receiving contract can recursively call back into the calling contract's function before the original execution finishes, leading to unauthorized withdrawals or state corruption.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "1. Adhere strictly to the Checks-Effects-Interactions (CEI) pattern: perform all internal state mutations BEFORE executing external calls.\n2. Implement OpenZeppelin's ReentrancyGuard with nonReentrant modifier.\n3. Use pull-over-push payments (withdrawal pattern).",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Potential Reentrancy (SWC-107): External call at line 14 occurs before state variable assignment at line 16.",
+        "original_code": "    function vulnerableWithdraw(uint256 amount) external {\n        require(balances[msg.sender] >= amount, \"Insufficient\");\n        (bool success, ) = msg.sender.call{value: amount}(\"\");\n        require(success, \"Failed\");\n        balances[msg.sender] -= amount;\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: ",
+        "retrieved_knowledge": []
+      }
+    ]
+  },
+  "TC15_Hallucination.sol": {
+    "is_vulnerable": true,
+    "total_findings": 2,
+    "findings": [
+      {
+        "finding_id": "finding-084b8f0d",
+        "is_vulnerable": true,
+        "vulnerability": "tx-origin",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          6
+        ],
+        "evidence": [
+          {
+            "function": "changeAdmin",
+            "lines": [
+              6
+            ]
+          }
+        ],
+        "explanation": "tx.origin returns the original sender of the entire transaction transaction call chain. If used for authorization (require(tx.origin == owner)), an attacker can trick the owner into interacting with a malicious intermediary contract that calls the target contract on their behalf.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "Always use msg.sender instead of tx.origin for access control and authentication checks.",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Authorization through tx.origin (SWC-115): Use of tx.origin for authorization makes the contract vulnerable to phishing attacks.",
+        "original_code": "    function changeAdmin(address newAdmin) external {\n        require(tx.origin == admin, \"Not admin\");\n        admin = newAdmin;\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: 1 validation error for VerifiedVulnerability\nis_vulnerable\n  Field required [type=missing, input_value={'finding_id': 'finding-0...'fallback_reason': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+        "retrieved_knowledge": []
+      },
+      {
+        "finding_id": "finding-ed8d9aa0",
+        "is_vulnerable": true,
+        "vulnerability": "missing-zero-check",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          7
+        ],
+        "evidence": [
+          {
+            "function": "changeAdmin",
+            "lines": [
+              7
+            ]
+          }
+        ],
+        "explanation": "Failing to validate that an address parameter is non-zero before assigning it to a critical state variable (e.g. owner or fee recipient) can lead to accidental burning of funds or permanent loss of administrative control.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "Add require(newAddress != address(0), 'Zero address not allowed') before state assignment.",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Missing Zero Address Validation: Parameter \"newAdmin\" assigned to state variable without validation against address(0).",
+        "original_code": "    function changeAdmin(address newAdmin) external {\n        require(tx.origin == admin, \"Not admin\");\n        admin = newAdmin;\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: 1 validation error for VerifiedVulnerability\nis_vulnerable\n  Field required [type=missing, input_value={'finding_id': 'finding-e...'fallback_reason': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+        "retrieved_knowledge": []
+      }
+    ]
+  },
+  "TC1_TxOriginAuth.sol": {
+    "is_vulnerable": true,
+    "total_findings": 1,
+    "findings": [
+      {
+        "finding_id": "finding-bb005c80",
+        "is_vulnerable": true,
+        "vulnerability": "tx-origin",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          6
+        ],
+        "evidence": [
+          {
+            "function": "withdraw",
+            "lines": [
+              6
+            ]
+          }
+        ],
+        "explanation": "tx.origin returns the original sender of the entire transaction transaction call chain. If used for authorization (require(tx.origin == owner)), an attacker can trick the owner into interacting with a malicious intermediary contract that calls the target contract on their behalf.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "Always use msg.sender instead of tx.origin for access control and authentication checks.",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Authorization through tx.origin (SWC-115): Use of tx.origin for authorization makes the contract vulnerable to phishing attacks.",
+        "original_code": "    function withdraw(uint256 amount, address payable recipient) external {\n        require(tx.origin == owner, \"Not owner\");\n        recipient.transfer(amount);\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: 1 validation error for VerifiedVulnerability\nis_vulnerable\n  Field required [type=missing, input_value={'finding_id': 'finding-b...'fallback_reason': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+        "retrieved_knowledge": []
+      }
+    ]
+  },
+  "TC3_ReentrancyVault.sol": {
+    "is_vulnerable": true,
+    "total_findings": 1,
+    "findings": [
+      {
+        "finding_id": "finding-b5f8606b",
+        "is_vulnerable": true,
+        "vulnerability": "reentrancy",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          6,
+          7,
+          8
+        ],
+        "evidence": [
+          {
+            "function": "withdraw",
+            "lines": [
+              6,
+              7,
+              8
+            ]
+          }
+        ],
+        "explanation": "Reentrancy occurs when a contract makes an external call to an untrusted contract before resolving its internal state. The receiving contract can recursively call back into the calling contract's function before the original execution finishes, leading to unauthorized withdrawals or state corruption.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "1. Adhere strictly to the Checks-Effects-Interactions (CEI) pattern: perform all internal state mutations BEFORE executing external calls.\n2. Implement OpenZeppelin's ReentrancyGuard with nonReentrant modifier.\n3. Use pull-over-push payments (withdrawal pattern).",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Potential Reentrancy (SWC-107): External call at line 6 occurs before state variable assignment at line 8.",
+        "original_code": "    function withdraw(uint256 amount) external {\n        require(balances[msg.sender] >= amount, \"Insufficient\");\n        (bool success, ) = msg.sender.call{value: amount}(\"\");\n        require(success, \"Failed\");\n        balances[msg.sender] -= amount;\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: ",
+        "retrieved_knowledge": []
+      }
+    ]
+  },
+  "TC4_DangerousDelegatecall.sol": {
+    "is_vulnerable": true,
+    "total_findings": 1,
+    "findings": [
+      {
+        "finding_id": "finding-d14e78b4",
+        "is_vulnerable": true,
+        "vulnerability": "dangerous-delegatecall",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          4
+        ],
+        "evidence": [
+          {
+            "function": "execute",
+            "lines": [
+              4
+            ]
+          }
+        ],
+        "explanation": "delegatecall executes code from a target contract inside the caller's storage context. If the target address or calldata is controlled by an attacker, they can modify arbitrary state variables (including owner) or execute selfdestruct.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "1. Only delegatecall to verified, immutable, or strictly governed implementation addresses.\n2. Ensure storage layouts match perfectly across proxy and implementation contracts.",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Dangerous Delegatecall (SWC-112): delegatecall executes code in the context of the calling contract, which can corrupt state if target is untrusted.",
+        "original_code": "    function execute(address target, bytes memory data) external {\n        (bool success, ) = target.delegatecall(data);\n        require(success, \"Failed\");\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: 1 validation error for VerifiedVulnerability\nis_vulnerable\n  Field required [type=missing, input_value={'finding_id': 'finding-d...'fallback_reason': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+        "retrieved_knowledge": []
+      }
+    ]
+  },
+  "TC8_TxOriginFalsePositive.sol": {
+    "is_vulnerable": true,
+    "total_findings": 1,
+    "findings": [
+      {
+        "finding_id": "finding-b62763af",
+        "is_vulnerable": true,
+        "vulnerability": "tx-origin",
+        "severity": "High",
+        "confidence": 1.0,
+        "affected_lines": [
+          5
+        ],
+        "evidence": [
+          {
+            "function": "recordAction",
+            "lines": [
+              5
+            ]
+          }
+        ],
+        "explanation": "tx.origin returns the original sender of the entire transaction transaction call chain. If used for authorization (require(tx.origin == owner)), an attacker can trick the owner into interacting with a malicious intermediary contract that calls the target contract on their behalf.",
+        "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+        "recommendation": "Always use msg.sender instead of tx.origin for access control and authentication checks.",
+        "fixed_code": "// Fallback applied: ReentrancyGuard missing",
+        "static_evidence": "Authorization through tx.origin (SWC-115): Use of tx.origin for authorization makes the contract vulnerable to phishing attacks.",
+        "original_code": "    function recordAction() external {\n        emit UserAction(tx.origin);\n    }",
+        "fallback_used": true,
+        "fallback_reason": "LLM verification failed: 1 validation error for VerifiedVulnerability\nis_vulnerable\n  Field required [type=missing, input_value={'finding_id': 'finding-b...'fallback_reason': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+        "retrieved_knowledge": []
+      }
+    ]
+  }
+}
