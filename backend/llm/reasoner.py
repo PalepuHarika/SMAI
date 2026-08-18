@@ -63,6 +63,11 @@ Analyze the following static analysis finding, code context, and security refere
 ### RETRIEVED SECURITY KNOWLEDGE:
 {kb_text}
 
+### CRITICAL GROUNDING CONSTRAINTS:
+1. Do NOT hallucinate generic textbook examples (e.g., do not use generic function names like "attack()" or "transferOwnership()" unless they actually appear in the snippet).
+2. The "attack_scenario" MUST exclusively reference the exact function name, arguments, and state variables found in the provided FUNCTION CONTEXT.
+3. Your explanation and exploit workflow must be strictly tied to the provided Solidity code logic.
+
 ### INSTRUCTIONS:
 Return a valid JSON object ONLY.
 Required JSON schema:
