@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class LLMReasoner:
     def __init__(self, ollama_url: str = "http://localhost:11434"):
         self.ollama_url = ollama_url
-        self.model = "qwen2.5-coder:latest"
+        self.model = "qwen2.5-coder:1.5b"
         
     def _build_prompt(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[Dict[str, Any]]) -> str:
         kb_text = "No additional context available."
@@ -103,7 +103,7 @@ Required JSON schema:
                     
                 return VerifiedVulnerability(
                     finding_id=finding.id,
-                    vulnerability=data.get("vulnerability", finding.vulnerability_type),
+                    vulnerability=data.get("vulnerability", finding.category),
                     severity=data.get("severity", "Medium"),
                     confidence=data.get("confidence", 0.5),
                     affected_lines=affected_lines,
