@@ -47,6 +47,7 @@ Do not invent:
 
 Before describing an attack, verify that every referenced function, variable, parameter, and call exists in the supplied source.
 If the source does not provide enough information to establish a specific attack path, state that instead of inventing one.
+If an attack path cannot be established directly from the supplied code, provide a cautious generic explanation rather than inventing code elements. When possible, construct the attack scenario using only functions, parameters, state variables, and control flow actually present in the supplied source.
 
 ### INSTRUCTIONS:
 Return a valid JSON object ONLY.
