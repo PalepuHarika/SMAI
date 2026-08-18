@@ -77,7 +77,7 @@ Required JSON schema:
         # Rule-based fallback if Ollama is unavailable
         try:
             import httpx
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=120.0) as client:
                 response = await client.post(
                     f"{self.ollama_url}/api/generate",
                     json={
@@ -113,7 +113,9 @@ Required JSON schema:
                     attack_scenario=data.get("attack_scenario", ""),
                     recommendation=data.get("recommendation", ""),
                     original_code=context.function_source,
-                    fixed_code=data.get("fixed_code")
+                    fixed_code=data.get("fixed_code"),
+                    fallback_used=False,
+                    fallback_reason=None
                 )
         except Exception as e:
             logger.warning(f"LLM verification failed ({str(e)}), falling back to rule-based expert system.")
@@ -134,5 +136,7 @@ Required JSON schema:
                 attack_scenario="Attacker exploits vulnerable pattern based on static evidence.",
                 recommendation=kb_dict.get("mitigation", "Review contract logic.") if kb_dict else "Secure the contract.",
                 original_code=context.function_source,
-                fixed_code="// Fallback applied: ReentrancyGuard missing"
+                fixed_code="// Fallback applied: ReentrancyGuard missing",
+                fallback_used=True,
+                fallback_reason=f"LLM verification failed: {str(e)}"
             )
