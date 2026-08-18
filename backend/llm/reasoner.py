@@ -1,64 +1,33 @@
-import os
 import json
-import httpx
+import logging
 import re
-from typing import List, Dict, Any, Optional
-from backend.core.finding import StaticFinding, CodeContext, VerifiedVulnerability
+from typing import Dict, Any, Optional
+from backend.core.finding import VerifiedVulnerability, StaticFinding, CodeContext
+
+logger = logging.getLogger(__name__)
 
 class LLMReasoner:
-    """
-    LLM reasoning engine that validates static analyzer findings against code context
-    and retrieved security knowledge, returning structured, auditable vulnerability evaluations.
-    """
-
-    def __init__(self, ollama_url: str = "http://localhost:11434", model: str = "qwen2.5-coder:latest"):
-        self.ollama_url = os.getenv("OLLAMA_URL", ollama_url)
-        self.model = os.getenv("LLM_MODEL", model)
-
-    async def verify_finding(
-        self,
-        finding: StaticFinding,
-        context: CodeContext,
-        knowledge: List[Dict[str, Any]]
-    ) -> VerifiedVulnerability:
-        prompt = self._build_prompt(finding, context, knowledge)
+    def __init__(self, ollama_url: str = "http://localhost:11434"):
+        self.ollama_url = ollama_url
+        self.model = "qwen2.5-coder:latest"
         
-        # Try local Ollama endpoint first
-        llm_response = await self._call_ollama(prompt)
-        
-        if llm_response:
-            parsed = self._parse_and_validate(llm_response, finding, context, knowledge)
-            if parsed:
-                return parsed
-
-        # Robust Fallback Expert Rule Engine if Ollama is offline or returns invalid response
-        return self._rule_based_fallback(finding, context, knowledge)
-
-    def _build_prompt(self, finding: StaticFinding, context: CodeContext, knowledge: List[Dict[str, Any]]) -> str:
-        kb_lines = [
-            f"- [{k.get('id')}] {k.get('name')}: {k.get('description')} Mitigation: {k.get('mitigation')}"
-            for k in knowledge
-        ]
-        kb_text = chr(10).join(kb_lines)
-        mods = ', '.join(context.modifiers) if context.modifiers else 'None'
-        svars = ', '.join(context.state_variables) if context.state_variables else 'None'
-        ext_calls = ', '.join(context.external_calls) if context.external_calls else 'None'
-
+    def _build_prompt(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[Dict[str, Any]]) -> str:
+        kb_text = "No additional context available."
+        if kb_context:
+            if isinstance(kb_context, list) and len(kb_context) > 0:
+                kb_context = kb_context[0] # Extract top match
+            if isinstance(kb_context, dict):
+                kb_text = f"Title: {kb_context.get('name', 'Unknown')}\nDescription: {kb_context.get('description', '')}\nMitigation: {kb_context.get('mitigation', '')}"
         return f"""You are an expert Solidity smart contract security auditor.
-Analyze the following static analysis finding, code context, and security reference material to determine if a real vulnerability exists.
+Analyze the following function for vulnerabilities based on the provided static analysis finding and security knowledge.
 
-### STATIC FINDING:
-- Category: {finding.category}
-- Detector Message: {finding.message}
-- Lines: {finding.line_start} - {finding.line_end}
-- Snippet: {finding.snippet}
+### STATIC ANALYSIS FINDING:
+Vulnerability: {finding.category}
+Lines: {finding.line_start} - {finding.line_end}
+Evidence: {finding.message}
 
-### FUNCTION CONTEXT ({context.contract_name}.{context.function_name}):
-- Modifiers: {mods}
-- State Variables: {svars}
-- External Calls: {ext_calls}
-
-
+### FUNCTION CONTEXT (Code to analyze):
+{context.function_source}
 
 ### RETRIEVED SECURITY KNOWLEDGE:
 {kb_text}
@@ -82,17 +51,17 @@ If the source does not provide enough information to establish a specific attack
 ### INSTRUCTIONS:
 Return a valid JSON object ONLY.
 Required JSON schema:
-{
+{{
   "is_vulnerable": true/false,
   "vulnerability": "<Name of Vulnerability>",
   "severity": "Critical" | "High" | "Medium" | "Low" | "Informational",
   "confidence": <float>,
   "affected_lines": [<line_numbers>],
   "evidence": [
-    {
+    {{
       "function": "<actual_function_name_from_context>",
       "lines": [<line_numbers>]
-    }
+    }}
   ],
   "explanation": "<Detailed reason why it is or is not vulnerable>",
   "attack_scenario": "<Step-by-step exploit workflow strictly using the evidence>",
@@ -101,10 +70,14 @@ Required JSON schema:
 }}
 """
 
-    async def _call_ollama(self, prompt: str) -> Optional[str]:
+    async def verify_finding(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[Dict[str, Any]] = None) -> VerifiedVulnerability:
+        prompt = self._build_prompt(finding, context, kb_context)
+        
+        # Rule-based fallback if Ollama is unavailable
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                res = await client.post(
+            import httpx
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
                     f"{self.ollama_url}/api/generate",
                     json={
                         "model": self.model,
@@ -113,91 +86,52 @@ Required JSON schema:
                         "format": "json"
                     }
                 )
-                if res.status_code == 200:
-                    data = res.json()
-                    return data.get("response")
-        except Exception:
-            return None
-        return None
-
-    def _parse_and_validate(
-        self,
-        raw_text: str,
-        finding: StaticFinding,
-        context: CodeContext,
-        knowledge: List[Dict[str, Any]]
-    ) -> Optional[VerifiedVulnerability]:
-        try:
-            json_str = raw_text.strip()
-            match = re.search(r'\{.*\}', json_str, re.DOTALL)
-            if match:
-                json_str = match.group(0)
-
-            # Sanitize trailing commas
-            json_str = re.sub(r',\s*\}', '}', json_str)
-            json_str = re.sub(r',\s*\]', ']', json_str)
+                response.raise_for_status()
+                json_str = response.json()["response"]
+                
+                # Sanitize trailing commas
+                json_str = re.sub(r',\s*\}', '}', json_str)
+                json_str = re.sub(r',\s*\]', ']', json_str)
+                
+                data = json.loads(json_str)
+                
+                # Safely extract lines or fallback to finding
+                affected_lines = data.get("affected_lines", [])
+                if not affected_lines:
+                    affected_lines = list(range(finding.line_start, finding.line_end + 1))
+                    
+                return VerifiedVulnerability(
+                    finding_id=finding.id,
+                    vulnerability=data.get("vulnerability", finding.vulnerability_type),
+                    severity=data.get("severity", "Medium"),
+                    confidence=data.get("confidence", 0.5),
+                    affected_lines=affected_lines,
+                    evidence=data.get("evidence", [{"function": context.function_name, "lines": affected_lines}]),
+                    explanation=data.get("explanation", ""),
+                    static_evidence=finding.message,
+                    attack_scenario=data.get("attack_scenario", ""),
+                    recommendation=data.get("recommendation", ""),
+                    original_code=context.function_source,
+                    fixed_code=data.get("fixed_code")
+                )
+        except Exception as e:
+            logger.warning(f"LLM verification failed ({str(e)}), falling back to rule-based expert system.")
             
-            data = json.loads(json_str)
-
-            valid_severities = ["Critical", "High", "Medium", "Low", "Informational"]
-            sev = str(data.get("severity", "Medium")).capitalize()
-            if sev not in valid_severities:
-                sev = "Medium"
-
-            conf = float(data.get("confidence", 0.8))
-            conf = max(0.0, min(1.0, conf))
-
-            affected_lines = data.get("affected_lines", [finding.line_start])
-            if not isinstance(affected_lines, list):
-                affected_lines = [finding.line_start]
-
+            kb_dict = kb_context[0] if isinstance(kb_context, list) and len(kb_context) > 0 else (kb_context if isinstance(kb_context, dict) else {})
+            
+            # Rule-based Fallback
             return VerifiedVulnerability(
                 finding_id=finding.id,
-                is_vulnerable=bool(data.get("is_vulnerable", True)),
-                vulnerability=str(data.get("vulnerability", finding.category.replace('-', ' ').title())),
-                severity=sev,
-                confidence=conf,
-                affected_lines=affected_lines,
-                evidence=data.get("evidence", [{"function": context.function_name, "lines": affected_lines}]),
-                explanation=str(data.get("explanation", finding.message)),
-                attack_scenario=str(data.get("attack_scenario", "An attacker can trigger this vulnerability to manipulate contract state or drain funds.")),
-                recommendation=str(data.get("recommendation", "Implement standard security guards and follow CEI pattern.")),
-                fixed_code=str(data.get("fixed_code", context.function_source)),
+                is_vulnerable=True,
+                vulnerability=finding.category,
+                severity="High",
+                confidence=1.0,
+                affected_lines=list(range(finding.line_start, finding.line_end + 1)),
+                evidence=[{"function": context.function_name, "lines": list(range(finding.line_start, finding.line_end + 1))}],
+                explanation=kb_dict.get("description", "Vulnerability detected via static analysis.") if kb_dict else "Detected by rule engine.",
                 static_evidence=finding.message,
+                attack_scenario="Attacker exploits vulnerable pattern based on static evidence.",
+                recommendation=kb_dict.get("mitigation", "Review contract logic.") if kb_dict else "Secure the contract.",
                 original_code=context.function_source,
-                retrieved_knowledge=knowledge
+                fixed_code="// Fallback applied: ReentrancyGuard missing"
             )
-        except Exception:
-            return None
-
-    def _rule_based_fallback(
-        self,
-        finding: StaticFinding,
-        context: CodeContext,
-        knowledge: List[Dict[str, Any]]
-    ) -> VerifiedVulnerability:
-        primary_kb = knowledge[0] if knowledge else {}
-        vuln_name = primary_kb.get("name", finding.category.replace('-', ' ').title())
-        severity = primary_kb.get("severity", "High")
-        explanation = f"{vuln_name} identified in function '{context.function_name}'. {finding.message}"
-        attack_scenario = primary_kb.get("exploit_pattern", "Attacker exploits state sequence to execute malicious callbacks or unauthorized state transitions.")
-        recommendation = primary_kb.get("mitigation", "Apply Checks-Effects-Interactions pattern and enforce access control.")
-        
-        fixed_code = primary_kb.get("example_fixed", context.function_source)
-
-        return VerifiedVulnerability(
-            finding_id=finding.id,
-            is_vulnerable=True,
-            vulnerability=vuln_name,
-            severity=severity,
-            confidence=finding.confidence,
-            affected_lines=list(range(finding.line_start, finding.line_end + 1)),
-            evidence=[{"function": context.function_name, "lines": list(range(finding.line_start, finding.line_end + 1))}],
-            explanation=explanation,
-            attack_scenario=attack_scenario,
-            recommendation=recommendation,
-            fixed_code=fixed_code,
-            static_evidence=finding.message,
-                original_code=context.function_source,
-            retrieved_knowledge=knowledge
-        )
