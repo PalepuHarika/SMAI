@@ -21,9 +21,12 @@ export default function RegisterPage() {
       const res = await api.post('/auth/register', { email, password, role });
       login(res.data.access_token, res.data.user);
       navigate(res.data.user.role === 'ADMIN' ? '/admin' : '/dashboard');
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail;
-      setError(msg || 'Registration failed. Please try again.');
+    } catch (err: any) {
+      let msg = err?.response?.data?.detail;
+      if (Array.isArray(msg)) {
+        msg = msg[0]?.msg;
+      }
+      setError(msg || 'Registration failed. Backend API might be unreachable.');
     } finally {
       setLoading(false);
     }
