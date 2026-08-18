@@ -2,9 +2,14 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install dependencies
+# Install uv (astral-sh) for lightning-fast package installation
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Copy dependencies
 COPY backend/requirements.txt backend/
-RUN pip install --no-cache-dir -r backend/requirements.txt
+
+# Use uv to install dependencies 10-100x faster than pip
+RUN uv pip install --system --no-cache -r backend/requirements.txt
 
 # Copy backend code
 COPY backend/ backend/
