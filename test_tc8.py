@@ -67,7 +67,7 @@ Evaluate if this is a genuine vulnerability or a false positive based on the cod
 Return a valid JSON object matching the requested schema. Ensure confidence is a number (it will be normalized to 0.0-1.0).
 """
 
-    model = "qwen2.5-coder:1.5b"
+    model = "qwen2.5-coder:latest"
     schema = VerifiedVulnerability.model_json_schema()
     for field in ["finding_id", "original_code", "static_evidence", "fallback_used", "fallback_reason", "model_used", "raw_response", "static_confidence"]:
         schema["properties"].pop(field, None)
@@ -77,20 +77,30 @@ Return a valid JSON object matching the requested schema. Ensure confidence is a
     payload = {
         "model": model,
         "prompt": prompt,
-        "stream": False,
+        "stream": True,
         "format": schema,
+        "options": {
+            "temperature": 0.2,
+            "repeat_penalty": 1.1,
+            "num_predict": 1024
+        }
     }
     
     try:
+        raw_response = ""
+        print("HTTP STATUS: Streaming started...")
         async with httpx.AsyncClient(timeout=300.0) as client:
-            resp = await client.post("http://localhost:11434/api/generate", json=payload)
-            data = resp.json()
-            raw_response = data.get("response", "")
+            async with client.stream("POST", "http://localhost:11434/api/generate", json=payload) as response:
+                async for line in response.aiter_lines():
+                    if line:
+                        chunk = json.loads(line)
+                        token = chunk.get("response", "")
+                        raw_response += token
+                        print(token, end="", flush=True)
+                        if chunk.get("done", False):
+                            break
             
-            print("HTTP STATUS:", resp.status_code)
-            print("RAW RESPONSE:")
-            print(raw_response)
-            
+            print("\n\nRAW RESPONSE COMPLETE.")
             parsed = json.loads(raw_response)
             if "confidence" in parsed:
                 try:
@@ -121,7 +131,7 @@ Return a valid JSON object matching the requested schema. Ensure confidence is a
             print(f"attack_scenario: {verified.attack_scenario}")
             
     except Exception as e:
-        print(f"Failed - {e}")
+        print(f"\nFailed - {e}")
         
 if __name__ == "__main__":
     asyncio.run(main())

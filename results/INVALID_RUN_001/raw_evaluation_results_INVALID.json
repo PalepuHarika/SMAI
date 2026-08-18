@@ -1,0 +1,752 @@
+[
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0009133815765380859,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0009133815765380859,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 0.88,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0009133815765380859,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 0.9,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00024175643920898438,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 6.961822509765625e-05,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00014901161193847656,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 0.88,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001327991485595703,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001327991485595703,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 0.7,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00012111663818359375,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 7.462501525878906e-05,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 7.462501525878906e-05,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 0.7,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 6.723403930664062e-05,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 7.343292236328125e-05,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 0.88,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 7.128715515136719e-05,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 0.9,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 6.103515625e-05,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 0.9,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 3.886222839355469e-05,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 4.3392181396484375e-05,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 5.054473876953125e-05,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0022058486938476562,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00036787986755371094,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0011401176452636719,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0007343292236328125,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0008628368377685547,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0010654926300048828,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0006682872772216797,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0001201629638671875,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0011065006256103516,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0011172294616699219,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0010838508605957031,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.000141143798828125,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0001571178436279297,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.001024007797241211,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.002177715301513672,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0003368854522705078,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.001760244369506836,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0024683475494384766,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.002292633056640625,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0022580623626708984,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0022568702697753906,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00019311904907226562,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.001672983169555664,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.002210378646850586,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.002249002456665039,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0001423358917236328,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00016379356384277344,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0015683174133300781,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0014498233795166016,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0003514289855957031,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0006864070892333984,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0009179115295410156,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0008795261383056641,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0010440349578857422,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0010609626770019531,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00019121170043945312,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0010671615600585938,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0010793209075927734,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0011267662048339844,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0001392364501953125,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00015425682067871094,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0011305809020996094,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0024602413177490234,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0004477500915527344,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0019378662109375,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0020132064819335938,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0019352436065673828,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0022628307342529297,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.001733541488647461,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00012159347534179688,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0018453598022460938,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0019600391387939453,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.002180337905883789,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0001735687255859375,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00029850006103515625,
+    "is_vulnerable": false,
+    "fallback_used": false,
+    "raw_response": null
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0017290115356445312,
+    "is_vulnerable": null,
+    "fallback_used": true,
+    "fallback_reason": "Pipeline crash: 'CodeContext' object has no attribute 'snippet'"
+  }
+]

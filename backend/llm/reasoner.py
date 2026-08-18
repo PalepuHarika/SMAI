@@ -13,7 +13,7 @@ class LLMReasoner:
         self.ollama_url = ollama_url
         self.model = model
         self.prompt_mode = prompt_mode
-        self.client = httpx.AsyncClient(base_url=self.ollama_url, timeout=30.0)
+        self.client = httpx.AsyncClient(base_url=self.ollama_url, timeout=120.0)
 
     async def verify_finding(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[str] = None) -> VerifiedVulnerability:
         schema = VerifiedVulnerability.model_json_schema()
@@ -36,7 +36,7 @@ Vulnerability: {finding.category}
 Message: {finding.message}
 
 Code Context:
-{context.snippet}
+{context.function_source}
 
 RAG Context (if any):
 {kb_context or 'None'}
@@ -54,7 +54,7 @@ Hypothesis (From Static Analyzer):
 
 Source Code Context:
 ```solidity
-{context.snippet}
+{context.function_source}
 ```
 
 RAG Knowledge Base Context (if available):
@@ -81,7 +81,9 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             "format": schema,
             "stream": False,
             "options": {
-                "temperature": 0.0
+                "temperature": 0.2,
+                "repeat_penalty": 1.1,
+                "num_predict": 1024
             }
         }
 
@@ -131,7 +133,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             explanation=f"Fallback triggered due to LLM failure. Static analyzer warning: {finding.message}",
             attack_scenario="Attacker exploits vulnerable pattern based on static evidence.",
             recommendation="Review the affected lines manually.",
-            original_code=context.snippet,
+            original_code=context.function_source,
             fixed_code="Manual review required.",
             fallback_used=True,
             fallback_reason=fallback_reason,

@@ -28,7 +28,7 @@ async def run_experiment():
     
     eval_results = []
     
-    model = "qwen2.5-coder:1.5b"
+    model = "qwen2.5-coder:latest"
     mode = "C"
     prompt = "P0"
     

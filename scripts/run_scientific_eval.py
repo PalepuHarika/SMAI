@@ -62,7 +62,7 @@ async def run_experiment():
             pass
 
     # 2. Mode B and C for Models
-    models = ["qwen2.5-coder:1.5b", "qwen2.5-coder:latest"]
+    models = ["qwen2.5-coder:latest"]
     modes = ["B", "C"]
     
     for model in models:
