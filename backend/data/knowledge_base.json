@@ -1,0 +1,98 @@
+[
+  {
+    "id": "SWC-107",
+    "name": "Reentrancy",
+    "category": "reentrancy",
+    "severity": "High",
+    "cwe": "CWE-841",
+    "description": "Reentrancy occurs when a contract makes an external call to an untrusted contract before resolving its internal state. The receiving contract can recursively call back into the calling contract's function before the original execution finishes, leading to unauthorized withdrawals or state corruption.",
+    "exploit_pattern": "Contract A calls msg.sender.call{value: amount}(\"\") before updating balances[msg.sender] = 0. Attacker fallback function recursively invokes withdraw(), draining Contract A.",
+    "mitigation": "1. Adhere strictly to the Checks-Effects-Interactions (CEI) pattern: perform all internal state mutations BEFORE executing external calls.\n2. Implement OpenZeppelin's ReentrancyGuard with nonReentrant modifier.\n3. Use pull-over-push payments (withdrawal pattern).",
+    "example_vulnerable": "function withdraw(uint amount) public {\n    require(balances[msg.sender] >= amount);\n    (bool s, ) = msg.sender.call{value: amount}(\"\");\n    require(s);\n    balances[msg.sender] -= amount;\n}",
+    "example_fixed": "function withdraw(uint amount) public nonReentrant {\n    require(balances[msg.sender] >= amount);\n    balances[msg.sender] -= amount;\n    (bool s, ) = msg.sender.call{value: amount}(\"\");\n    require(s);\n}"
+  },
+  {
+    "id": "SWC-104",
+    "name": "Unchecked Call Return Value",
+    "category": "unchecked-call",
+    "severity": "Medium",
+    "cwe": "CWE-252",
+    "description": "Low-level Solidity calls like address.call(), address.send(), and address.delegatecall() return a boolean indicating success or failure instead of reverting automatically on error. If the return value is not checked, execution continues even if the external call failed.",
+    "exploit_pattern": "Contract sends ether via recipient.send(amount) or recipient.call{value: amount}(\"\") without verifying the bool return value. If recipient reverts or runs out of gas, contract state still treats payment as successful.",
+    "mitigation": "1. Always check the boolean return value: (bool success, ) = target.call(...); require(success, 'Call failed');\n2. Prefer OpenZeppelin Address.sendValue() or SafeERC20 for token transfers.",
+    "example_vulnerable": "function sendReward(address payable recipient, uint amount) public {\n    recipient.send(amount);\n    rewardsDistributed[recipient] = true;\n}",
+    "example_fixed": "function sendReward(address payable recipient, uint amount) public {\n    (bool success, ) = recipient.call{value: amount}(\"\");\n    require(success, 'Transfer failed');\n    rewardsDistributed[recipient] = true;\n}"
+  },
+  {
+    "id": "SWC-115",
+    "name": "Authorization through tx.origin",
+    "category": "tx-origin",
+    "severity": "High",
+    "cwe": "CWE-302",
+    "description": "tx.origin returns the original sender of the entire transaction transaction call chain. If used for authorization (require(tx.origin == owner)), an attacker can trick the owner into interacting with a malicious intermediary contract that calls the target contract on their behalf.",
+    "exploit_pattern": "Owner is tricked into calling attack() on MaliciousContract, which then executes victim.transferOwnership(attacker). Since tx.origin is the owner, authorization check passes.",
+    "mitigation": "Always use msg.sender instead of tx.origin for access control and authentication checks.",
+    "example_vulnerable": "function transferOwnership(address newOwner) public {\n    require(tx.origin == owner, 'Not authorized');\n    owner = newOwner;\n}",
+    "example_fixed": "function transferOwnership(address newOwner) public {\n    require(msg.sender == owner, 'Not authorized');\n    owner = newOwner;\n}"
+  },
+  {
+    "id": "SWC-116",
+    "name": "Block Values as a Proxy for Time / Timestamp Dependence",
+    "category": "timestamp-dependence",
+    "severity": "Low",
+    "cwe": "CWE-337",
+    "description": "Using block.timestamp (or now) in conditionals or for pseudo-random number generation introduces vulnerabilities because miners/validators have leeway (up to ~15-30 seconds) to manipulate block timestamps to their advantage.",
+    "exploit_pattern": "Lottery winner calculated via uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 10 == 0. Miner produces blocks only when timestamp yields a winning ticket.",
+    "mitigation": "1. Do not use block.timestamp as a source of randomness; use Chainlink VRF (Verifiable Random Function).\n2. For time-locks, ensure time differences are significantly larger than the 15-second block manipulation window.",
+    "example_vulnerable": "function spinWheel() public payable {\n    if (block.timestamp % 2 == 0) { msg.sender.transfer(address(this).balance); }\n}",
+    "example_fixed": "// Use Chainlink VRF or verifiable off-chain oracle for randomness"
+  },
+  {
+    "id": "SWC-106",
+    "name": "Unprotected SELFDESTRUCT Instruction",
+    "category": "unprotected-selfdestruct",
+    "severity": "Critical",
+    "cwe": "CWE-284",
+    "description": "The selfdestruct opcode (or suicide) destroys the contract on chain and forces all remaining ether to a specified target. If the function invoking selfdestruct lacks strict authorization (e.g. onlyOwner), any arbitrary caller can permanently destroy the contract.",
+    "exploit_pattern": "Unprotected kill() or destroy() function called by an attacker, permanently erasing contract bytecode and draining balance.",
+    "mitigation": "1. Protect destruction functions with strict onlyOwner or multi-sig access control.\n2. Note that EIP-6780 in Dencun hard fork limits selfdestruct behavior to same-transaction creations.",
+    "example_vulnerable": "function destroy() public {\n    selfdestruct(payable(msg.sender));\n}",
+    "example_fixed": "function destroy() public onlyOwner {\n    selfdestruct(payable(owner));\n}"
+  },
+  {
+    "id": "SWC-112",
+    "name": "Delegatecall to Untrusted Callee",
+    "category": "dangerous-delegatecall",
+    "severity": "Critical",
+    "cwe": "CWE-829",
+    "description": "delegatecall executes code from a target contract inside the caller's storage context. If the target address or calldata is controlled by an attacker, they can modify arbitrary state variables (including owner) or execute selfdestruct.",
+    "exploit_pattern": "Contract passes user-supplied target address to address(target).delegatecall(data), allowing attacker to overwrite storage slot 0 (owner) with attacker address.",
+    "mitigation": "1. Only delegatecall to verified, immutable, or strictly governed implementation addresses.\n2. Ensure storage layouts match perfectly across proxy and implementation contracts.",
+    "example_vulnerable": "function execute(address target, bytes memory data) public {\n    target.delegatecall(data);\n}",
+    "example_fixed": "function execute(bytes memory data) public onlyOwner {\n    trustedImplementation.delegatecall(data);\n}"
+  },
+  {
+    "id": "SWC-109",
+    "name": "Uninitialized Storage Pointer",
+    "category": "uninitialized-storage",
+    "severity": "High",
+    "cwe": "CWE-824",
+    "description": "In Solidity < 0.5.0, uninitialized local struct or array variables default to pointing to contract storage slot 0, allowing writes to overwrite critical variables like owner.",
+    "exploit_pattern": "User struct local pointer created without memory keyword; assigning user.id = 1 overwrites owner at slot 0.",
+    "mitigation": "Explicitly declare memory or storage keywords on all complex types and use modern Solidity compiler versions (>= 0.8.0).",
+    "example_vulnerable": "function register() public {\n    User user;\n    user.addr = msg.sender;\n}",
+    "example_fixed": "function register() public {\n    User memory user;\n    user.addr = msg.sender;\n}"
+  },
+  {
+    "id": "SWC-000",
+    "name": "Missing Zero Address Validation",
+    "category": "missing-zero-check",
+    "severity": "Low",
+    "cwe": "CWE-20",
+    "description": "Failing to validate that an address parameter is non-zero before assigning it to a critical state variable (e.g. owner or fee recipient) can lead to accidental burning of funds or permanent loss of administrative control.",
+    "exploit_pattern": "Admin transfers ownership to address(0) due to a typo or null client payload, permanently locking admin functions.",
+    "mitigation": "Add require(newAddress != address(0), 'Zero address not allowed') before state assignment.",
+    "example_vulnerable": "function setFeeRecipient(address _recipient) public onlyOwner {\n    feeRecipient = _recipient;\n}",
+    "example_fixed": "function setFeeRecipient(address _recipient) public onlyOwner {\n    require(_recipient != address(0), 'Zero address prohibited');\n    feeRecipient = _recipient;\n}"
+  }
+]
