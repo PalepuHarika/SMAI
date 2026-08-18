@@ -57,6 +57,19 @@ function FindingCard({ f, idx }: { f: VerifiedVulnerability; idx: number }) {
           <div className="p-5 space-y-4">
             {activeTab === 'explanation' && (
               <>
+                {f.evidence && f.evidence.length > 0 && (
+                  <div className="bg-blue-950/20 border border-blue-500/15 rounded-lg p-4 mb-4">
+                    <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">📜 Grounded Evidence</p>
+                    <ul className="text-sm text-gray-300 list-disc list-inside">
+                      {f.evidence.map((ev, i) => (
+                        <li key={i}>
+                          Function: <code className="text-blue-300 bg-blue-950/50 px-1 rounded">{ev.function}</code> 
+                          (Lines: {ev.lines.join(', ')})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div>
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">🔎 Static Evidence</p>
                   <div className="bg-amber-950/30 border border-amber-500/20 rounded-lg px-4 py-3 text-amber-300 text-xs font-mono leading-relaxed">

@@ -30,6 +30,7 @@ class VerifiedVulnerability(BaseModel):
     severity: str = Field(..., description="Critical, High, Medium, Low, or Informational")
     confidence: float = Field(..., ge=0.0, le=1.0)
     affected_lines: List[int] = Field(default_factory=list)
+    evidence: List[Dict[str, Any]] = Field(default_factory=list)
     explanation: str
     attack_scenario: str
     recommendation: str

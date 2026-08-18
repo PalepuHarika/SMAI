@@ -16,6 +16,7 @@ export interface VerifiedVulnerability {
   severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'Informational';
   confidence: number;
   affected_lines: number[];
+  evidence: { function: string; lines: number[] }[];
   explanation: string;
   attack_scenario: string;
   recommendation: string;

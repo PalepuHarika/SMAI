@@ -63,22 +63,39 @@ Analyze the following static analysis finding, code context, and security refere
 ### RETRIEVED SECURITY KNOWLEDGE:
 {kb_text}
 
-### CRITICAL GROUNDING CONSTRAINTS:
-1. Do NOT hallucinate generic textbook examples (e.g., do not use generic function names like "attack()" or "transferOwnership()" unless they actually appear in the snippet).
-2. The "attack_scenario" MUST exclusively reference the exact function name, arguments, and state variables found in the provided FUNCTION CONTEXT.
-3. Your explanation and exploit workflow must be strictly tied to the provided Solidity code logic.
+### STRICT CODE-GROUNDING DIRECTIVE:
+Every attack scenario MUST be grounded exclusively in the supplied FUNCTION CONTEXT.
+
+Do not invent:
+- functions
+- contracts
+- variables
+- parameters
+- state variables
+- authorization mechanisms
+- calls
+- code paths
+
+Before describing an attack, verify that every referenced function, variable, parameter, and call exists in the supplied source.
+If the source does not provide enough information to establish a specific attack path, state that instead of inventing one.
 
 ### INSTRUCTIONS:
 Return a valid JSON object ONLY.
 Required JSON schema:
-{{
+{
   "is_vulnerable": true/false,
   "vulnerability": "<Name of Vulnerability>",
   "severity": "Critical" | "High" | "Medium" | "Low" | "Informational",
-  "confidence": <float between 0.0 and 1.0>,
+  "confidence": <float>,
   "affected_lines": [<line_numbers>],
+  "evidence": [
+    {
+      "function": "<actual_function_name_from_context>",
+      "lines": [<line_numbers>]
+    }
+  ],
   "explanation": "<Detailed reason why it is or is not vulnerable>",
-  "attack_scenario": "<Step-by-step exploit workflow>",
+  "attack_scenario": "<Step-by-step exploit workflow strictly using the evidence>",
   "recommendation": "<Concrete mitigation steps>",
   "fixed_code": "<Corrected Solidity code snippet>"
 }}
@@ -141,6 +158,7 @@ Required JSON schema:
                 severity=sev,
                 confidence=conf,
                 affected_lines=affected_lines,
+                evidence=data.get("evidence", [{"function": context.function_name, "lines": affected_lines}]),
                 explanation=str(data.get("explanation", finding.message)),
                 attack_scenario=str(data.get("attack_scenario", "An attacker can trigger this vulnerability to manipulate contract state or drain funds.")),
                 recommendation=str(data.get("recommendation", "Implement standard security guards and follow CEI pattern.")),
@@ -174,6 +192,7 @@ Required JSON schema:
             severity=severity,
             confidence=finding.confidence,
             affected_lines=list(range(finding.line_start, finding.line_end + 1)),
+            evidence=[{"function": context.function_name, "lines": list(range(finding.line_start, finding.line_end + 1))}],
             explanation=explanation,
             attack_scenario=attack_scenario,
             recommendation=recommendation,
