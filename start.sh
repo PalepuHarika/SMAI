@@ -16,7 +16,7 @@ sleep 1
 
 # Start React frontend
 echo "[2/2] Starting frontend on http://localhost:5173 ..."
-cd "$ROOT/frontend" && npm run dev &
+cd "$ROOT/frontend" && bun run dev &
 FRONTEND_PID=$!
 
 echo ""
