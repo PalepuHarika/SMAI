@@ -1,16 +1,16 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import List, Optional, Dict, Any
 
 class StaticFinding(BaseModel):
-    id: str = Field(..., description="Unique finding identifier")
-    contract: str = Field(..., description="Target smart contract name")
-    function: str = Field(..., description="Target function name or global scope")
-    line_start: int = Field(..., description="Starting line number of finding (1-indexed)")
-    line_end: int = Field(..., description="Ending line number of finding (1-indexed)")
-    category: str = Field(..., description="Vulnerability category, e.g. reentrancy, unchecked-call")
-    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score of static detector between 0.0 and 1.0")
-    message: str = Field(..., description="Detailed detector message explaining the suspicious pattern")
-    snippet: Optional[str] = Field(None, description="Code snippet around the finding")
+    id: str
+    contract: str
+    function: str
+    line_start: int
+    line_end: int
+    category: str
+    confidence: float
+    message: str
+    snippet: str
 
 class CodeContext(BaseModel):
     contract_name: str
@@ -24,22 +24,23 @@ class CodeContext(BaseModel):
     surrounding_code: str = ""
 
 class VerifiedVulnerability(BaseModel):
-    finding_id: str
-    is_vulnerable: bool
-    vulnerability: str
-    severity: str = Field(..., description="Critical, High, Medium, Low, or Informational")
-    confidence: float = Field(..., ge=0.0, le=1.0)
-    affected_lines: List[int] = Field(default_factory=list)
-    evidence: List[Dict[str, Any]] = Field(default_factory=list)
-    explanation: str
-    attack_scenario: str
-    recommendation: str
-    fixed_code: str
-    static_evidence: str
-    original_code: str
-    fallback_used: bool = Field(False)
-    fallback_reason: Optional[str] = Field(None)
-    retrieved_knowledge: List[Dict[str, Any]] = Field(default_factory=list)
+    finding_id: str = Field(..., description="Unique identifier for the finding")
+    is_vulnerable: bool = Field(..., description="True if a genuine vulnerability, false if a false positive")
+    vulnerability: str = Field(..., description="Vulnerability type/name")
+    severity: str = Field(..., description="Severity: Critical, High, Medium, Low, Informational")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="LLM Confidence score (float MUST be between 0.0 and 1.0, e.g. 0.95)")
+    static_confidence: Optional[float] = Field(None, description="Static analyzer original confidence")
+    affected_lines: List[int] = Field(..., description="List of line numbers affected")
+    evidence: List[Dict[str, Any]] = Field(..., description="Array of evidence objects with 'function' and 'lines'")
+    explanation: str = Field(..., description="Detailed explanation of the vulnerability")
+    attack_scenario: str = Field(..., description="Step by step attack scenario, grounded only in the source")
+    recommendation: str = Field(..., description="Concrete mitigation steps")
+    original_code: str = Field(..., description="Original vulnerable code snippet")
+    fixed_code: str = Field(..., description="Corrected code snippet")
+    fallback_used: bool = Field(False, description="True if LLM verification failed and fallback was used")
+    fallback_reason: Optional[str] = Field(None, description="Reason for fallback if used")
+    model_used: Optional[str] = Field(None, description="Model used for inference")
+    raw_response: Optional[str] = Field(None, description="Raw LLM response string")
 
 class VulnerabilityReportPayload(BaseModel):
     analysis_id: str
@@ -47,8 +48,6 @@ class VulnerabilityReportPayload(BaseModel):
     timestamp: str
     total_findings: int
     is_vulnerable: bool
-    severity_counts: Dict[str, int] = Field(default_factory=lambda: {
-        "Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0
-    })
-    findings: List[VerifiedVulnerability] = Field(default_factory=list)
+    severity_counts: Dict[str, int]
+    findings: List[VerifiedVulnerability]
     summary: str

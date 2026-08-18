@@ -1,0 +1,16 @@
+{
+  "TC1_TxOriginAuth.sol": { "is_vulnerable": true, "category": "tx-origin", "severity": "High" },
+  "TC2_TxOriginOwnerChange.sol": { "is_vulnerable": true, "category": "tx-origin", "severity": "High" },
+  "TC3_ReentrancyVault.sol": { "is_vulnerable": true, "category": "reentrancy", "severity": "High" },
+  "TC3_ReentrancySafe.sol": { "is_vulnerable": false, "category": "none", "severity": "Informational" },
+  "TC4_DangerousDelegatecall.sol": { "is_vulnerable": true, "category": "dangerous-delegatecall", "severity": "High" },
+  "TC4_SafeDelegatecall.sol": { "is_vulnerable": false, "category": "none", "severity": "Informational" },
+  "TC6_MissingAccessControl.sol": { "is_vulnerable": true, "category": "missing-access-control", "severity": "High" },
+  "TC7_UncheckedExternalCall.sol": { "is_vulnerable": true, "category": "unchecked-external-call", "severity": "Medium" },
+  "TC8_TxOriginFalsePositive.sol": { "is_vulnerable": false, "category": "none", "severity": "Informational" },
+  "TC12_CleanContract.sol": { "is_vulnerable": false, "category": "none", "severity": "Informational" },
+  "TC13_Decoy.sol": { "is_vulnerable": false, "category": "none", "severity": "Informational" },
+  "TC14_MultiFunction.sol": { "is_vulnerable": true, "category": "reentrancy", "severity": "High" },
+  "TC15_Hallucination.sol": { "is_vulnerable": true, "category": "tx-origin", "severity": "High" },
+  "TC11_Combined.sol": { "is_vulnerable": true, "category": "multiple", "severity": "Critical" }
+}

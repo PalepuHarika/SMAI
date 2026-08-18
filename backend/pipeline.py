@@ -9,11 +9,6 @@ from backend.rag.retriever import RAGRetriever
 from backend.llm.reasoner import LLMReasoner
 
 class SecurityPipeline:
-    """
-    End-to-End Security Pipeline:
-    Solidity Code -> Static Analyzer -> Context Extractor -> RAG Retrieval -> LLM Reasoner -> Structured Report.
-    """
-
     def __init__(
         self,
         analyzer: Optional[SolidityStaticAnalyzer] = None,
@@ -28,26 +23,43 @@ class SecurityPipeline:
         self.retriever = retriever or RAGRetriever(self.kb)
         self.reasoner = reasoner or LLMReasoner()
 
-    async def scan(self, source_code: str, contract_name: Optional[str] = None) -> VulnerabilityReportPayload:
+    async def scan(self, source_code: str, contract_name: Optional[str] = None, mode: str = "C") -> VulnerabilityReportPayload:
+        # mode A: static only
+        # mode B: static + LLM
+        # mode C: static + RAG + LLM
         analysis_id = f"analysis-{uuid.uuid4().hex[:12]}"
         timestamp = datetime.now(timezone.utc).isoformat()
         
-        # 1. Static Analysis
         raw_findings = self.analyzer.analyze(source_code, contract_name)
-        
         verified_findings: List[VerifiedVulnerability] = []
         severity_counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0}
 
-        # 2. Iterate through each static finding
         for finding in raw_findings:
-            # Code Context Extraction
-            context = self.extractor.extract(source_code, finding)
-            
-            # RAG Knowledge Retrieval
-            knowledge = self.retriever.retrieve(finding, context, top_k=2)
-            
-            # LLM Reasoning & Verification
-            verified = await self.reasoner.verify_finding(finding, context, knowledge)
+            if mode == "A":
+                # Static only - bypass LLM completely, just convert to VerifiedVulnerability
+                verified = VerifiedVulnerability(
+                    finding_id=finding.id,
+                    is_vulnerable=True,
+                    vulnerability=finding.category,
+                    severity="High",
+                    confidence=finding.confidence,
+                    static_confidence=finding.confidence,
+                    affected_lines=list(range(finding.line_start, finding.line_end + 1)),
+                    evidence=[],
+                    explanation=f"Static analyzer flag: {finding.message}",
+                    attack_scenario="N/A",
+                    recommendation="N/A",
+                    original_code="N/A",
+                    fixed_code="N/A",
+                    fallback_used=False
+                )
+            else:
+                context = self.extractor.extract(source_code, finding)
+                knowledge = None
+                if mode == "C":
+                    knowledge = self.retriever.retrieve(finding, context, top_k=2)
+                
+                verified = await self.reasoner.verify_finding(finding, context, knowledge)
             
             if verified.is_vulnerable:
                 verified_findings.append(verified)
@@ -57,11 +69,10 @@ class SecurityPipeline:
                 else:
                     severity_counts["Medium"] += 1
 
-        # Summary Generation
         total_vulns = len(verified_findings)
         is_vuln = total_vulns > 0
         if not is_vuln:
-            summary = f"Security analysis completed for '{contract_name or 'Contract'}'. No critical or high-risk vulnerabilities were identified by static analysis and LLM verification."
+            summary = f"Security analysis completed for '{contract_name or 'Contract'}'. No critical or high-risk vulnerabilities were identified."
         else:
             crit = severity_counts.get("Critical", 0)
             high = severity_counts.get("High", 0)

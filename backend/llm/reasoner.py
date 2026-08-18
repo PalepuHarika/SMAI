@@ -1,142 +1,139 @@
 import json
 import logging
-import re
-from typing import Dict, Any, Optional
-from backend.core.finding import VerifiedVulnerability, StaticFinding, CodeContext
+from typing import Optional, List, Dict, Any
+from pydantic import ValidationError
+
+import httpx
+from backend.core.finding import StaticFinding, CodeContext, VerifiedVulnerability
 
 logger = logging.getLogger(__name__)
 
 class LLMReasoner:
-    def __init__(self, ollama_url: str = "http://localhost:11434"):
+    def __init__(self, ollama_url: str = "http://localhost:11434", model: str = "qwen2.5-coder:latest", prompt_mode: str = "P1"):
         self.ollama_url = ollama_url
-        self.model = "qwen2.5-coder:1.5b"
-        
-    def _build_prompt(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[Dict[str, Any]]) -> str:
-        kb_text = "No additional context available."
-        if kb_context:
-            if isinstance(kb_context, list) and len(kb_context) > 0:
-                kb_context = kb_context[0] # Extract top match
-            if isinstance(kb_context, dict):
-                kb_text = f"Title: {kb_context.get('name', 'Unknown')}\nDescription: {kb_context.get('description', '')}\nMitigation: {kb_context.get('mitigation', '')}"
-        return f"""You are an expert Solidity smart contract security auditor.
-Analyze the following function for vulnerabilities based on the provided static analysis finding and security knowledge.
+        self.model = model
+        self.prompt_mode = prompt_mode
+        self.client = httpx.AsyncClient(base_url=self.ollama_url, timeout=30.0)
 
-### STATIC ANALYSIS FINDING:
+    async def verify_finding(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[str] = None) -> VerifiedVulnerability:
+        schema = VerifiedVulnerability.model_json_schema()
+        schema.pop("title", None)
+        schema.pop("description", None)
+        schema["properties"].pop("fallback_used", None)
+        schema["properties"].pop("fallback_reason", None)
+        schema["properties"].pop("static_confidence", None)
+        if "fallback_used" in schema.get("required", []):
+            schema["required"].remove("fallback_used")
+        if "fallback_reason" in schema.get("required", []):
+            schema["required"].remove("fallback_reason")
+        if "static_confidence" in schema.get("required", []):
+            schema["required"].remove("static_confidence")
+
+        # P0: Minimal Baseline Prompt
+        prompt_p0 = f"""You are a smart contract auditor.
+Review the following vulnerability reported by a static analyzer.
 Vulnerability: {finding.category}
-Lines: {finding.line_start} - {finding.line_end}
-Evidence: {finding.message}
+Message: {finding.message}
 
-### FUNCTION CONTEXT (Code to analyze):
-{context.function_source}
+Code Context:
+{context.snippet}
 
-### RETRIEVED SECURITY KNOWLEDGE:
-{kb_text}
+RAG Context (if any):
+{kb_context or 'None'}
 
-### STRICT CODE-GROUNDING DIRECTIVE:
-Every attack scenario MUST be grounded exclusively in the supplied FUNCTION CONTEXT.
+Is this a real vulnerability? Return JSON matching the schema."""
 
-Do not invent:
-- functions
-- contracts
-- variables
-- parameters
-- state variables
-- authorization mechanisms
-- calls
-- code paths
+        # P1: Current Source-Grounding Prompt
+        prompt_p1 = f"""You are an expert Smart Contract Security Auditor.
+You must verify if the following potential vulnerability reported by a static analyzer is a TRUE POSITIVE or FALSE POSITIVE.
 
-Before describing an attack, verify that every referenced function, variable, parameter, and call exists in the supplied source.
-If the source does not provide enough information to establish a specific attack path, state that instead of inventing one.
-If an attack path cannot be established directly from the supplied code, provide a cautious generic explanation rather than inventing code elements. When possible, construct the attack scenario using only functions, parameters, state variables, and control flow actually present in the supplied source.
+Hypothesis (From Static Analyzer):
+- Category: {finding.category}
+- Message: {finding.message}
+- Line: {finding.line_start}
 
-### INSTRUCTIONS:
-Return a valid JSON object ONLY.
-Required JSON schema:
-{{
-  "is_vulnerable": true/false,
-  "vulnerability": "<Name of Vulnerability>",
-  "severity": "Critical" | "High" | "Medium" | "Low" | "Informational",
-  "confidence": <float>,
-  "affected_lines": [<line_numbers>],
-  "evidence": [
-    {{
-      "function": "<actual_function_name_from_context>",
-      "lines": [<line_numbers>]
-    }}
-  ],
-  "explanation": "<Detailed reason why it is or is not vulnerable>",
-  "attack_scenario": "<Step-by-step exploit workflow strictly using the evidence>",
-  "recommendation": "<Concrete mitigation steps>",
-  "fixed_code": "<Corrected Solidity code snippet>"
-}}
+Source Code Context:
+```solidity
+{context.snippet}
+```
+
+RAG Knowledge Base Context (if available):
+{kb_context or 'No external context available.'}
+
+VERIFICATION DIRECTIVES:
+1. DO NOT TRUST THE STATIC ANALYZER. It often flags keywords without understanding semantics.
+2. If `tx.origin` is used, WHERE is it used?
+   - `tx.origin == admin` or `require(tx.origin == ...)` is SWC-115 (True Positive).
+   - `tx.origin` used only for logging, event emission, informational purposes, or data recording is NOT SWC-115 by itself.
+
+Think carefully about the code. If it is a False Positive, set `is_vulnerable` to false.
+Return valid JSON matching the schema exactly. Do not output anything else.
 """
-
-    async def verify_finding(self, finding: StaticFinding, context: CodeContext, kb_context: Optional[Dict[str, Any]] = None) -> VerifiedVulnerability:
-        prompt = self._build_prompt(finding, context, kb_context)
         
-        # Rule-based fallback if Ollama is unavailable
+        system_prompt = prompt_p1 if self.prompt_mode == "P1" else prompt_p0
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": "You are a smart contract auditor that outputs strictly valid JSON matching the requested schema."},
+                {"role": "user", "content": system_prompt}
+            ],
+            "format": schema,
+            "stream": False,
+            "options": {
+                "temperature": 0.0
+            }
+        }
+
+        fallback_reason = ""
         try:
-            import httpx
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                response = await client.post(
-                    f"{self.ollama_url}/api/generate",
-                    json={
-                        "model": self.model,
-                        "prompt": prompt,
-                        "stream": False,
-                        "format": "json"
-                    }
-                )
-                response.raise_for_status()
-                json_str = response.json()["response"]
-                
-                # Sanitize trailing commas
-                json_str = re.sub(r',\s*\}', '}', json_str)
-                json_str = re.sub(r',\s*\]', ']', json_str)
-                
-                data = json.loads(json_str)
-                
-                # Safely extract lines or fallback to finding
-                affected_lines = data.get("affected_lines", [])
-                if not affected_lines:
-                    affected_lines = list(range(finding.line_start, finding.line_end + 1))
-                    
-                return VerifiedVulnerability(
-                    finding_id=finding.id,
-                    vulnerability=data.get("vulnerability", finding.category),
-                    severity=data.get("severity", "Medium"),
-                    confidence=data.get("confidence", 0.5),
-                    affected_lines=affected_lines,
-                    evidence=data.get("evidence", [{"function": context.function_name, "lines": affected_lines}]),
-                    explanation=data.get("explanation", ""),
-                    static_evidence=finding.message,
-                    attack_scenario=data.get("attack_scenario", ""),
-                    recommendation=data.get("recommendation", ""),
-                    original_code=context.function_source,
-                    fixed_code=data.get("fixed_code"),
-                    fallback_used=False,
-                    fallback_reason=None
-                )
+            response = await self.client.post("/api/chat", json=payload)
+            response.raise_for_status()
+            result_json = response.json()
+            raw_content = result_json.get("message", {}).get("content", "")
+            
+            parsed_data = json.loads(raw_content)
+            
+            if "confidence" in parsed_data:
+                conf = parsed_data["confidence"]
+                if isinstance(conf, (int, float)):
+                    if conf > 1.0:
+                        parsed_data["confidence"] = conf / 100.0
+
+            parsed_data["fallback_used"] = False
+            parsed_data["finding_id"] = finding.id
+            parsed_data["static_confidence"] = finding.confidence
+            
+            return VerifiedVulnerability(**parsed_data)
+            
+        except (httpx.RequestError, httpx.HTTPStatusError) as e:
+            fallback_reason = f"API/Connection Error: {str(e)}"
+            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
+        except json.JSONDecodeError as e:
+            fallback_reason = f"JSON Parsing Error: {str(e)}"
+            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
+        except ValidationError as e:
+            fallback_reason = f"Pydantic Validation Error: {str(e)}"
+            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
         except Exception as e:
-            logger.warning(f"LLM verification failed ({str(e)}), falling back to rule-based expert system.")
-            
-            kb_dict = kb_context[0] if isinstance(kb_context, list) and len(kb_context) > 0 else (kb_context if isinstance(kb_context, dict) else {})
-            
-            # Rule-based Fallback
-            return VerifiedVulnerability(
-                finding_id=finding.id,
-                is_vulnerable=True,
-                vulnerability=finding.category,
-                severity="High",
-                confidence=1.0,
-                affected_lines=list(range(finding.line_start, finding.line_end + 1)),
-                evidence=[{"function": context.function_name, "lines": list(range(finding.line_start, finding.line_end + 1))}],
-                explanation=kb_dict.get("description", "Vulnerability detected via static analysis.") if kb_dict else "Detected by rule engine.",
-                static_evidence=finding.message,
-                attack_scenario="Attacker exploits vulnerable pattern based on static evidence.",
-                recommendation=kb_dict.get("mitigation", "Review contract logic.") if kb_dict else "Secure the contract.",
-                original_code=context.function_source,
-                fixed_code="// Fallback applied: ReentrancyGuard missing",
-                fallback_used=True,
-                fallback_reason=f"LLM verification failed: {str(e)}"
-            )
+            fallback_reason = f"Unexpected Error: {str(e)}"
+            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
+
+        return VerifiedVulnerability(
+            finding_id=finding.id,
+            is_vulnerable=True,
+            vulnerability=finding.category,
+            severity="High",
+            confidence=finding.confidence,
+            static_confidence=finding.confidence,
+            affected_lines=[finding.line_start],
+            evidence=[],
+            explanation=f"Fallback triggered due to LLM failure. Static analyzer warning: {finding.message}",
+            attack_scenario="Attacker exploits vulnerable pattern based on static evidence.",
+            recommendation="Review the affected lines manually.",
+            original_code=context.snippet,
+            fixed_code="Manual review required.",
+            fallback_used=True,
+            fallback_reason=fallback_reason,
+            raw_response=None
+        )

@@ -1,0 +1,1772 @@
+[
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0013496875762939453,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0013496875762939453,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 0.88,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0013496875762939453,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 0.9,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0003647804260253906,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 9.751319885253906e-05,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00012922286987304688,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 0.88,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001609325408935547,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001609325408935547,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 0.7,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001163482666015625,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 8.249282836914062e-05,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 8.249282836914062e-05,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 0.7,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00016427040100097656,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00015044212341308594,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 0.88,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001342296600341797,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 0.9,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00018310546875,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 0.9,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.0001308917999267578,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00010466575622558594,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "A",
+    "model": "static",
+    "inference_time": 0.00011157989501953125,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 0.92,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": "N/A",
+    "evidence": []
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.06469511985778809,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.06469511985778809,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12,
+          13,
+          14,
+          15
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.06469511985778809,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0003833770751953125,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.008432149887084961,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "unknown",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.009202241897583008,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "vulnerableWithdraw",
+        "lines": [
+          14,
+          15,
+          16
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.017252683639526367,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.017252683639526367,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.009632349014282227,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.014894723892211914,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.014894723892211914,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.000171661376953125,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.008158206939697266,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6,
+          7,
+          8
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.008980035781860352,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.007554054260253906,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00013065338134765625,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 9.822845458984375e-05,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.008379220962524414,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "recordAction",
+        "lines": [
+          5
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.03170132637023926,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.03170132637023926,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12,
+          13,
+          14,
+          15
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.03170132637023926,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00035071372985839844,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.010057926177978516,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "unknown",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.007927656173706055,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "vulnerableWithdraw",
+        "lines": [
+          14,
+          15,
+          16
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.020488739013671875,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.020488739013671875,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.009656667709350586,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.018230199813842773,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.018230199813842773,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.0001938343048095703,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.012441873550415039,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6,
+          7,
+          8
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.01175379753112793,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.012245655059814453,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00018358230590820312,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.00011014938354492188,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:1.5b",
+    "inference_time": 0.010124921798706055,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "recordAction",
+        "lines": [
+          5
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.02114105224609375,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.02114105224609375,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12,
+          13,
+          14,
+          15
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.02114105224609375,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0003554821014404297,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0060939788818359375,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "unknown",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.005563020706176758,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "vulnerableWithdraw",
+        "lines": [
+          14,
+          15,
+          16
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.012558698654174805,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.012558698654174805,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.006155490875244141,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.012227296829223633,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.012227296829223633,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00021409988403320312,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.005766630172729492,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6,
+          7,
+          8
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0077321529388427734,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.005337715148925781,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0001418590545654297,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.0001049041748046875,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "B",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.008476495742797852,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "recordAction",
+        "lines": [
+          5
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.02736663818359375,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.02736663818359375,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12,
+          13,
+          14,
+          15
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC11_Combined.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.02736663818359375,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdrawAll",
+        "lines": [
+          12
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC12_CleanContract.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00036334991455078125,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC13_Decoy.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.009794473648071289,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "unknown",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC14_MultiFunction.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.009471893310546875,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "vulnerableWithdraw",
+        "lines": [
+          14,
+          15,
+          16
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.015215396881103516,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC15_Hallucination.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.015215396881103516,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "changeAdmin",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC1_TxOriginAuth.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.007616758346557617,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.016921043395996094,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC2_TxOriginOwnerChange.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.016921043395996094,
+    "is_vulnerable": true,
+    "vulnerability": "missing-zero-check",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "setOwner",
+        "lines": [
+          7
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC3_ReentrancySafe.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00018548965454101562,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC3_ReentrancyVault.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.009491920471191406,
+    "is_vulnerable": true,
+    "vulnerability": "reentrancy",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "withdraw",
+        "lines": [
+          6,
+          7,
+          8
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_DangerousDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.007837057113647461,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          4
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC4_SafeDelegatecall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.008300542831420898,
+    "is_vulnerable": true,
+    "vulnerability": "dangerous-delegatecall",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "execute",
+        "lines": [
+          6
+        ]
+      }
+    ]
+  },
+  {
+    "contract": "TC6_MissingAccessControl.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.00014543533325195312,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC7_UncheckedExternalCall.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 9.870529174804688e-05,
+    "is_vulnerable": false,
+    "vulnerability": null,
+    "severity": null,
+    "confidence": null,
+    "fallback_used": false,
+    "fallback_reason": null,
+    "raw_response": null,
+    "attack_scenario": null,
+    "evidence": []
+  },
+  {
+    "contract": "TC8_TxOriginFalsePositive.sol",
+    "mode": "C",
+    "model": "qwen2.5-coder:latest",
+    "inference_time": 0.01012730598449707,
+    "is_vulnerable": true,
+    "vulnerability": "tx-origin",
+    "severity": "High",
+    "confidence": 1.0,
+    "fallback_used": true,
+    "fallback_reason": "API/Connection Error: All connection attempts failed",
+    "raw_response": "No response generated.",
+    "attack_scenario": "Attacker exploits vulnerable pattern based on static evidence.",
+    "evidence": [
+      {
+        "function": "recordAction",
+        "lines": [
+          5
+        ]
+      }
+    ]
+  }
+]
