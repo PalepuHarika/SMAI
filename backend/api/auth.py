@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,10 +9,17 @@ from backend.core.security import hash_password, verify_password, create_access_
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+ADMIN_BOOTSTRAP_SECRET = os.getenv("ADMIN_BOOTSTRAP_SECRET", "scanner-admin-secret-key-2026")
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
-    role: str = "USER"  # USER or ADMIN
+    role: str = "USER"
+
+class BootstrapAdminRequest(BaseModel):
+    email: EmailStr
+    password: str
+    admin_secret: str
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -38,11 +46,44 @@ async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
             detail="Email is already registered"
         )
 
-    role = "ADMIN" if req.role.upper() == "ADMIN" else "USER"
+    # Security fix: Public registration strictly creates USER role accounts
+    role = "USER"
     user = User(
         email=req.email,
         hashed_password=hash_password(req.password),
         role=role
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    token = create_access_token(data={"sub": user.id, "role": user.role})
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user=UserResponse(id=user.id, email=user.email, role=user.role)
+    )
+
+@router.post("/bootstrap-admin", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+async def bootstrap_admin(req: BootstrapAdminRequest, db: AsyncSession = Depends(get_db)):
+    if req.admin_secret != ADMIN_BOOTSTRAP_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid administrative bootstrap secret"
+        )
+
+    stmt = select(User).where(User.email == req.email)
+    res = await db.execute(stmt)
+    if res.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is already registered"
+        )
+
+    user = User(
+        email=req.email,
+        hashed_password=hash_password(req.password),
+        role="ADMIN"
     )
     db.add(user)
     await db.commit()

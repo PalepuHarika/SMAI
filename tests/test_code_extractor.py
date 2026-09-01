@@ -1,11 +1,13 @@
 import pytest
+from pathlib import Path
 from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
 from backend.analyzer.code_extractor import CodeContextExtractor
 
 def test_code_extraction():
     analyzer = SolidityStaticAnalyzer()
     extractor = CodeContextExtractor()
-    with open('/home/penjarla-revanth/.gemini/antigravity/scratch/smart-contract-scanner/contracts/ReentrancyVault.sol') as f:
+    contract_path = Path(__file__).parent.parent / "contracts" / "ReentrancyVault.sol"
+    with open(contract_path) as f:
         src = f.read()
     findings = analyzer.analyze(src, 'ReentrancyVault')
     assert len(findings) > 0

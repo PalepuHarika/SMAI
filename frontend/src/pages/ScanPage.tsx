@@ -13,6 +13,8 @@ export default function ScanPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [scanMode, setScanMode] = useState<'C' | 'A'>('C');
+
   // Initial template
   const defaultCode = '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract Example {\n    // paste your contract here...\n}';
 
@@ -48,7 +50,7 @@ export default function ScanPage() {
     
     setLoading(true);
     try {
-      const res = await api.post('/api/analysis', { contract_name: contractName, source_code: sourceCode });
+      const res = await api.post('/api/analysis', { contract_name: contractName, source_code: sourceCode, mode: scanMode });
       navigate(`/report/${res.data.analysis_id}`, { state: { report: res.data } });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail;
@@ -69,11 +71,19 @@ export default function ScanPage() {
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex-1 flex flex-col">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-5">
-            <div className="flex gap-4">
-              <div className="flex-1">
+            <div className="flex gap-4 flex-wrap items-end">
+              <div className="flex-1 min-w-[200px]">
                 <label className="block text-sm font-medium text-gray-300 mb-1">Contract Name</label>
                 <input type="text" value={contractName} onChange={e => setContractName(e.target.value)}
                   className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" />
+              </div>
+              <div className="min-w-[180px]">
+                <label className="block text-sm font-medium text-gray-300 mb-1">Analysis Mode</label>
+                <select value={scanMode} onChange={e => setScanMode(e.target.value as 'C' | 'A')}
+                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="C">Mode C (AI + RAG)</option>
+                  <option value="A">Mode A (Static Only)</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Upload .sol File</label>

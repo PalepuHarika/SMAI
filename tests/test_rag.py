@@ -16,7 +16,8 @@ def test_rag_retrieval():
         line_end=15,
         category='reentrancy',
         confidence=0.9,
-        message='External call occurs before state update'
+        message='External call occurs before state update',
+        snippet='(bool success, ) = msg.sender.call{value: amount}("");'
     )
     context = CodeContext(
         contract_name='Vault',

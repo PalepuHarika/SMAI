@@ -12,6 +12,7 @@ export interface AuthState {
 export interface VerifiedVulnerability {
   finding_id: string;
   is_vulnerable: boolean;
+  verification_status?: 'CONFIRMED' | 'REJECTED' | 'UNVERIFIED';
   vulnerability: string;
   severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'Informational';
   confidence: number;
@@ -23,7 +24,11 @@ export interface VerifiedVulnerability {
   fixed_code: string;
   static_evidence: string;
   original_code: string;
-  retrieved_knowledge: Record<string, unknown>[];
+  retrieved_knowledge?: Record<string, unknown>[];
+  contract?: string;
+  function?: string;
+  swc_id?: string;
+  fix_verified?: boolean;
 }
 
 export interface VulnerabilityReport {
@@ -35,6 +40,8 @@ export interface VulnerabilityReport {
   severity_counts: Record<string, number>;
   findings: VerifiedVulnerability[];
   summary: string;
+  security_score?: number;
+  risk_level?: string;
 }
 
 export interface AnalysisHistoryItem {

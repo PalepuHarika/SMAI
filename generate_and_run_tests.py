@@ -198,23 +198,26 @@ contract Hallucination {
 }
 
 def write_contracts():
-    out_dir = Path("/home/penjarla-revanth/.gemini/antigravity/scratch/smart-contract-scanner/contracts/test_suite")
+    base_dir = Path(__file__).parent
+    out_dir = base_dir / "contracts" / "test_suite"
+    out_dir.mkdir(parents=True, exist_ok=True)
     for name, content in contracts.items():
-        with open(out_dir / name, "w") as f:
+        with open(out_dir / name, "w", encoding="utf-8") as f:
             f.write(content.strip())
 
 async def scanner():
     import sys
-    sys.path.append("/home/penjarla-revanth/.gemini/antigravity/scratch/smart-contract-scanner")
+    base_dir = Path(__file__).parent
+    sys.path.insert(0, str(base_dir))
     from backend.pipeline import SecurityPipeline
     
     pipeline = SecurityPipeline()
-    out_dir = Path("/home/penjarla-revanth/.gemini/antigravity/scratch/smart-contract-scanner/contracts/test_suite")
+    out_dir = base_dir / "contracts" / "test_suite"
     results = {}
     
     for contract_file in sorted(out_dir.glob("*.sol")):
         print(f"Scanning {contract_file.name}...")
-        with open(contract_file, "r") as f:
+        with open(contract_file, "r", encoding="utf-8") as f:
             source = f.read()
         try:
             report = await pipeline.scan(source, contract_file.name)
@@ -223,7 +226,7 @@ async def scanner():
             print(f"Error scanning {contract_file.name}: {e}")
             results[contract_file.name] = {"error": str(e)}
             
-    with open("test_suite_results.json", "w") as f:
+    with open(base_dir / "test_suite_results.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
 if __name__ == "__main__":

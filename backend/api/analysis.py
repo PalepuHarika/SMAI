@@ -17,6 +17,7 @@ pipeline = SecurityPipeline()
 class ScanRequest(BaseModel):
     contract_name: Optional[str] = "Contract.sol"
     source_code: str = Field(..., min_length=1)
+    mode: Optional[str] = "C"
 
 class AnalysisListItem(BaseModel):
     id: str
@@ -32,10 +33,10 @@ class ScanResponse(BaseModel):
     status: str
     message: str
 
-async def process_analysis_background(analysis_id: str, source_code: str, contract_name: str):
+async def process_analysis_background(analysis_id: str, source_code: str, contract_name: str, mode: str = "C"):
     try:
         # Run the core security pipeline
-        report_payload = await pipeline.scan(source_code, contract_name)
+        report_payload = await pipeline.scan(source_code, contract_name, mode=mode)
         
         async with AsyncSessionLocal() as db:
             stmt = select(Analysis).where(Analysis.id == analysis_id)
@@ -89,7 +90,7 @@ async def create_analysis(
     db.add(analysis)
     await db.commit()
 
-    background_tasks.add_task(process_analysis_background, analysis_id, req.source_code, req.contract_name)
+    background_tasks.add_task(process_analysis_background, analysis_id, req.source_code, req.contract_name, req.mode or "C")
 
     return ScanResponse(
         analysis_id=analysis_id,
@@ -161,6 +162,11 @@ async def get_analysis_by_id(
     if not rep:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Report data unavailable")
 
+    from backend.pipeline import calculate_security_score
+    from backend.core.finding import VerifiedVulnerability
+    findings_list = [VerifiedVulnerability(**f) if isinstance(f, dict) else f for f in (rep.verified_findings or [])]
+    score, risk = calculate_security_score(findings_list)
+
     return VulnerabilityReportPayload(
         analysis_id=analysis.id,
         contract_name=analysis.contract_name,
@@ -168,6 +174,8 @@ async def get_analysis_by_id(
         total_findings=rep.total_findings,
         is_vulnerable=rep.is_vulnerable,
         severity_counts=rep.severity_counts or {},
-        findings=rep.verified_findings or [],
-        summary=rep.summary
+        findings=findings_list,
+        summary=rep.summary,
+        security_score=score,
+        risk_level=risk
     )

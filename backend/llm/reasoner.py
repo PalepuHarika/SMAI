@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from typing import Optional, List, Dict, Any
 from pydantic import ValidationError
 
@@ -7,6 +8,49 @@ import httpx
 from backend.core.finding import StaticFinding, CodeContext, VerifiedVulnerability
 
 logger = logging.getLogger(__name__)
+
+def _clean_json_str(content: str) -> str:
+    content = content.strip()
+    if content.startswith("```"):
+        content = re.sub(r"^```(?:json)?\s*", "", content)
+        content = re.sub(r"\s*```$", "", content)
+    return content.strip()
+
+def validate_solidity_syntax(code: str) -> bool:
+    if not code or not code.strip() or code == "N/A":
+        return False
+    brace_balance = 0
+    paren_balance = 0
+    in_string = False
+    quote_char = ''
+    i = 0
+    while i < len(code):
+        ch = code[i]
+        if not in_string and (ch == '"' or ch == "'"):
+            in_string = True
+            quote_char = ch
+        elif in_string and ch == quote_char and (i == 0 or code[i-1] != '\\'):
+            in_string = False
+        elif not in_string:
+            if ch == '{':
+                brace_balance += 1
+            elif ch == '}':
+                brace_balance -= 1
+            elif ch == '(':
+                paren_balance += 1
+            elif ch == ')':
+                paren_balance -= 1
+        i += 1
+    return brace_balance == 0 and paren_balance == 0
+
+def rescan_fix(fixed_code: str, category: str) -> bool:
+    try:
+        from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+        analyzer = SolidityStaticAnalyzer()
+        findings = analyzer.analyze(fixed_code)
+        return not any(f.category == category for f in findings)
+    except Exception:
+        return False
 
 class LLMReasoner:
     def __init__(self, ollama_url: str = "http://localhost:11434", model: str = "qwen2.5-coder:latest", prompt_mode: str = "P1"):
@@ -19,15 +63,13 @@ class LLMReasoner:
         schema = VerifiedVulnerability.model_json_schema()
         schema.pop("title", None)
         schema.pop("description", None)
-        schema["properties"].pop("fallback_used", None)
-        schema["properties"].pop("fallback_reason", None)
-        schema["properties"].pop("static_confidence", None)
-        if "fallback_used" in schema.get("required", []):
-            schema["required"].remove("fallback_used")
-        if "fallback_reason" in schema.get("required", []):
-            schema["required"].remove("fallback_reason")
-        if "static_confidence" in schema.get("required", []):
-            schema["required"].remove("static_confidence")
+        for key in [
+            "fallback_used", "fallback_reason", "static_confidence", "model_used",
+            "raw_response", "contract", "function", "swc_id", "fix_verified", "verification_status"
+        ]:
+            schema["properties"].pop(key, None)
+            if key in schema.get("required", []):
+                schema["required"].remove(key)
 
         # P0: Minimal Baseline Prompt
         prompt_p0 = f"""You are a smart contract auditor.
@@ -88,54 +130,81 @@ Return valid JSON matching the schema exactly. Do not output anything else.
         }
 
         fallback_reason = ""
-        try:
-            response = await self.client.post("/api/chat", json=payload)
-            response.raise_for_status()
-            result_json = response.json()
-            raw_content = result_json.get("message", {}).get("content", "")
-            
-            parsed_data = json.loads(raw_content)
-            
-            if "confidence" in parsed_data:
-                conf = parsed_data["confidence"]
-                if isinstance(conf, (int, float)):
-                    if conf > 1.0:
-                        parsed_data["confidence"] = conf / 100.0
+        raw_content = ""
+        max_attempts = 2
 
-            parsed_data["fallback_used"] = False
-            parsed_data["finding_id"] = finding.id
-            parsed_data["static_confidence"] = finding.confidence
-            
-            return VerifiedVulnerability(**parsed_data)
-            
-        except (httpx.RequestError, httpx.HTTPStatusError) as e:
-            fallback_reason = f"API/Connection Error: {str(e)}"
-            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
-        except json.JSONDecodeError as e:
-            fallback_reason = f"JSON Parsing Error: {str(e)}"
-            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
-        except ValidationError as e:
-            fallback_reason = f"Pydantic Validation Error: {str(e)}"
-            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
-        except Exception as e:
-            fallback_reason = f"Unexpected Error: {str(e)}"
-            logger.error(f"LLM verification failed ({fallback_reason}), falling back to rule-based expert system.")
+        for attempt in range(max_attempts):
+            try:
+                response = await self.client.post("/api/chat", json=payload)
+                response.raise_for_status()
+                result_json = response.json()
+                raw_content = result_json.get("message", {}).get("content", "")
+                cleaned = _clean_json_str(raw_content)
+                parsed_data = json.loads(cleaned)
+                
+                if "confidence" in parsed_data:
+                    conf = parsed_data["confidence"]
+                    if isinstance(conf, (int, float)):
+                        if conf > 1.0:
+                            parsed_data["confidence"] = min(1.0, conf / 100.0)
+                        elif conf < 0.0:
+                            parsed_data["confidence"] = 0.0
 
+                parsed_data["finding_id"] = finding.id
+                parsed_data["fallback_used"] = False
+                parsed_data["static_confidence"] = finding.confidence
+                parsed_data["contract"] = finding.contract
+                parsed_data["function"] = finding.function
+                parsed_data["swc_id"] = finding.swc_id
+                parsed_data["static_evidence"] = finding.snippet
+
+                is_vuln = bool(parsed_data.get("is_vulnerable", False))
+                parsed_data["verification_status"] = "CONFIRMED" if is_vuln else "REJECTED"
+
+                fixed_sol = parsed_data.get("fixed_code", "")
+                if fixed_sol and fixed_sol != "N/A" and validate_solidity_syntax(fixed_sol):
+                    parsed_data["fix_verified"] = rescan_fix(fixed_sol, finding.category)
+                else:
+                    parsed_data["fix_verified"] = False
+
+                return VerifiedVulnerability(**parsed_data)
+
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                fallback_reason = f"API/Connection Error: {str(e)}"
+                logger.warning(f"LLM verification connection failed ({fallback_reason}).")
+                break
+            except (json.JSONDecodeError, ValidationError) as e:
+                fallback_reason = f"JSON/Schema Validation Error: {str(e)}"
+                logger.warning(f"Attempt {attempt + 1} validation failed ({fallback_reason}).")
+                if attempt < max_attempts - 1:
+                    payload["messages"].append({"role": "user", "content": f"Correction required: Your output was invalid ({str(e)}). Output strictly valid JSON matching the schema."})
+            except Exception as e:
+                fallback_reason = f"Unexpected Error: {str(e)}"
+                logger.error(f"Unexpected error in LLM verification: {fallback_reason}")
+                break
+
+        # Controlled Fallback: Mark UNVERIFIED, do not falsely confirm vulnerabilities
         return VerifiedVulnerability(
             finding_id=finding.id,
-            is_vulnerable=True,
+            is_vulnerable=False,
+            verification_status="UNVERIFIED",
             vulnerability=finding.category,
-            severity="High",
-            confidence=finding.confidence,
+            severity=finding.severity or "Medium",
+            confidence=0.5,
             static_confidence=finding.confidence,
             affected_lines=[finding.line_start],
             evidence=[],
-            explanation=f"Fallback triggered due to LLM failure. Static analyzer warning: {finding.message}",
-            attack_scenario="Attacker exploits vulnerable pattern based on static evidence.",
+            explanation=f"Static analyzer flagged this candidate, but AI verification was unavailable ({fallback_reason}). This finding remains unverified.",
+            attack_scenario="AI verification was not completed; no attack scenario could be confirmed from source evidence.",
             recommendation="Review the affected lines manually.",
             original_code=context.function_source,
-            fixed_code="Manual review required.",
+            fixed_code="",
             fallback_used=True,
             fallback_reason=fallback_reason,
-            raw_response=None
+            contract=finding.contract,
+            function=finding.function,
+            swc_id=finding.swc_id,
+            fix_verified=False,
+            static_evidence=finding.snippet,
+            raw_response=raw_content if raw_content else None
         )

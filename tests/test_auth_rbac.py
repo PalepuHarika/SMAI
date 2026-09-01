@@ -6,6 +6,9 @@ from httpx import AsyncClient, ASGITransport
 from backend.main import app
 from backend.db.database import init_db
 
+from pathlib import Path
+_contracts_dir = Path(__file__).parent.parent / "contracts"
+
 @pytest.fixture(autouse=True)
 async def setup_db():
     await init_db()
@@ -32,17 +35,27 @@ async def test_full_auth_and_rbac_lifecycle():
         assert res_b.status_code == 201
         headers_b = {"Authorization": f"Bearer {res_b.json()['access_token']}"}
 
-        # 3. Register Admin User
-        res_admin = await client.post("/auth/register", json={
-            "email": f"admin_{_run}@example.com",
-            "password": "adminPassword123!",
+        # 3. Verify that public registration cannot self-grant ADMIN role
+        res_escalate = await client.post("/auth/register", json={
+            "email": f"escalate_{_run}@example.com",
+            "password": "escalatePassword123!",
             "role": "ADMIN"
         })
+        assert res_escalate.status_code == 201
+        assert res_escalate.json()["user"]["role"] == "USER"
+
+        # 4. Register Admin User via secure bootstrap endpoint
+        res_admin = await client.post("/auth/bootstrap-admin", json={
+            "email": f"admin_{_run}@example.com",
+            "password": "adminPassword123!",
+            "admin_secret": "scanner-admin-secret-key-2026"
+        })
         assert res_admin.status_code == 201
+        assert res_admin.json()["user"]["role"] == "ADMIN"
         headers_admin = {"Authorization": f"Bearer {res_admin.json()['access_token']}"}
 
         # 5. User A creates an analysis
-        with open('/home/penjarla-revanth/.gemini/antigravity/scratch/smart-contract-scanner/contracts/ReentrancyVault.sol') as f:
+        with open(_contracts_dir / "ReentrancyVault.sol") as f:
             sol_src = f.read()
 
         scan_res = await client.post("/api/analysis", json={

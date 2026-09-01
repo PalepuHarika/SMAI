@@ -26,8 +26,28 @@ function FindingCard({ f, idx }: { f: VerifiedVulnerability; idx: number }) {
         <div className="flex items-center gap-3 text-left">
           <span className="text-gray-500 text-xs font-mono w-5">#{idx + 1}</span>
           <div>
-            <p className="text-white font-semibold text-sm">{f.vulnerability}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-white font-semibold text-sm">{f.vulnerability}</p>
+              {f.swc_id && <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded font-mono">{f.swc_id}</span>}
+              {f.verification_status && (
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                  f.verification_status === 'CONFIRMED'
+                    ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
+                    : f.verification_status === 'REJECTED'
+                    ? 'bg-blue-950 text-blue-400 border border-blue-500/30'
+                    : 'bg-amber-950 text-amber-400 border border-amber-500/30'
+                }`}>
+                  {f.verification_status}
+                </span>
+              )}
+              {f.fix_verified && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-950 text-green-400 border border-green-500/30">
+                  FIX VERIFIED
+                </span>
+              )}
+            </div>
             <p className="text-gray-400 text-xs mt-0.5">
+              {f.function && <span className="text-blue-300 font-mono">function {f.function} · </span>}
               Lines&nbsp;
               <span className="text-amber-400 font-mono">{f.affected_lines.join(', ')}</span>
               &nbsp;·&nbsp;Confidence&nbsp;
@@ -185,11 +205,24 @@ export default function ReportPage() {
               <h1 className="text-2xl font-bold text-white font-mono">{report.contract_name}</h1>
               <p className="text-gray-400 text-sm mt-1">{new Date(report.timestamp).toLocaleString()}</p>
             </div>
-            <span className={`text-sm font-semibold px-4 py-2 rounded-full border ${
-              report.is_vulnerable ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.2)]' : 'bg-green-500/10 text-green-400 border-green-500/30'
-            }`}>
-              {report.is_vulnerable ? '⚠ Vulnerable' : '✓ Clean'}
-            </span>
+            <div className="flex items-center gap-3">
+              {report.security_score !== undefined && (
+                <span className={`text-sm font-semibold px-4 py-2 rounded-full border font-mono ${
+                  report.security_score >= 80
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                    : report.security_score >= 50
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    : 'bg-red-500/10 text-red-400 border-red-500/30'
+                }`}>
+                  Score: {report.security_score}/100 {report.risk_level ? `· ${report.risk_level}` : ''}
+                </span>
+              )}
+              <span className={`text-sm font-semibold px-4 py-2 rounded-full border ${
+                report.is_vulnerable ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.2)]' : 'bg-green-500/10 text-green-400 border-green-500/30'
+              }`}>
+                {report.is_vulnerable ? '⚠ Vulnerable' : '✓ Clean'}
+              </span>
+            </div>
           </div>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 space-y-4">

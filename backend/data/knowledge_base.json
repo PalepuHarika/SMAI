@@ -94,5 +94,17 @@
     "mitigation": "Add require(newAddress != address(0), 'Zero address not allowed') before state assignment.",
     "example_vulnerable": "function setFeeRecipient(address _recipient) public onlyOwner {\n    feeRecipient = _recipient;\n}",
     "example_fixed": "function setFeeRecipient(address _recipient) public onlyOwner {\n    require(_recipient != address(0), 'Zero address prohibited');\n    feeRecipient = _recipient;\n}"
+  },
+  {
+    "id": "SWC-105",
+    "name": "Unprotected Critical Function / Missing Access Control",
+    "category": "missing-access-control",
+    "severity": "High",
+    "cwe": "CWE-284",
+    "description": "Critical administrative functions (e.g. setting fees, changing ownership, withdrawing funds) that lack access control checks can be called by any arbitrary account, leading to system hijacking or unauthorized parameter alteration.",
+    "exploit_pattern": "Attacker calls setFee(0) or setOwner(attacker) directly because the function is public and has no onlyOwner modifier or authorization check.",
+    "mitigation": "1. Implement access control modifiers like OpenZeppelin Ownable/AccessControl (onlyOwner).\n2. Add require(msg.sender == owner, 'Not authorized'); to sensitive functions.",
+    "example_vulnerable": "function setFee(uint256 newFee) external {\n    fee = newFee;\n}",
+    "example_fixed": "function setFee(uint256 newFee) external onlyOwner {\n    fee = newFee;\n}"
   }
 ]
