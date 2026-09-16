@@ -298,7 +298,7 @@ for name, code in contracts.items():
             actual[f.function] = set()
         actual[f.function].add(f.category)
         if not f.function.startswith("test") and f.function != "onlyTxOrigin":
-             stats["func_err"] += 1
+             print(f"FUNC ERR: {f.function} (category: {f.category})"); stats["func_err"] += 1
     
     for func, (expect_detect, cat) in EXPECTED[name].items():
         stats["total"] += 1

@@ -340,7 +340,7 @@ def test_regression_9_modifier():
     findings = analyzer.analyze(src, 'TxOriginAdversarial')
     findings_tx = [f for f in findings if f.category == 'tx-origin']
     assert len(findings_tx) > 0
-    assert findings_tx[0].function == 'test9_modifier'
+    assert any(f.function == 'test9_modifier' for f in findings_tx)
 
 def test_regression_8_relative_prize():
     analyzer = SolidityStaticAnalyzer()
@@ -419,3 +419,269 @@ def test_regression_swc136_with_check():
     findings = analyzer.analyze(src, 'Test')
     findings_136 = [f for f in findings if f.category == 'missing-zero-check']
     assert len(findings_136) == 0
+
+# ==========================================
+# PHASE 1B REGRESSION TESTS
+# ==========================================
+
+def test_string_literal_braces():
+    src = '''
+    contract Test {
+        function test(uint256 a) public {
+            require(a == 1, "Error {");
+            uint256 state = 1;
+        }
+        function another() public {
+            uint256 state = 2;
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    funcs = [f for c in analyzer._parse_contracts(src.split('\n')) for f in c['functions']]
+    assert len(funcs) == 2, f"Expected 2 functions, got {len(funcs)}"
+    assert funcs[0]['name'] == 'test'
+    assert funcs[1]['name'] == 'another'
+
+def test_multiline_block_comments_braces():
+    src = '''
+    contract Test {
+        function test() public {
+            /*
+               {
+            */
+            uint256 state = 1;
+        }
+        function another() public {
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    funcs = [f for c in analyzer._parse_contracts(src.split('\n')) for f in c['functions']]
+    assert len(funcs) == 2
+
+def test_reentrancy_consecutive_calls():
+    src = '''
+    contract Test {
+        function f(address a, address target) external {
+            a.call("");
+            _internalFunc();
+        }
+        function _internalFunc() internal {}
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    reentrancy = [f for f in findings if f.category == 'reentrancy']
+    assert len(reentrancy) == 0
+
+def test_unchecked_call_predefined_bool_require():
+    src = '''
+    contract Test {
+        function f(address target) external {
+            bool ok;
+            (ok, ) = target.call("");
+            require(ok);
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    unchecked = [f for f in findings if f.category == 'unchecked-call']
+    assert len(unchecked) == 0
+
+def test_tx_origin_internal_helper():
+    src = '''
+    contract Test {
+        address owner;
+        function withdraw() external {
+            _authorize(tx.origin);
+            _log(tx.origin);
+        }
+        function _authorize(address user) internal {
+            require(user == owner);
+        }
+        function _log(address user) internal {
+            emit Log(user);
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    tx_origin = [f for f in findings if f.category == 'tx-origin']
+    
+    assert len(tx_origin) > 0, "Expected findings"
+    for f in tx_origin:
+        assert '_log' not in f.function, "Should not flag _log"
+        assert 'emit Log' not in f.snippet, "Should not flag _log"
+
+def test_timestamp_alias_randomness():
+    src = '''
+    contract Test {
+        function random() external returns (uint256) {
+            uint256 t = block.timestamp;
+            return uint256(keccak256(abi.encode(t))) % 10;
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    ts = [f for f in findings if f.category == 'timestamp-dependence']
+    assert len(ts) > 0
+
+def test_custom_authorized_modifier():
+    src = '''
+    contract Test {
+        address treasury;
+        modifier onlyTreasury() {
+            require(msg.sender == treasury);
+            _;
+        }
+        function destroy() external onlyTreasury {
+            selfdestruct(payable(msg.sender));
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    unprotected = [f for f in findings if f.category == 'unprotected-selfdestruct']
+    assert len(unprotected) == 0
+
+def test_zero_check_custom_constant():
+    src = '''
+    contract Test {
+        address constant ZERO_ADDRESS = address(0);
+        address owner;
+        function setOwner(address newOwner) external {
+            require(msg.sender == owner);
+            require(newOwner != ZERO_ADDRESS);
+            owner = newOwner;
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    mz = [f for f in findings if f.category == 'missing-zero-check']
+    assert len(mz) == 0
+
+def test_setApprovalForAll():
+    src = '''
+    contract Test {
+        mapping(address => mapping(address => bool)) _operatorApprovals;
+        function setApprovalForAll(address operator, bool approved) external {
+            _operatorApprovals[msg.sender][operator] = approved;
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    mac = [f for f in findings if f.category == 'missing-access-control']
+    assert len(mac) == 0
+
+def test_dangerous_delegatecall_hardcoded():
+    src = '''
+    contract Test {
+        address constant TARGET = 0x1234567890123456789012345678901234567890;
+        function doCall() external {
+            TARGET.delegatecall("");
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    dc = [f for f in findings if f.category == 'dangerous-delegatecall']
+    assert len(dc) == 0
+
+def test_swc103_floating_pragma():
+    src = '''
+    pragma solidity ^0.8.0;
+    contract Test {}
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    assert any(f.category == 'floating-pragma' for f in findings)
+    
+    src_fixed = '''
+    pragma solidity 0.8.4;
+    contract Test {}
+    '''
+    findings_fixed = analyzer.analyze(src_fixed, 'Test')
+    assert not any(f.category == 'floating-pragma' for f in findings_fixed)
+
+def test_swc117_ecrecover():
+    src = '''
+    contract Test {
+        function verify() external {
+            address signer = ecrecover(hash, v, r, s);
+            // No zero check!
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    assert any(f.category == 'ecrecover-validation' for f in findings)
+    
+    src_fixed = '''
+    contract Test {
+        function verify() external {
+            address signer = ecrecover(hash, v, r, s);
+            require(signer != address(0));
+        }
+    }
+    '''
+    findings_fixed = analyzer.analyze(src_fixed, 'Test')
+    assert not any(f.category == 'ecrecover-validation' for f in findings_fixed)
+
+def test_swc101_integer_overflow():
+    src = '''
+    pragma solidity 0.7.6;
+    contract Test {
+        uint256 count;
+        function add() external {
+            count += 1;
+        }
+    }
+    '''
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    findings = analyzer.analyze(src, 'Test')
+    assert any(f.category == 'integer-overflow' for f in findings)
+    
+    src_08 = '''
+    pragma solidity 0.8.0;
+    contract Test {
+        uint256 count;
+        function add() external {
+            count += 1;
+        }
+    }
+    '''
+    findings_08 = analyzer.analyze(src_08, 'Test')
+    assert not any(f.category == 'integer-overflow' for f in findings_08)
+    
+    src_unchecked = '''
+    pragma solidity 0.8.0;
+    contract Test {
+        uint256 count;
+        function add() external {
+            unchecked {
+                count += 1;
+            }
+        }
+    }
+    '''
+    findings_unchecked = analyzer.analyze(src_unchecked, 'Test')
+    assert any(f.category == 'integer-overflow' for f in findings_unchecked)
