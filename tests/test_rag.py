@@ -31,3 +31,17 @@ def test_rag_retrieval():
     results = retriever.retrieve(finding, context, top_k=2)
     assert len(results) > 0
     assert results[0]['id'] == 'SWC-107'
+    assert 'similarity_score' in results[0]
+    assert 0.0 <= results[0]['similarity_score'] <= 1.0
+    assert 'relevance_reason' in results[0]
+
+    # Test explainability summary
+    top_score, expl = retriever.get_explainability_summary(results)
+    assert top_score is not None
+    assert "SWC-107" in expl
+
+    # Test LLM context formatting
+    formatted = retriever.format_kb_context_for_llm(results)
+    assert "SWC-107" in formatted
+    assert "Exploit Pattern" in formatted
+    assert "Mitigation" in formatted

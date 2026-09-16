@@ -28,11 +28,7 @@ async def run_experiment():
     
     eval_results = []
     
-<<<<<<< HEAD
-    model = "qwen2.5-coder:latest"
-=======
     models = ["qwen2.5-coder:1.5b", "qwen2.5-coder:latest"]
->>>>>>> 1b46d91 (feat: add scientific evaluation and accuracy dashboard)
     mode = "C"
     prompt = "P0"
     

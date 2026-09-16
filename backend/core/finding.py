@@ -23,6 +23,7 @@ class CodeContext(BaseModel):
     modifiers: List[str] = Field(default_factory=list)
     state_variables: List[str] = Field(default_factory=list)
     external_calls: List[str] = Field(default_factory=list)
+    candidate_slices: List[str] = Field(default_factory=list)
     surrounding_code: str = ""
 
 class VerifiedVulnerability(BaseModel):
@@ -49,6 +50,9 @@ class VerifiedVulnerability(BaseModel):
     swc_id: Optional[str] = Field(None, description="SWC identifier")
     fix_verified: Optional[bool] = Field(None, description="True if rescanning fixed code confirms fix")
     static_evidence: Optional[str] = Field(None, description="Static code evidence snippet")
+    retrieved_knowledge: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="RAG retrieved knowledge items")
+    rag_similarity_score: Optional[float] = Field(None, description="Top RAG cosine similarity score")
+    rag_explanation: Optional[str] = Field(None, description="Explanation of why RAG context supports finding")
 
 class VulnerabilityReportPayload(BaseModel):
     analysis_id: str

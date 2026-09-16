@@ -54,6 +54,9 @@ class CodeContextExtractor:
             if re.search(r'\.(call|transfer|send|delegatecall)\b', clean):
                 external_calls.append(clean)
 
+        func_lines = lines[func_start_line - 1 : func_end_line]
+        candidate_slices = self.extract_candidate_slices(func_lines)
+
         surrounding_start = max(1, func_start_line - 5)
         surrounding_end = min(total_lines, func_end_line + 5)
         surrounding_code = chr(10).join(lines[surrounding_start - 1 : surrounding_end])
@@ -67,8 +70,42 @@ class CodeContextExtractor:
             modifiers=modifiers,
             state_variables=state_variables,
             external_calls=external_calls,
+            candidate_slices=candidate_slices,
             surrounding_code=surrounding_code
         )
+
+    def is_normal_balance_deduction(self, line: str) -> bool:
+        """
+        Determines if an expression is an ordinary caller balance deduction (e.g. balances[msg.sender] -= amount),
+        which is normal accounting and should be filtered from inverted-gatekeeping candidate slices.
+        """
+        clean = re.sub(r'//.*$', '', line).strip()
+        if re.search(r'\b[a-zA-Z0-9_]*balances?\[\s*msg\.sender\s*\]\s*-=', clean):
+            return True
+        if re.search(r'\b[a-zA-Z0-9_]*balances?\[\s*msg\.sender\s*\]\s*=\s*[a-zA-Z0-9_]*balances?\[\s*msg\.sender\s*\]\s*-\s*', clean):
+            return True
+        return False
+
+    def filter_inverted_gatekeeping_slices(self, candidate_slices: List[str]) -> List[str]:
+        """
+        Filters out clearly irrelevant normal balance deductions from candidate slices for inverted-gatekeeping
+        analysis, while preserving genuinely suspicious state modifications.
+        """
+        return [s for s in candidate_slices if not self.is_normal_balance_deduction(s)]
+
+    def extract_candidate_slices(self, func_lines: List[str]) -> List[str]:
+        """
+        Extracts candidate state-modifying slices from the function, applying inverted-gatekeeping
+        filtering to exclude standard caller balance deductions.
+        """
+        raw_slices = []
+        for line in func_lines:
+            clean = re.sub(r'//.*$', '', line).strip()
+            if not clean or clean.startswith('//') or clean.startswith('require') or clean.startswith('if') or clean.startswith('emit') or clean.startswith('assert'):
+                continue
+            if re.search(r'\b[a-zA-Z0-9_\[\]\.]+\s*(=|\+=|-=|\*=|/=|\+\+|--)', clean):
+                raw_slices.append(clean)
+        return self.filter_inverted_gatekeeping_slices(raw_slices)
 
     def _extract_state_variables(self, lines: List[str], before_line_idx: int) -> List[str]:
         state_vars = []

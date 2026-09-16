@@ -39,7 +39,7 @@
     "id": "SWC-116",
     "name": "Block Values as a Proxy for Time / Timestamp Dependence",
     "category": "timestamp-dependence",
-    "severity": "Low",
+    "severity": "Medium",
     "cwe": "CWE-337",
     "description": "Using block.timestamp (or now) in conditionals or for pseudo-random number generation introduces vulnerabilities because miners/validators have leeway (up to ~15-30 seconds) to manipulate block timestamps to their advantage.",
     "exploit_pattern": "Lottery winner calculated via uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 10 == 0. Miner produces blocks only when timestamp yields a winning ticket.",
@@ -75,7 +75,7 @@
     "id": "SWC-109",
     "name": "Uninitialized Storage Pointer",
     "category": "uninitialized-storage",
-    "severity": "High",
+    "severity": "Medium",
     "cwe": "CWE-824",
     "description": "In Solidity < 0.5.0, uninitialized local struct or array variables default to pointing to contract storage slot 0, allowing writes to overwrite critical variables like owner.",
     "exploit_pattern": "User struct local pointer created without memory keyword; assigning user.id = 1 overwrites owner at slot 0.",
@@ -84,7 +84,7 @@
     "example_fixed": "function register() public {\n    User memory user;\n    user.addr = msg.sender;\n}"
   },
   {
-    "id": "SWC-000",
+    "id": "SWC-136",
     "name": "Missing Zero Address Validation",
     "category": "missing-zero-check",
     "severity": "Low",

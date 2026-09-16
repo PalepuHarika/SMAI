@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 from backend.core.finding import StaticFinding, CodeContext, VerifiedVulnerability, VulnerabilityReportPayload
 from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
 from backend.analyzer.code_extractor import CodeContextExtractor
@@ -18,23 +18,50 @@ def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int
         "Informational": 1.0,
     }
 
+    max_severity_weight = 0
+    highest_severity = "Informational"
+
     for f in findings:
         conf = f.confidence if f.confidence is not None else 0.8
-        if f.verification_status == "CONFIRMED":
-            weight = deduction_weights.get(f.severity, 8.0)
+        weight = deduction_weights.get(f.severity, 8.0)
+        if f.verification_status in ["CONFIRMED", "UNVERIFIED"]:
             score -= weight * conf
-        elif f.verification_status == "UNVERIFIED":
-            score -= 3.0 * conf
+            if weight > max_severity_weight:
+                max_severity_weight = weight
+                highest_severity = str(f.severity).title()
 
     final_score = max(0, min(100, int(round(score))))
+    
     if final_score >= 90:
-        risk_level = "Low Risk"
+        base_risk = "Low Risk"
     elif final_score >= 70:
-        risk_level = "Moderate Risk"
+        base_risk = "Moderate Risk"
     elif final_score >= 40:
-        risk_level = "High Risk"
+        base_risk = "High Risk"
     else:
-        risk_level = "Critical Risk"
+        base_risk = "Critical Risk"
+
+    risk_hierarchy = {
+        "Critical Risk": 4,
+        "High Risk": 3,
+        "Moderate Risk": 2,
+        "Low Risk": 1
+    }
+    
+    severity_floor = {
+        "Critical": "Critical Risk",
+        "High": "High Risk",
+        "Medium": "Moderate Risk",
+        "Low": "Low Risk",
+        "Informational": "Low Risk"
+    }
+
+    floor_risk = severity_floor.get(highest_severity, "Low Risk")
+    
+    if risk_hierarchy.get(floor_risk, 1) > risk_hierarchy.get(base_risk, 1):
+        risk_level = floor_risk
+    else:
+        risk_level = base_risk
 
     return final_score, risk_level
 
@@ -68,18 +95,19 @@ class SecurityPipeline:
             if mode == "A":
                 # Static only - use finding severity from analyzer
                 sev = finding.severity or "High"
+                calibrated_conf = round(min(0.90, max(0.60, finding.confidence)), 2)
                 verified = VerifiedVulnerability(
                     finding_id=finding.id,
                     is_vulnerable=True,
                     verification_status="CONFIRMED",
                     vulnerability=finding.category,
                     severity=sev,
-                    confidence=finding.confidence,
+                    confidence=calibrated_conf,
                     static_confidence=finding.confidence,
                     affected_lines=list(range(finding.line_start, finding.line_end + 1)),
                     evidence=[{"function": finding.function, "lines": list(range(finding.line_start, finding.line_end + 1))}],
-                    explanation=f"Static analyzer flag: {finding.message}",
-                    attack_scenario="Static analysis detected a high-risk security pattern without LLM execution.",
+                    explanation=f"Static analyzer detection: {finding.message}",
+                    attack_scenario="Rule-based heuristic pattern flagged in static AST/regex analysis without LLM execution.",
                     recommendation=f"Review and refactor function '{finding.function}' to address {finding.category}.",
                     original_code=finding.snippet,
                     fixed_code="",
@@ -97,15 +125,13 @@ class SecurityPipeline:
                 
                 verified = await self.reasoner.verify_finding(finding, context, knowledge)
             
-            if verified.is_vulnerable or verified.verification_status == "CONFIRMED":
+            if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
                 verified_findings.append(verified)
-                sev = verified.severity
-                if sev in severity_counts:
-                    severity_counts[sev] += 1
-                else:
-                    severity_counts["Medium"] += 1
-            elif verified.verification_status == "UNVERIFIED":
-                verified_findings.append(verified)
+                sev = str(verified.severity).title()
+                if sev not in severity_counts:
+                    sev = "Medium"
+                verified.severity = sev
+                severity_counts[sev] += 1
 
         total_vulns = len(verified_findings)
         is_vuln = total_vulns > 0
