@@ -1,0 +1,18 @@
+{
+  "status": "PARTIAL",
+  "hardware_constraint": "CPU inference too slow (>120s per reasoning step)",
+  "ollama_version": "0.34.1",
+  "model": "qwen2.5-coder:latest",
+  "tests_executed": [
+    "failure_recovery"
+  ],
+  "tests_blocked": [
+    "single_vuln",
+    "safe_contract",
+    "multi_finding",
+    "prompt_injection",
+    "rescan_fix",
+    "variance",
+    "corpus_140"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "BLOCKED_BY_COMPUTE",
+  "reason": "Hardware latency exceeds 120s per LLM invocation, making corpus evaluation impossible.",
+  "static_metrics": {
+    "TP": 97,
+    "TN": 0,
+    "FP": 18,
+    "FN": 0,
+    "Accuracy": 0.84,
+    "Precision": 0.84,
+    "Recall": 1.00,
+    "F1": 0.92
+  },
+  "e2e_metrics": null,
+  "execution_time": "Timeout Exceeded",
+  "dataset_size": 140
+}
