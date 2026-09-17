@@ -1,0 +1,281 @@
+{
+  "TP": 7,
+  "TN": 2,
+  "FP": 1,
+  "FN": 0,
+  "Accuracy": 0.9,
+  "Precision": 0.875,
+  "Recall": 1.0,
+  "F1": 0.9333333333333333,
+  "Brier": 0.07304029999999997,
+  "ECE": 0.3369,
+  "MCE": 1.0,
+  "Risk_Matrix": {
+    "Low Risk": {
+      "Low Risk": 3,
+      "Moderate Risk": 0,
+      "High Risk": 0,
+      "Critical Risk": 0
+    },
+    "Moderate Risk": {
+      "Low Risk": 0,
+      "Moderate Risk": 2,
+      "High Risk": 0,
+      "Critical Risk": 0
+    },
+    "High Risk": {
+      "Low Risk": 1,
+      "Moderate Risk": 0,
+      "High Risk": 2,
+      "Critical Risk": 0
+    },
+    "Critical Risk": {
+      "Low Risk": 0,
+      "Moderate Risk": 0,
+      "High Risk": 0,
+      "Critical Risk": 2
+    }
+  },
+  "Raw_Results": [
+    {
+      "contract": "Eval_Reentrancy_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "reentrancy"
+        ],
+        "expected_severities": [
+          "High"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "pred_confs": [
+        0.923
+      ],
+      "score": 97,
+      "risk": "Low Risk"
+    },
+    {
+      "contract": "Eval_Safe_01.sol",
+      "truth": {
+        "is_vulnerable": false,
+        "expected_vulnerabilities": [],
+        "expected_severities": []
+      },
+      "pred_is_vuln": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "pred_confs": [],
+      "score": 100,
+      "risk": "Low Risk"
+    },
+    {
+      "contract": "Eval_TxOrigin_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "tx-origin"
+        ],
+        "expected_severities": [
+          "High"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma",
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "pred_confs": [
+        0.923,
+        0.891
+      ],
+      "score": 84,
+      "risk": "High Risk"
+    },
+    {
+      "contract": "Eval_Timestamp_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "timestamp-dependence"
+        ],
+        "expected_severities": [
+          "Medium"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma",
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Low",
+        "Medium"
+      ],
+      "pred_confs": [
+        0.923,
+        0.891
+      ],
+      "score": 90,
+      "risk": "Moderate Risk"
+    },
+    {
+      "contract": "Eval_UncheckedCall_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "unchecked-call"
+        ],
+        "expected_severities": [
+          "Medium"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma",
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Low",
+        "Medium"
+      ],
+      "pred_confs": [
+        0.923,
+        0.877
+      ],
+      "score": 90,
+      "risk": "Moderate Risk"
+    },
+    {
+      "contract": "Eval_MissingAccessControl_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "missing-access-control"
+        ],
+        "expected_severities": [
+          "High"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma",
+        "missing-zero-check",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "Low",
+        "Low",
+        "High"
+      ],
+      "pred_confs": [
+        0.923,
+        0.83,
+        0.877
+      ],
+      "score": 82,
+      "risk": "High Risk"
+    },
+    {
+      "contract": "Eval_Safe_MissingAccessControl_02.sol",
+      "truth": {
+        "is_vulnerable": false,
+        "expected_vulnerabilities": [],
+        "expected_severities": []
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "pred_confs": [
+        0.83
+      ],
+      "score": 98,
+      "risk": "Low Risk"
+    },
+    {
+      "contract": "Eval_Delegatecall_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "dangerous-delegatecall"
+        ],
+        "expected_severities": [
+          "Critical"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma",
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Low",
+        "Medium",
+        "Critical"
+      ],
+      "pred_confs": [
+        0.923,
+        0.877,
+        0.909
+      ],
+      "score": 67,
+      "risk": "Critical Risk"
+    },
+    {
+      "contract": "Eval_Selfdestruct_01.sol",
+      "truth": {
+        "is_vulnerable": true,
+        "expected_vulnerabilities": [
+          "unprotected-selfdestruct"
+        ],
+        "expected_severities": [
+          "Critical"
+        ]
+      },
+      "pred_is_vuln": true,
+      "pred_categories": [
+        "floating-pragma",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Low",
+        "Critical"
+      ],
+      "pred_confs": [
+        0.923,
+        0.923
+      ],
+      "score": 74,
+      "risk": "Critical Risk"
+    },
+    {
+      "contract": "Eval_Safe_02.sol",
+      "truth": {
+        "is_vulnerable": false,
+        "expected_vulnerabilities": [],
+        "expected_severities": []
+      },
+      "pred_is_vuln": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "pred_confs": [],
+      "score": 100,
+      "risk": "Low Risk"
+    }
+  ]
+}

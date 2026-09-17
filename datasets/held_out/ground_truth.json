@@ -1,0 +1,1150 @@
+{
+  "Eval_Reentrancy_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Eval_Safe_01.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Eval_TxOrigin_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Eval_Timestamp_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Eval_UncheckedCall_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Eval_MissingAccessControl_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Eval_Safe_MissingAccessControl_02.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Eval_Delegatecall_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Eval_Selfdestruct_01.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Eval_Safe_02.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_10.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_11.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_12.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_13.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Vuln_14.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "reentrancy"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_Reentrancy_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_5.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_6.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_7.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_8.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Reentrancy_Safe_9.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_UncheckedCall_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unchecked-call"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_UncheckedCall_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_UncheckedCall_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_UncheckedCall_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_UncheckedCall_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_UncheckedCall_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_TxOrigin_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_TxOrigin_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_TxOrigin_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_TxOrigin_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_TxOrigin_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_TxOrigin_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Timestamp_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "timestamp-dependence"
+    ],
+    "expected_severities": [
+      "Medium"
+    ]
+  },
+  "Phase4_Timestamp_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Timestamp_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Timestamp_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Timestamp_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Timestamp_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Selfdestruct_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Selfdestruct_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Selfdestruct_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Selfdestruct_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Selfdestruct_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Selfdestruct_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Delegatecall_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "dangerous-delegatecall"
+    ],
+    "expected_severities": [
+      "Critical"
+    ]
+  },
+  "Phase4_Delegatecall_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Delegatecall_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Delegatecall_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Delegatecall_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_Delegatecall_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_AccessControl_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Vuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "missing-access-control"
+    ],
+    "expected_severities": [
+      "High"
+    ]
+  },
+  "Phase4_AccessControl_Safe_0.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_AccessControl_Safe_1.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_AccessControl_Safe_2.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_AccessControl_Safe_3.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_AccessControl_Safe_4.sol": {
+    "is_vulnerable": false,
+    "expected_vulnerabilities": [],
+    "expected_severities": []
+  },
+  "Phase4_FloatingPragma_Vuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "floating-pragma"
+    ],
+    "expected_severities": [
+      "Informational"
+    ]
+  },
+  "Phase4_FloatingPragma_Vuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "floating-pragma"
+    ],
+    "expected_severities": [
+      "Informational"
+    ]
+  },
+  "Phase4_FloatingPragma_Vuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "floating-pragma"
+    ],
+    "expected_severities": [
+      "Informational"
+    ]
+  },
+  "Phase4_FloatingPragma_Vuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "floating-pragma"
+    ],
+    "expected_severities": [
+      "Informational"
+    ]
+  },
+  "Phase4_FloatingPragma_Vuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "floating-pragma"
+    ],
+    "expected_severities": [
+      "Informational"
+    ]
+  },
+  "Phase4_MultiVuln_0.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_1.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_2.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_3.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_4.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_5.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_6.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_7.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_8.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  },
+  "Phase4_MultiVuln_9.sol": {
+    "is_vulnerable": true,
+    "expected_vulnerabilities": [
+      "tx-origin",
+      "reentrancy",
+      "unchecked-call",
+      "unprotected-selfdestruct"
+    ],
+    "expected_severities": [
+      "High",
+      "High",
+      "Medium",
+      "Critical"
+    ]
+  }
+}

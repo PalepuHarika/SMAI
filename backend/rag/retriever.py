@@ -27,6 +27,16 @@ class RAGRetriever:
         else:
             self.tfidf_matrix = None
 
+    def _normalize_solidity(self, text: str) -> str:
+        import re
+        # Remove single-line comments
+        text = re.sub(r'//.*', '', text)
+        # Remove multi-line comments
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+        # Remove string literals
+        text = re.sub(r'".*?"|\'.*?\'', '""', text)
+        return text
+
     def retrieve(self, finding: StaticFinding, context: CodeContext, top_k: int = 2) -> List[Dict[str, Any]]:
         query_parts = [
             finding.category,
@@ -38,9 +48,10 @@ class RAGRetriever:
             ' '.join(context.state_variables[:3])
         ]
         query_text = ' '.join(p for p in query_parts if p).strip()
+        query_text = self._normalize_solidity(query_text)
 
-        # Compute cosine similarities for all entries
-        similarities = [0.0] * len(self.entries)
+        import numpy as np
+        similarities = np.zeros(len(self.entries))
         if self.tfidf_matrix is not None and query_text:
             query_vec = self.vectorizer.transform([query_text])
             similarities = cosine_similarity(query_vec, self.tfidf_matrix)[0]

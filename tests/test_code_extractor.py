@@ -10,9 +10,11 @@ def test_code_extraction():
     with open(contract_path) as f:
         src = f.read()
     findings = analyzer.analyze(src, 'ReentrancyVault')
+    # Filter for the finding the test originally expected (reentrancy)
+    reentrancy_finding = next((f for f in findings if f.category == 'reentrancy'), findings[0])
     assert len(findings) > 0
-    
-    ctx = extractor.extract(src, findings[0])
+
+    ctx = extractor.extract(src, reentrancy_finding)
     assert ctx.contract_name == 'ReentrancyVault'
     assert ctx.function_name == 'withdraw'
     assert 'msg.sender.call' in ctx.function_source

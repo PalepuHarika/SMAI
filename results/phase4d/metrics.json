@@ -1,0 +1,55 @@
+{
+  "static_metrics": {
+    "TP": 97,
+    "TN": 25,
+    "FP": 18,
+    "FN": 0,
+    "Accuracy": 0.8714285714285714,
+    "Precision": 0.8434782608695652,
+    "Recall": 1.0,
+    "F1": 0.9150943396226415
+  },
+  "e2e_metrics": {
+    "TP": 97,
+    "TN": 25,
+    "FP": 18,
+    "FN": 0,
+    "Accuracy": 0.8714285714285714,
+    "Precision": 0.8434782608695652,
+    "Recall": 1.0,
+    "F1": 0.9150943396226415
+  },
+  "calibration": {
+    "brier": 0.10087998571428547,
+    "ece": 0.3230285714285723,
+    "mce": 1.0
+  },
+  "risk_matrix": {
+    "Low Risk": {
+      "Low Risk": 36,
+      "Moderate Risk": 0,
+      "High Risk": 12,
+      "Critical Risk": 0
+    },
+    "Moderate Risk": {
+      "Low Risk": 11,
+      "Moderate Risk": 11,
+      "High Risk": 0,
+      "Critical Risk": 0
+    },
+    "High Risk": {
+      "Low Risk": 0,
+      "Moderate Risk": 0,
+      "High Risk": 38,
+      "Critical Risk": 0
+    },
+    "Critical Risk": {
+      "Low Risk": 11,
+      "Moderate Risk": 0,
+      "High Risk": 0,
+      "Critical Risk": 21
+    }
+  },
+  "execution_time": 7.195879936218262,
+  "dataset_size": 140
+}

@@ -19,8 +19,20 @@ class SecurityKnowledgeBase:
 
     def _load(self):
         if os.path.exists(self.json_path):
-            with open(self.json_path, 'r', encoding='utf-8') as f:
-                self.entries = json.load(f)
+            try:
+                with open(self.json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        self.entries = [d for d in data if isinstance(d, dict) and "id" in d and "category" in d]
+                    else:
+                        print("Error: Knowledge base JSON root must be a list.")
+                        self.entries = []
+            except json.JSONDecodeError as e:
+                print(f"Error loading knowledge base: Malformed JSON. {e}")
+                self.entries = []
+            except Exception as e:
+                print(f"Error loading knowledge base: {e}")
+                self.entries = []
         else:
             self.entries = []
 

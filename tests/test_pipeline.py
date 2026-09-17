@@ -20,7 +20,10 @@ async def test_end_to_end_pipeline():
     assert 0 <= report_a.security_score <= 100
     assert report_a.risk_level in ["Low Risk", "Moderate Risk", "High Risk", "Critical Risk"]
     assert report_a.findings[0].verification_status == "CONFIRMED"
-    assert report_a.findings[0].function == "withdraw"
+    
+    # Verify that the expected reentrancy finding exists and has function withdraw
+    reentrancy_finding = next(f for f in report_a.findings if "reentrancy" in f.vulnerability.lower())
+    assert reentrancy_finding.function == "withdraw"
 
 @pytest.mark.asyncio
 async def test_pipeline_llm_fallback_unverified():
@@ -84,7 +87,7 @@ def test_fix_verification_logic():
 async def test_severity_counting_and_score_consistency():
     pipeline = SecurityPipeline()
     src = """
-    pragma solidity ^0.8.0;
+    pragma solidity 0.8.20;
     contract ReentrancyVaultBug {
         mapping(address => uint256) public balances;
         function withdraw(uint256 amount) public {

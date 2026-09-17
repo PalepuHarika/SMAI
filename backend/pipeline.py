@@ -18,17 +18,48 @@ def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int
         "Informational": 1.0,
     }
 
+    # Strict maximum penalty that can be incurred per severity tier
+    deduction_caps = {
+        "Critical": 100.0,
+        "High": 100.0,
+        "Medium": 30.0,
+        "Low": 20.0,
+        "Informational": 10.0,
+    }
+
+    tier_deductions = {
+        "Critical": 0.0,
+        "High": 0.0,
+        "Medium": 0.0,
+        "Low": 0.0,
+        "Informational": 0.0,
+    }
+
     max_severity_weight = 0
     highest_severity = "Informational"
 
     for f in findings:
         conf = f.confidence if f.confidence is not None else 0.8
+        
+        # Safely handle NaN or invalid types
+        if not isinstance(conf, (int, float)) or conf != conf:
+            conf = 0.8
+        conf = max(0.0, min(1.0, float(conf)))
+        
         weight = deduction_weights.get(f.severity, 8.0)
+        
         if f.verification_status in ["CONFIRMED", "UNVERIFIED"]:
-            score -= weight * conf
+            if f.severity in tier_deductions:
+                tier_deductions[f.severity] += weight * conf
+            
             if weight > max_severity_weight:
                 max_severity_weight = weight
                 highest_severity = str(f.severity).title()
+
+    # Apply the caps and deduct from base score
+    for sev, total_deduction in tier_deductions.items():
+        cap = deduction_caps.get(sev, 100.0)
+        score -= min(total_deduction, cap)
 
     final_score = max(0, min(100, int(round(score))))
     
@@ -91,9 +122,8 @@ class SecurityPipeline:
         verified_findings: List[VerifiedVulnerability] = []
         severity_counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0}
 
-        for finding in raw_findings:
-            if mode == "A":
-                # Static only - use finding severity from analyzer
+        if mode == "A":
+            for finding in raw_findings:
                 sev = finding.severity or "High"
                 calibrated_conf = round(min(0.90, max(0.60, finding.confidence)), 2)
                 verified = VerifiedVulnerability(
@@ -117,21 +147,29 @@ class SecurityPipeline:
                     swc_id=finding.swc_id,
                     static_evidence=finding.snippet
                 )
-            else:
+                verified_findings.append(verified)
+        else:
+            async def verify_single_finding(finding):
                 context = self.extractor.extract(source_code, finding)
                 knowledge = None
                 if mode == "C":
                     knowledge = self.retriever.retrieve(finding, context, top_k=2)
-                
-                verified = await self.reasoner.verify_finding(finding, context, knowledge)
+                return await self.reasoner.verify_finding(finding, context, knowledge)
             
-            if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
-                verified_findings.append(verified)
-                sev = str(verified.severity).title()
-                if sev not in severity_counts:
-                    sev = "Medium"
-                verified.severity = sev
-                severity_counts[sev] += 1
+            import asyncio
+            tasks = [verify_single_finding(f) for f in raw_findings]
+            results = await asyncio.gather(*tasks)
+            
+            for verified in results:
+                if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
+                    verified_findings.append(verified)
+
+        for verified in verified_findings:
+            sev = str(verified.severity).title()
+            if sev not in severity_counts:
+                sev = "Medium"
+            verified.severity = sev
+            severity_counts[sev] += 1
 
         total_vulns = len(verified_findings)
         is_vuln = total_vulns > 0
