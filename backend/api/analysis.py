@@ -56,6 +56,7 @@ async def process_analysis_background(analysis_id: str, source_code: str, contra
                 db.add(report)
                 await db.commit()
     except Exception as e:
+        print(f"PIPELINE EXCEPTION: {repr(e)}")
         async with AsyncSessionLocal() as db:
             stmt = select(Analysis).where(Analysis.id == analysis_id)
             res = await db.execute(stmt)

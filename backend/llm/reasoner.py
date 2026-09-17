@@ -113,7 +113,7 @@ class LLMReasoner:
             self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         self.model = model
         self.prompt_mode = prompt_mode
-        self.client = httpx.AsyncClient(base_url=self.ollama_url, timeout=120.0)
+        self.client = httpx.AsyncClient(base_url=self.ollama_url, timeout=600.0)
 
     async def verify_finding(
         self,

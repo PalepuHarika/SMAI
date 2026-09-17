@@ -1,137 +1,238 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
-const CodeViewer = lazy(() => import('@/components/CodeViewer'));
 import Navbar from '@/components/Navbar';
-import SeverityBadge from '@/components/SeverityBadge';
-import DiffViewer from '@/components/DiffViewer';
-import RiskBar from '@/components/RiskBar';
 import api from '@/api/client';
-import type { VulnerabilityReport, VerifiedVulnerability } from '@/types';
+import { VulnerabilityReport, VerifiedVulnerability } from '@/types';
+import CodeViewer from '@/components/CodeViewer';
 
-const SEVERITIES = ['Critical', 'High', 'Medium', 'Low', 'Informational'];
+function getFriendlyVulnerabilityName(id: string): string {
+  const map: Record<string, string> = {
+    'reentrancy': 'Reentrancy',
+    'tx-origin': 'tx.origin Authorization Bypass',
+    'floating-pragma': 'Floating Pragma',
+    'unprotected-selfdestruct': 'Unprotected Self-Destruct',
+    'unchecked-call': 'Unchecked Call Return Value',
+    'missing-access-control': 'Missing Access Control',
+    'integer-overflow': 'Integer Overflow/Underflow',
+    'timestamp-dependence': 'Timestamp Dependence'
+  };
+  return map[id] || id.replace(/-/g, ' ');
+}
 
-function FindingCard({ f, idx }: { f: VerifiedVulnerability; idx: number }) {
-  const [open, setOpen] = useState(idx === 0);
-  const [activeTab, setActiveTab] = useState<'explanation' | 'code' | 'diff'>('explanation');
-  const hasDiff = !!f.fixed_code && f.fixed_code !== f.original_code && f.fixed_code.trim().length > 0;
+function getSeverityColor(sev: string) {
+  if (sev === 'Critical') return 'text-red-500';
+  if (sev === 'High') return 'text-orange-500';
+  if (sev === 'Medium') return 'text-yellow-400';
+  return 'text-blue-400';
+}
+
+function getRiskColor(risk: string | undefined) {
+  if (risk === 'Critical Risk') return 'text-red-500 border-red-500/30 bg-red-500/10';
+  if (risk === 'High Risk') return 'text-orange-500 border-orange-500/30 bg-orange-500/10';
+  if (risk === 'Moderate Risk') return 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10';
+  return 'text-green-400 border-green-500/30 bg-green-500/10';
+}
+
+function FindingCard({ f }: { f: VerifiedVulnerability }) {
+  const [expanded, setExpanded] = useState(false);
+  const [techDetails, setTechDetails] = useState(false);
+
+  const isConfirmed = f.verification_status === 'CONFIRMED';
+  const isUnverified = f.verification_status === 'UNVERIFIED' || !f.verification_status;
+  
+  const friendlyName = getFriendlyVulnerabilityName(f.vulnerability);
+  const sevColor = getSeverityColor(f.severity);
 
   return (
-    <div className={`rounded-xl overflow-hidden border transition-colors ${f.severity === 'Critical' || f.severity === 'High'
-        ? 'border-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.08)]'
-        : 'border-gray-800'
-      } bg-gray-900`}>
-      <button onClick={() => setOpen(o => !o)}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors">
-        <div className="flex items-center gap-3 text-left">
-          <span className="text-gray-500 text-xs font-mono w-5">#{idx + 1}</span>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-white font-semibold text-sm">{f.vulnerability}</p>
-              {f.swc_id && <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded font-mono">{f.swc_id}</span>}
-              {f.verification_status && (
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                  f.verification_status === 'CONFIRMED'
-                    ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
-                    : f.verification_status === 'REJECTED'
-                    ? 'bg-blue-950 text-blue-400 border border-blue-500/30'
-                    : 'bg-amber-950 text-amber-400 border border-amber-500/30'
-                }`}>
-                  {f.verification_status}
-                </span>
-              )}
-              {f.fix_verified && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-950 text-green-400 border border-green-500/30">
-                  FIX VERIFIED
-                </span>
-              )}
+    <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden mb-4 shadow-sm">
+      {/* Finding Header (always visible) */}
+      <div 
+        className="p-5 cursor-pointer hover:bg-gray-800/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <span className={`text-xs font-bold uppercase px-2 py-1 rounded border border-gray-700 ${sevColor}`}>
+              {isUnverified ? '⚠ POTENTIAL' : '🔴 ' + f.severity.toUpperCase()}
+            </span>
+            <span className="text-gray-400 text-sm font-mono">{f.swc_id || 'Unknown SWC'}</span>
+          </div>
+          <h3 className="text-xl font-bold text-white capitalize">{friendlyName}</h3>
+          
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <div>
+              <span className="text-gray-500">Function: </span>
+              <code className="text-gray-300 font-mono bg-gray-950 px-1.5 py-0.5 rounded">{f.function || 'Global/Unknown'}</code>
             </div>
-            <p className="text-gray-400 text-xs mt-0.5">
-              {f.function && <span className="text-blue-300 font-mono">function {f.function} · </span>}
-              Lines&nbsp;
-              <span className="text-amber-400 font-mono">{f.affected_lines.join(', ')}</span>
-              &nbsp;·&nbsp;Confidence&nbsp;
-              <span className="text-gray-300">{(f.confidence * 100).toFixed(0)}%</span>
-            </p>
+            <div>
+              <span className="text-gray-500">Lines: </span>
+              <span className="text-gray-300 font-mono">{f.affected_lines?.join(', ') || 'N/A'}</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <SeverityBadge severity={f.severity} size="md" showDot />
-          <span className="text-gray-500 text-sm">{open ? '▲' : '▼'}</span>
-        </div>
-      </button>
 
-      {open && (
-        <div className="border-t border-gray-800">
-          <div className="flex border-b border-gray-800 bg-gray-900">
-            {(['explanation', 'code', ...(hasDiff ? ['diff'] : [])] as const).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab as typeof activeTab)}
-                className={`px-5 py-2.5 text-xs font-semibold capitalize transition-colors border-b-2 ${activeTab === tab
-                  ? 'text-white border-blue-500'
-                  : 'text-gray-500 border-transparent hover:text-gray-300'
-                  }`}>
-                {tab === 'code' ? '📄 Code' : tab === 'diff' ? '🛠 Fix Diff' : '💡 Explanation'}
-              </button>
-            ))}
+        <div className="flex flex-col items-start md:items-end gap-2 border-t border-gray-800 md:border-none pt-4 md:pt-0">
+          <div className="text-sm">
+            <span className="text-gray-500">AI Verification: </span>
+            {isConfirmed ? (
+              <span className="text-green-400 font-bold">✓ CONFIRMED</span>
+            ) : isUnverified ? (
+              <span className="text-amber-500 font-bold">⚠ VERIFICATION INCOMPLETE</span>
+            ) : (
+              <span className="text-gray-400 font-bold">✗ REJECTED</span>
+            )}
           </div>
-          <div className="p-5 space-y-4">
-            {activeTab === 'explanation' && (
-              <>
-                {f.evidence && f.evidence.length > 0 && (
-                  <div className="bg-blue-950/20 border border-blue-500/15 rounded-lg p-4 mb-4">
-                    <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">📜 Grounded Evidence</p>
-                    <ul className="text-sm text-gray-300 list-disc list-inside">
-                      {f.evidence.map((ev, i) => (
-                        <li key={i}>
-                          Function: <code className="text-blue-300 bg-blue-950/50 px-1 rounded">{ev.function}</code> 
-                          (Lines: {ev.lines.join(', ')})
-                        </li>
+          <div className="text-sm">
+            <span className="text-gray-500">Confidence: </span>
+            <span className="text-white font-semibold">{(f.confidence * 100).toFixed(1)}%</span>
+          </div>
+          <button className="text-blue-400 text-sm font-medium mt-2 hover:text-blue-300">
+            {expanded ? 'Hide details' : 'Understand This Issue →'}
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded Details */}
+      {expanded && (
+        <div className="p-5 border-t border-gray-800 bg-gray-950/30">
+          
+          {/* Warning for unverified */}
+          {isUnverified && (
+            <div className="mb-8 bg-amber-950/30 border border-amber-500/40 rounded-lg p-5">
+              <h4 className="text-amber-500 font-bold text-lg mb-2 flex items-center gap-2">
+                ⚠ VERIFICATION INCOMPLETE
+              </h4>
+              <p className="text-amber-200/80 mb-4 text-sm leading-relaxed">
+                SMAI's static analyzer detected a potential security issue, but AI verification could not be completed.
+                <br/><br/>
+                <strong className="text-amber-400 block mb-1">IMPORTANT: This does NOT mean the contract is safe.</strong>
+                Review the affected code manually before deployment.
+              </p>
+            </div>
+          )}
+
+          {isConfirmed && (
+            <div className="mb-6">
+              <h4 className="text-red-400 font-bold flex items-center gap-2 mb-2">
+                🔴 CONFIRMED VULNERABILITY
+              </h4>
+            </div>
+          )}
+
+          <div className="space-y-8">
+            {/* 1. What is the problem */}
+            <section>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-2">1. What is the problem?</h4>
+              <p className="text-gray-300 leading-relaxed text-sm">
+                {f.explanation || "Not available"}
+              </p>
+            </section>
+
+            {/* 2. Where is it & 3. Code */}
+            <section>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-2">2 & 3. Where is the problem in my code?</h4>
+              <div className="mb-3 text-sm text-gray-400">
+                Found in <code className="text-gray-300 font-mono">{f.contract || 'contract'}</code> inside <code className="text-gray-300 font-mono">{f.function || 'unknown function'}</code> on lines <code className="text-gray-300 font-mono">{f.affected_lines?.join(', ') || 'N/A'}</code>.
+              </div>
+              <div className="rounded-lg overflow-hidden border border-gray-800">
+                <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 text-xs text-gray-500 font-mono flex justify-between">
+                  <span>Affected lines</span>
+                </div>
+                <Suspense fallback={<div className="p-4 text-gray-500 text-sm">Loading code...</div>}>
+                  <CodeViewer code={f.original_code || "Code unavailable"} language="solidity" highlightLines={f.affected_lines} />
+                </Suspense>
+              </div>
+            </section>
+
+            {/* 4. Why was it flagged */}
+            <section>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-3">4. Why did SMAI flag this?</h4>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                  <h5 className="text-gray-400 text-xs font-bold uppercase mb-2">Static Evidence</h5>
+                  <p className="text-sm text-gray-300 font-mono">{f.static_evidence || "Not available"}</p>
+                </div>
+                
+                {f.retrieved_knowledge && f.retrieved_knowledge.length > 0 && (
+                  <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                    <h5 className="text-gray-400 text-xs font-bold uppercase mb-2">Security Evidence (RAG)</h5>
+                    <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                      {f.retrieved_knowledge.map((k, i) => (
+                        <li key={i}>{String(k.name || k.vulnerability || 'Security Pattern')}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">🔎 Static Evidence</p>
-                  <div className="bg-amber-950/30 border border-amber-500/20 rounded-lg px-4 py-3 text-amber-300 text-xs font-mono leading-relaxed">
-                    {f.static_evidence}
+              </div>
+            </section>
+
+            {/* 5. What could happen */}
+            <section>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-2">5. How could this be exploited?</h4>
+              {isUnverified ? (
+                <div className="bg-amber-950/20 border border-amber-500/20 rounded-lg p-4">
+                  <p className="text-sm text-amber-300">
+                    <strong className="block mb-1">⚡ ATTACK SCENARIO</strong>
+                    AI verification was unavailable, so SMAI could not generate a verified attack scenario. Review the affected lines manually.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-300 leading-relaxed text-sm bg-red-950/10 border border-red-500/10 p-4 rounded-lg">
+                  {f.attack_scenario || "Not available"}
+                </p>
+              )}
+            </section>
+
+            {/* 6. How do I fix it */}
+            <section>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-2">6. How should it be fixed?</h4>
+              <p className="text-gray-300 leading-relaxed text-sm bg-green-950/10 border border-green-500/10 p-4 rounded-lg mb-3">
+                {f.recommendation || "Not available"}
+              </p>
+              {f.fixed_code && f.fixed_code !== 'N/A' && (
+                <div className="rounded-lg overflow-hidden border border-gray-800">
+                  <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 text-xs text-green-400 font-mono font-bold">
+                    Suggested Fix
+                  </div>
+                  <Suspense fallback={<div className="p-4 text-gray-500">Loading code...</div>}>
+                    <CodeViewer code={f.fixed_code} language="solidity" highlightLines={[]} />
+                  </Suspense>
+                </div>
+              )}
+            </section>
+
+            {/* 7. Technical Details */}
+            <section>
+              <button 
+                onClick={() => setTechDetails(!techDetails)}
+                className="text-gray-500 hover:text-gray-300 text-sm font-semibold uppercase tracking-wider flex items-center gap-2"
+              >
+                7. Technical Details {techDetails ? '▲' : '▼'}
+              </button>
+              
+              {techDetails && (
+                <div className="mt-4 bg-gray-900 border border-gray-800 rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="block text-gray-500 text-xs">Category</span>
+                    <span className="text-gray-300 font-mono">{f.vulnerability}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 text-xs">SWC ID</span>
+                    <span className="text-gray-300 font-mono">{f.swc_id || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 text-xs">Backend Status</span>
+                    <span className="text-gray-300 font-mono">{f.verification_status || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 text-xs">Raw Confidence</span>
+                    <span className="text-gray-300 font-mono">{f.confidence}</span>
                   </div>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">💡 Explanation</p>
-                  <p className="text-sm text-gray-300 leading-relaxed">{f.explanation}</p>
-                </div>
-                <div className="bg-red-950/20 border border-red-500/15 rounded-lg p-4">
-                  <p className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-2">⚡ Attack Scenario</p>
-                  <p className="text-sm text-gray-300 leading-relaxed">{f.attack_scenario}</p>
-                </div>
-                <div className="bg-green-950/20 border border-green-500/15 rounded-lg p-4">
-                  <p className="text-xs font-semibold text-green-400 uppercase tracking-wider mb-2">✅ Recommendation</p>
-                  <p className="text-sm text-gray-300 leading-relaxed">{f.recommendation}</p>
-                </div>
-              </>
-            )}
-            {activeTab === 'code' && (
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Flagged code context — affected lines highlighted
-                </p>
-                <Suspense fallback={<div className='text-gray-500 text-xs p-4'>Loading highlighter...</div>}>
-                <CodeViewer
-                  code={f.original_code}
-                  language="solidity"
-                  highlightLines={f.affected_lines}
-                />
-                </Suspense>
-              </div>
-            )}
-            {activeTab === 'diff' && hasDiff && (
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Inline diff — vulnerable pattern vs. secure remediation
-                </p>
-                <DiffViewer original={f.original_code} fixed={f.fixed_code} label={`${f.vulnerability} — Fix`} />
-              </div>
-            )}
+              )}
+            </section>
+
           </div>
         </div>
       )}
@@ -164,7 +265,7 @@ export default function ReportPage() {
            setLoading(false);
         }
       } catch {
-        setError('Report not found or access denied.');
+        setError('Backend connection unavailable. Make sure the SMAI backend is running and try again.');
         setLoading(false);
       }
     };
@@ -173,84 +274,117 @@ export default function ReportPage() {
   }, [id, pollCount]);
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-gray-950 flex flex-col font-sans">
       <Navbar />
       <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
-        <div className="animate-spin text-4xl mb-4">⚙️</div>
-        <p className="font-semibold text-white">Analyzing Smart Contract...</p>
-        <p className="text-sm mt-2 text-gray-500">Running static analysis and LLM verification.</p>
+        <div className="animate-spin text-4xl mb-6">⟳</div>
+        <h2 className="text-xl font-bold text-white mb-2">Analyzing your contract...</h2>
+        <p className="text-sm text-gray-500">SMAI is performing static analysis and AI verification.</p>
       </div>
     </div>
   );
 
   if (error || !report) return (
-    <div className="min-h-screen bg-gray-950"><Navbar />
-      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <p className="text-red-400 mb-4">{error || 'Report unavailable.'}</p>
-        <button onClick={() => navigate('/history')} className="text-blue-400 hover:text-blue-300 text-sm">← Back to History</button>
+    <div className="min-h-screen bg-gray-950 flex flex-col font-sans">
+      <Navbar />
+      <div className="max-w-2xl mx-auto px-6 py-16 text-center w-full flex-1 flex flex-col justify-center">
+        <h2 className="text-xl font-bold text-white mb-2">Backend connection unavailable</h2>
+        <p className="text-gray-400 mb-8">{error}</p>
+        <button onClick={() => navigate('/scan')} className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg inline-block mx-auto">
+          Try Again
+        </button>
       </div>
     </div>
   );
 
-  const totalFindings = report.total_findings;
+  const isSafe = report.findings.length === 0;
+  const riskClass = getRiskColor(report.risk_level);
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-950 font-sans pb-20">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="mb-6">
-          <button onClick={() => navigate('/history')} className="text-gray-500 hover:text-gray-300 text-sm mb-3 block">← Back to History</button>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white font-mono">{report.contract_name}</h1>
-              <p className="text-gray-400 text-sm mt-1">{new Date(report.timestamp).toLocaleString()}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              {report.security_score !== undefined && (
-                <span className={`text-sm font-semibold px-4 py-2 rounded-full border font-mono ${
-                  report.security_score >= 80
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : report.security_score >= 50
-                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                    : 'bg-red-500/10 text-red-400 border-red-500/30'
-                }`}>
-                  Score: {report.security_score}/100 {report.risk_level ? `· ${report.risk_level}` : ''}
-                </span>
-              )}
-              <span className={`text-sm font-semibold px-4 py-2 rounded-full border ${
-                report.is_vulnerable ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.2)]' : 'bg-green-500/10 text-green-400 border-green-500/30'
-              }`}>
-                {report.is_vulnerable ? '⚠ Vulnerable' : '✓ Clean'}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 space-y-4">
-          <p className="text-gray-300 text-sm leading-relaxed">{report.summary}</p>
-          {totalFindings > 0 && <RiskBar counts={report.severity_counts} total={totalFindings} />}
-        </div>
-        {report.findings.length === 0 ? (
-          <div className="text-center py-16 bg-gray-900 border border-green-500/10 rounded-xl shadow-[0_0_24px_rgba(34,197,94,0.06)]">
-            <p className="text-4xl mb-3">✅</p>
-            <p className="text-white font-semibold">No vulnerabilities detected</p>
-            <p className="text-gray-400 text-sm mt-1">Static analysis found no suspicious patterns in this contract.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-white font-semibold">Findings ({report.findings.length})</h2>
-              <div className="flex gap-2">
-                {SEVERITIES.filter(s => (report.severity_counts[s] ?? 0) > 0).map(s => (
-                  <div key={s} className="flex items-center gap-1">
-                    <SeverityBadge severity={s} showDot />
-                    <span className="text-white text-xs font-bold">{report.severity_counts[s]}</span>
-                  </div>
-                ))}
+      <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
+        
+        {/* Navigation */}
+        <button onClick={() => navigate('/scan')} className="text-gray-500 hover:text-gray-300 text-sm mb-6 flex items-center gap-2">
+          ← Back to Scanner
+        </button>
+
+        {/* OVERALL SUMMARY BANNER */}
+        {isSafe ? (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 md:p-12 text-center shadow-lg mb-8">
+            <div className="text-green-500 text-6xl mb-4">✓</div>
+            <h1 className="text-3xl font-extrabold text-white mb-8 tracking-tight">NO VULNERABILITIES DETECTED</h1>
+            
+            <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-8">
+              <div className="bg-gray-950 rounded-lg p-4 border border-gray-800">
+                <p className="text-gray-500 text-xs font-bold uppercase mb-1">Security Score</p>
+                <p className="text-2xl font-bold text-white">{report.security_score} / 100</p>
+              </div>
+              <div className="bg-gray-950 rounded-lg p-4 border border-gray-800">
+                <p className="text-gray-500 text-xs font-bold uppercase mb-1">Risk Level</p>
+                <p className="text-xl font-bold text-green-400 uppercase">{report.risk_level}</p>
               </div>
             </div>
-            {report.findings.map((f, i) => <FindingCard key={f.finding_id} f={f} idx={i} />)}
+
+            <p className="text-gray-300 leading-relaxed max-w-xl mx-auto mb-6">
+              Your contract did not trigger any of the known vulnerability checks used by SMAI. No issues were detected by the current analysis.
+            </p>
+            <p className="text-gray-500 text-xs max-w-md mx-auto">
+              Important note: No automated scanner can guarantee that a smart contract is completely secure. Manual review is always recommended for critical financial code.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 md:p-8 shadow-lg mb-8">
+            <h1 className="text-2xl font-extrabold text-white mb-6 flex items-center gap-3">
+              <span className="text-amber-500">⚠</span> SECURITY ISSUES DETECTED
+            </h1>
+            
+            <div className="flex flex-wrap gap-4 mb-6">
+              <div className="bg-gray-950 rounded-lg p-4 border border-gray-800 min-w-[140px]">
+                <p className="text-gray-500 text-xs font-bold uppercase mb-1">Security Score</p>
+                <p className="text-2xl font-bold text-white">{report.security_score} / 100</p>
+              </div>
+              <div className={`rounded-lg p-4 border min-w-[140px] ${riskClass}`}>
+                <p className="text-current/60 text-xs font-bold uppercase mb-1">Risk Level</p>
+                <p className="text-xl font-bold text-current uppercase">{report.risk_level}</p>
+              </div>
+            </div>
+
+            <p className="text-gray-300 text-sm mb-4">
+              Your score reflects the security findings identified during this scan. 
+              <strong> {report.findings.length} security {report.findings.length === 1 ? 'issue was' : 'issues were'} detected.</strong>
+            </p>
+
+            {/* Severity Breakdown */}
+            <div className="flex gap-3">
+              {['Critical', 'High', 'Medium', 'Low', 'Informational'].map(sev => {
+                const count = report.severity_counts[sev] || 0;
+                if (count === 0) return null;
+                return (
+                  <span key={sev} className="text-xs font-bold px-3 py-1 bg-gray-950 border border-gray-800 rounded text-gray-300">
+                    <span className={getSeverityColor(sev)}>{count}</span> {sev}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         )}
+
+        {/* FINDINGS LIST */}
+        {!isSafe && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white">Vulnerability Findings</h2>
+              <span className="text-gray-500 text-sm">{report.findings.length} total</span>
+            </div>
+            
+            {report.findings.map(f => (
+              <FindingCard key={f.finding_id} f={f} />
+            ))}
+          </div>
+        )}
+
       </div>
     </div>
   );

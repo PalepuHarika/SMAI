@@ -3,157 +3,186 @@ import { useNavigate } from 'react-router-dom';
 import Editor, { OnMount } from '@monaco-editor/react';
 import Navbar from '@/components/Navbar';
 import api from '@/api/client';
-import * as monaco from 'monaco-editor';
 
 export default function ScanPage() {
   const navigate = useNavigate();
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const editorRef = useRef<any>(null);
   
-  const [contractName, setContractName] = useState('Contract.sol');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [progressStep, setProgressStep] = useState(0);
 
-  const [scanMode, setScanMode] = useState<'C' | 'A'>('C');
+  const defaultCode = `pragma solidity ^0.8.0;
 
-  // Initial template
-  const defaultCode = '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract Example {\n    // paste your contract here...\n}';
+contract ReentrancyVault {
+    mapping(address => uint256) public balances;
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount);
+        (bool ok, ) = msg.sender.call{value: amount}("");
+        require(ok);
+        balances[msg.sender] -= amount;
+    }
+}`;
+
+  const [code, setCode] = useState(defaultCode);
 
   const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setContractName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = (ev.target?.result as string) ?? '';
-      if (editorRef.current) {
-        editorRef.current.setValue(text);
-      }
-    };
-    reader.readAsText(file);
+  const loadExample = () => {
+    const exampleCode = `pragma solidity ^0.8.0;
+
+contract ReentrancyVault {
+    mapping(address => uint256) public balances;
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount);
+        (bool ok, ) = msg.sender.call{value: amount}("");
+        require(ok);
+        balances[msg.sender] -= amount;
+    }
+}`;
+    setCode(exampleCode);
+    if (editorRef.current) {
+      editorRef.current.setValue(exampleCode);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleClear = () => {
+    setCode('');
+    if (editorRef.current) {
+      editorRef.current.setValue('');
+    }
+  };
+
+  const handleSubmit = async () => {
     setError('');
-    
-    // Get the latest content directly from the editor instance
-    const sourceCode = editorRef.current?.getValue() || '';
+    const sourceCode = code || editorRef.current?.getValue() || '';
     
     if (!sourceCode.trim()) { 
-      setError('Please enter or upload Solidity source code.'); 
+      setError('Check that the submitted code is valid Solidity.'); 
       return; 
     }
     
     setLoading(true);
+    setProgressStep(1);
+    
     try {
-      const res = await api.post('/api/analysis', { contract_name: contractName, source_code: sourceCode, mode: scanMode });
+      const interval = setInterval(() => {
+        setProgressStep(prev => (prev < 4 ? prev + 1 : prev));
+      }, 1500);
+
+      const res = await api.post('/api/analysis', { 
+        contract_name: 'Scan.sol', 
+        source_code: sourceCode, 
+        mode: 'C' 
+      });
+      
+      clearInterval(interval);
+      setProgressStep(5);
       navigate(`/report/${res.data.analysis_id}`, { state: { report: res.data } });
     } catch (err: unknown) {
+      setProgressStep(0);
       const msg = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail;
-      setError(msg || 'Scan failed. Please try again.');
+      setError(msg ? `Analysis took too long or failed: ${msg}` : 'Backend connection unavailable. Make sure the SMAI backend is running and try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-gray-950 flex flex-col font-sans">
       <Navbar />
-      <div className="max-w-5xl w-full mx-auto px-6 py-8 flex-1 flex flex-col">
+      <div className="max-w-6xl w-full mx-auto px-6 py-8 flex-1 flex flex-col">
+        
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">New Contract Scan</h1>
-          <p className="text-gray-400 text-sm mt-1">Upload or paste your Solidity source code to begin vulnerability analysis</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Scan Smart Contract</h1>
+          <p className="text-gray-400 text-base">Paste your Solidity code below. SMAI will analyze it for known security risks.</p>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex-1 flex flex-col">
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-5">
-            <div className="flex gap-4 flex-wrap items-end">
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-medium text-gray-300 mb-1">Contract Name</label>
-                <input type="text" value={contractName} onChange={e => setContractName(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono" />
-              </div>
-              <div className="min-w-[180px]">
-                <label className="block text-sm font-medium text-gray-300 mb-1">Analysis Mode</label>
-                <select value={scanMode} onChange={e => setScanMode(e.target.value as 'C' | 'A')}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="C">Mode C (AI + RAG)</option>
-                  <option value="A">Mode A (Static Only)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Upload .sol File</label>
-                <label className="flex items-center gap-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 rounded-lg px-4 py-2.5 text-sm cursor-pointer transition-colors h-[42px]">
-                  📁 Choose file
-                  <input type="file" accept=".sol" className="hidden" onChange={handleFileUpload} />
-                </label>
-              </div>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-lg">
+          
+          {/* Top Actions Toolbar */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900/80">
+            <div className="flex gap-3">
+              <button onClick={handleClear} disabled={loading} className="text-sm px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors cursor-pointer font-medium">
+                Clear
+              </button>
+              <button onClick={loadExample} disabled={loading} className="text-sm px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors cursor-pointer font-medium">
+                Example Contract
+              </button>
             </div>
+            <button onClick={handleSubmit} disabled={loading} className="text-sm font-bold px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow-lg cursor-pointer">
+              {loading ? 'Scanning...' : 'Scan Contract'}
+            </button>
+          </div>
 
-            <div className="flex-1 flex flex-col min-h-[400px]">
-              <label className="block text-sm font-medium text-gray-300 mb-1 flex justify-between items-center">
-                <span>Solidity Source Code</span>
-                <span className="text-xs text-gray-500 font-mono">VS Code Intellisense Active</span>
-              </label>
-              
-              {/* Force a fixed/absolute layout context for Monaco to prevent collapsing or flex stealing focus */}
-              <div className="flex-1 relative rounded-lg overflow-hidden border border-gray-700 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all bg-[#1e1e1e]">
-                <div className="absolute inset-0">
-                  <Editor
-                    height="100%"
-                    width="100%"
-                    language="solidity"
-                    theme="vs-dark"
-                    defaultValue={defaultCode}
-                    onMount={handleEditorDidMount}
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 14,
-                      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                      padding: { top: 16, bottom: 16 },
-                      scrollBeyondLastLine: false,
-                      smoothScrolling: true,
-                      cursorBlinking: "smooth",
-                      cursorSmoothCaretAnimation: "on",
-                      formatOnPaste: true,
-                      suggestOnTriggerCharacters: true,
-                    }}
-                    loading={
-                      <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm">
-                        Loading Editor...
-                      </div>
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-red-900/40 border border-red-700 text-red-300 rounded-lg px-4 py-2.5 text-sm">{error}</div>
-            )}
-
+          {/* Editor Area with explicit pixel height */}
+          <div className="w-full relative bg-gray-950" style={{ height: '500px', minHeight: '450px' }}>
+            <Editor
+              height="100%"
+              width="100%"
+              language="solidity"
+              theme="vs-dark"
+              value={code}
+              onChange={(val) => setCode(val || '')}
+              onMount={handleEditorDidMount}
+              loading={<div className="p-6 text-gray-400 font-mono text-sm">Loading code editor...</div>}
+              options={{
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                padding: { top: 16, bottom: 16 },
+                lineNumbers: "on",
+                scrollBeyondLastLine: false,
+                readOnly: loading,
+              }}
+            />
+            
+            {/* Loading Overlay */}
             {loading && (
-              <div className="bg-blue-900/30 border border-blue-700 text-blue-300 rounded-lg px-4 py-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <div className="animate-spin text-lg">⚙️</div>
-                  <div>
-                    <p className="font-medium">Scanning contract...</p>
-                    <p className="text-blue-400/80 text-xs mt-0.5">Running static analysis → RAG retrieval → LLM verification</p>
+              <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                <h3 className="text-xl font-bold text-white mb-6">Analyzing your contract...</h3>
+                <div className="space-y-4 w-64">
+                  <div className={`flex items-center gap-3 ${progressStep >= 1 ? 'text-blue-400' : 'text-gray-600'}`}>
+                    <span className="text-lg">{progressStep > 1 ? '✓' : '→'}</span>
+                    <span className="font-medium">Static Analysis</span>
+                  </div>
+                  <div className={`flex items-center gap-3 ${progressStep >= 2 ? 'text-blue-400' : 'text-gray-600'}`}>
+                    <span className="text-lg">{progressStep > 2 ? '✓' : '→'}</span>
+                    <span className="font-medium">Security Evidence</span>
+                  </div>
+                  <div className={`flex items-center gap-3 ${progressStep >= 3 ? 'text-blue-400' : 'text-gray-600'}`}>
+                    <span className="text-lg">{progressStep > 3 ? '✓' : '→'}</span>
+                    <span className="font-medium">AI Verification</span>
+                  </div>
+                  <div className={`flex items-center gap-3 ${progressStep >= 4 ? 'text-blue-400' : 'text-gray-600'}`}>
+                    <span className="text-lg">{progressStep > 4 ? '✓' : '→'}</span>
+                    <span className="font-medium">Security Report</span>
                   </div>
                 </div>
               </div>
             )}
-
-            <button type="submit" disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-3 text-sm transition-colors mt-auto">
-              {loading ? 'Analyzing...' : '🔍 Analyze Contract'}
-            </button>
-          </form>
+          </div>
         </div>
+
+        {error && (
+          <div className="mt-6 p-4 bg-red-950/50 border border-red-500/30 rounded-lg">
+            <p className="text-red-400 font-semibold mb-1">Error</p>
+            <p className="text-red-300/80 text-sm">{error}</p>
+          </div>
+        )}
       </div>
     </div>
   );

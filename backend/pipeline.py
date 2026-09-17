@@ -111,10 +111,7 @@ class SecurityPipeline:
         self.retriever = retriever or RAGRetriever(self.kb)
         self.reasoner = reasoner or LLMReasoner()
 
-    async def scan(self, source_code: str, contract_name: Optional[str] = None, mode: str = "C") -> VulnerabilityReportPayload:
-        # mode A: static only
-        # mode B: static + LLM
-        # mode C: static + RAG + LLM
+    async def scan(self, source_code: str, contract_name: Optional[str] = None, mode: str = "hybrid") -> VulnerabilityReportPayload:
         analysis_id = f"analysis-{uuid.uuid4().hex[:12]}"
         timestamp = datetime.now(timezone.utc).isoformat()
         
@@ -122,46 +119,69 @@ class SecurityPipeline:
         verified_findings: List[VerifiedVulnerability] = []
         severity_counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0}
 
-        if mode == "A":
+        if mode == "rag":
             for finding in raw_findings:
+                context = self.extractor.extract(source_code, finding)
+                knowledge = self.retriever.retrieve(finding, context, top_k=2)
+                
+                if knowledge:
+                    explanation = f"**RAG Context**: {knowledge[0].get('description', '')}"
+                    recommendation = knowledge[0].get('mitigation', '')
+                    scenario = knowledge[0].get('exploit_pattern', '')
+                    rag_score, rag_explain = self.retriever.get_explainability_summary(knowledge)
+                else:
+                    explanation = f"Static analyzer detection: {finding.message}"
+                    recommendation = f"Review and refactor function '{finding.function}' to address {finding.category}."
+                    scenario = "Rule-based heuristic pattern flagged in static AST/regex analysis."
+                    rag_score, rag_explain = None, None
+
                 sev = finding.severity or "High"
                 calibrated_conf = round(min(0.90, max(0.60, finding.confidence)), 2)
                 verified = VerifiedVulnerability(
                     finding_id=finding.id,
                     is_vulnerable=True,
-                    verification_status="CONFIRMED",
+                    verification_status="UNVERIFIED",
                     vulnerability=finding.category,
                     severity=sev,
                     confidence=calibrated_conf,
                     static_confidence=finding.confidence,
                     affected_lines=list(range(finding.line_start, finding.line_end + 1)),
                     evidence=[{"function": finding.function, "lines": list(range(finding.line_start, finding.line_end + 1))}],
-                    explanation=f"Static analyzer detection: {finding.message}",
-                    attack_scenario="Rule-based heuristic pattern flagged in static AST/regex analysis without LLM execution.",
-                    recommendation=f"Review and refactor function '{finding.function}' to address {finding.category}.",
+                    explanation=explanation,
+                    attack_scenario=scenario,
+                    recommendation=recommendation,
                     original_code=finding.snippet,
-                    fixed_code="",
+                    fixed_code="Manual fix required (AI not used)",
                     fallback_used=False,
+                    model_used="RAG Only (No AI)",
                     contract=finding.contract,
                     function=finding.function,
                     swc_id=finding.swc_id,
-                    static_evidence=finding.snippet
+                    static_evidence=finding.snippet,
+                    retrieved_knowledge=knowledge,
+                    rag_similarity_score=rag_score,
+                    rag_explanation=rag_explain
                 )
                 verified_findings.append(verified)
         else:
             async def verify_single_finding(finding):
                 context = self.extractor.extract(source_code, finding)
                 knowledge = None
-                if mode == "C":
+                if mode == "hybrid":
                     knowledge = self.retriever.retrieve(finding, context, top_k=2)
                 return await self.reasoner.verify_finding(finding, context, knowledge)
             
-            import asyncio
-            tasks = [verify_single_finding(f) for f in raw_findings]
-            results = await asyncio.gather(*tasks)
+            results = []
+            for f in raw_findings:
+                result = await verify_single_finding(f)
+                results.append(result)
             
             for verified in results:
                 if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
+                    if mode == "ai":
+                         verified.retrieved_knowledge = []
+                         verified.rag_similarity_score = None
+                         verified.rag_explanation = None
                     verified_findings.append(verified)
 
         for verified in verified_findings:
