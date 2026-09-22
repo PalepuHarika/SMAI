@@ -178,5 +178,6 @@ async def get_analysis_by_id(
         findings=findings_list,
         summary=rep.summary,
         security_score=score,
-        risk_level=risk
+        risk_level=risk,
+        source_code=analysis.source_code
     )

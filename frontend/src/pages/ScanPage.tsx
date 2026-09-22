@@ -4,6 +4,25 @@ import Editor, { OnMount } from '@monaco-editor/react';
 import Navbar from '@/components/Navbar';
 import api from '@/api/client';
 
+const analysisModes = [
+  {
+    id: 'hybrid',
+    title: 'Hybrid Analysis',
+    description: 'Static Analysis + RAG + AI Verification',
+    badge: 'Recommended'
+  },
+  {
+    id: 'rag',
+    title: 'RAG Only',
+    description: 'Static Analysis + Security Knowledge Retrieval'
+  },
+  {
+    id: 'ai',
+    title: 'AI Only',
+    description: 'Static Analysis + Qwen AI Verification'
+  }
+];
+
 export default function ScanPage() {
   const navigate = useNavigate();
   const editorRef = useRef<any>(null);
@@ -11,6 +30,7 @@ export default function ScanPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [progressStep, setProgressStep] = useState(0);
+  const [selectedMode, setSelectedMode] = useState<string>('hybrid');
 
   const defaultCode = `pragma solidity ^0.8.0;
 
@@ -85,11 +105,12 @@ contract ReentrancyVault {
       const res = await api.post('/api/analysis', { 
         contract_name: 'Scan.sol', 
         source_code: sourceCode, 
-        mode: 'C' 
+        mode: selectedMode 
       });
       
       clearInterval(interval);
       setProgressStep(5);
+      sessionStorage.setItem(`smai_mode_${res.data.analysis_id}`, selectedMode);
       navigate(`/report/${res.data.analysis_id}`, { state: { report: res.data } });
     } catch (err: unknown) {
       setProgressStep(0);
@@ -107,7 +128,61 @@ contract ReentrancyVault {
         
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-white mb-2">Scan Smart Contract</h1>
-          <p className="text-gray-400 text-base">Paste your Solidity code below. SMAI will analyze it for known security risks.</p>
+          <p className="text-gray-400 text-base">Paste your Solidity code below. Select your analysis mode and SMAI will analyze it for security risks.</p>
+        </div>
+
+        {/* Analysis Mode Selector */}
+        <div className="mb-6 bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+              <span className="text-blue-500">⚡</span> Analysis Mode
+            </label>
+            <span className="text-xs text-gray-400 font-mono">
+              Active Mode: <strong className="text-blue-400 uppercase font-semibold">{selectedMode}</strong>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {analysisModes.map((mode) => {
+              const isSelected = selectedMode === mode.id;
+              return (
+                <div
+                  key={mode.id}
+                  onClick={() => !loading && setSelectedMode(mode.id)}
+                  className={`p-3.5 rounded-lg border transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? 'bg-blue-950/30 border-blue-500 text-white shadow-md shadow-blue-950/20'
+                      : 'bg-gray-950/50 border-gray-800 text-gray-400 hover:border-gray-700 hover:bg-gray-900/50'
+                  } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2.5">
+                      <input
+                        type="radio"
+                        name="analysisMode"
+                        value={mode.id}
+                        checked={isSelected}
+                        onChange={() => setSelectedMode(mode.id)}
+                        disabled={loading}
+                        className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-700 focus:ring-blue-500 focus:ring-offset-gray-900 cursor-pointer"
+                      />
+                      <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                        {mode.title}
+                      </span>
+                    </div>
+                    {mode.badge && (
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        {mode.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 leading-normal pl-6">
+                    {mode.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-lg">

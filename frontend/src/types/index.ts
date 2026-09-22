@@ -16,6 +16,7 @@ export interface VerifiedVulnerability {
   vulnerability: string;
   severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'Informational';
   confidence: number;
+  static_confidence?: number;
   affected_lines: number[];
   evidence: { function: string; lines: number[] }[];
   explanation: string;
@@ -25,10 +26,15 @@ export interface VerifiedVulnerability {
   static_evidence: string;
   original_code: string;
   retrieved_knowledge?: Record<string, unknown>[];
+  rag_similarity_score?: number;
+  rag_explanation?: string;
   contract?: string;
   function?: string;
   swc_id?: string;
   fix_verified?: boolean;
+  fallback_used?: boolean;
+  fallback_reason?: string;
+  model_used?: string;
 }
 
 export interface VulnerabilityReport {
@@ -42,6 +48,7 @@ export interface VulnerabilityReport {
   summary: string;
   security_score?: number;
   risk_level?: string;
+  source_code?: string;
 }
 
 export interface AnalysisHistoryItem {

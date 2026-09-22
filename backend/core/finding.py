@@ -65,3 +65,4 @@ class VulnerabilityReportPayload(BaseModel):
     summary: str
     security_score: Optional[int] = Field(None, description="Security score from 0 to 100")
     risk_level: Optional[str] = Field(None, description="Risk level rating based on security score")
+    source_code: Optional[str] = Field(None, description="Original Solidity source code")
