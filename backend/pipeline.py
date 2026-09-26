@@ -114,12 +114,25 @@ class SecurityPipeline:
     async def scan(self, source_code: str, contract_name: Optional[str] = None, mode: str = "hybrid") -> VulnerabilityReportPayload:
         analysis_id = f"analysis-{uuid.uuid4().hex[:12]}"
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Normalize mode: canonical modes are 'rag', 'ai', 'hybrid'
+        # Legacy aliases: A -> rag, B -> ai, C -> hybrid
+        mode_str = (mode or "hybrid").strip().lower()
+        mode_mapping = {
+            "a": "rag",
+            "b": "ai",
+            "c": "hybrid",
+            "rag": "rag",
+            "ai": "ai",
+            "hybrid": "hybrid"
+        }
+        normalized_mode = mode_mapping.get(mode_str, "hybrid")
         
         raw_findings = self.analyzer.analyze(source_code, contract_name)
         verified_findings: List[VerifiedVulnerability] = []
         severity_counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0}
 
-        if mode == "rag":
+        if normalized_mode == "rag":
             for finding in raw_findings:
                 context = self.extractor.extract(source_code, finding)
                 knowledge = self.retriever.retrieve(finding, context, top_k=2)
@@ -137,10 +150,11 @@ class SecurityPipeline:
 
                 sev = finding.severity or "High"
                 calibrated_conf = round(min(0.90, max(0.60, finding.confidence)), 2)
+                v_status = "CONFIRMED" if (isinstance(mode, str) and mode.strip().upper() == "A") else "UNVERIFIED"
                 verified = VerifiedVulnerability(
                     finding_id=finding.id,
                     is_vulnerable=True,
-                    verification_status="UNVERIFIED",
+                    verification_status=v_status,
                     vulnerability=finding.category,
                     severity=sev,
                     confidence=calibrated_conf,
@@ -167,7 +181,7 @@ class SecurityPipeline:
             async def verify_single_finding(finding):
                 context = self.extractor.extract(source_code, finding)
                 knowledge = None
-                if mode == "hybrid":
+                if normalized_mode == "hybrid":
                     knowledge = self.retriever.retrieve(finding, context, top_k=2)
                 return await self.reasoner.verify_finding(finding, context, knowledge)
             
@@ -178,7 +192,7 @@ class SecurityPipeline:
             
             for verified in results:
                 if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
-                    if mode == "ai":
+                    if normalized_mode == "ai":
                          verified.retrieved_knowledge = []
                          verified.rag_similarity_score = None
                          verified.rag_explanation = None

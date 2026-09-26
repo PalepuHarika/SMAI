@@ -1,7 +1,9 @@
+import asyncio
 import json
 import logging
 import re
 import os
+import time
 from typing import Optional, List, Dict, Any
 from pydantic import ValidationError
 
@@ -222,6 +224,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             try:
                 response = await self.client.post("/api/chat", json=payload)
                 response.raise_for_status()
+
                 result_json = response.json()
                 raw_content = result_json.get("message", {}).get("content", "")
                 cleaned = _clean_json_str(raw_content)
@@ -283,7 +286,19 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                 fallback_reason = f"JSON/Schema Validation Error: {str(e)}"
                 logger.warning(f"Attempt {attempt + 1} validation failed ({fallback_reason}).")
                 if attempt < max_attempts - 1:
-                    payload["messages"].append({"role": "user", "content": f"Correction required: Your output was invalid ({str(e)}). Output strictly valid JSON matching the schema."})
+                    # Compact retry: preserve original system/user messages with security delimiters,
+                    # and append the assistant turn + a compact user correction
+                    payload["messages"].append({
+                        "role": "assistant",
+                        "content": raw_content[:800]
+                    })
+                    payload["messages"].append({
+                        "role": "user",
+                        "content": (
+                            f"Correction required: Your previous output was not valid JSON matching the schema ({str(e)}).\n"
+                            f"Return ONLY valid JSON matching this schema:\n{json.dumps(schema, separators=(',', ':'))}"
+                        )
+                    })
             except Exception as e:
                 fallback_reason = f"Unexpected Error: {str(e)}"
                 logger.error(f"Unexpected error in LLM verification: {fallback_reason}")
