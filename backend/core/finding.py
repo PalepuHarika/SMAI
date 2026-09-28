@@ -53,6 +53,7 @@ class VerifiedVulnerability(BaseModel):
     retrieved_knowledge: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="RAG retrieved knowledge items")
     rag_similarity_score: Optional[float] = Field(None, description="Top RAG cosine similarity score")
     rag_explanation: Optional[str] = Field(None, description="Explanation of why RAG context supports finding")
+    finding_hash: Optional[str] = Field(None, description="Deterministic cryptographic hash of the finding")
 
 class VulnerabilityReportPayload(BaseModel):
     analysis_id: str
@@ -66,3 +67,17 @@ class VulnerabilityReportPayload(BaseModel):
     security_score: Optional[int] = Field(None, description="Security score from 0 to 100")
     risk_level: Optional[str] = Field(None, description="Risk level rating based on security score")
     source_code: Optional[str] = Field(None, description="Original Solidity source code")
+    source_hash: Optional[str] = Field(None, description="SHA-256 hash of submitted Solidity source code")
+    source_keccak256: Optional[str] = Field(None, description="Keccak-256 hash of submitted Solidity source code")
+    report_hash: Optional[str] = Field(None, description="Deterministic canonical hash of the analysis report")
+    findings_hash: Optional[str] = Field(None, description="Deterministic hash of canonical findings")
+    findings_merkle_root: Optional[str] = Field(None, description="Merkle root of canonical finding hashes")
+    analyzer_version: Optional[str] = Field(None, description="Version of the static analyzer / engine")
+    analysis_timestamp: Optional[str] = Field(None, description="ISO-8601 analysis execution timestamp")
+    model_used: Optional[str] = Field(None, description="LLM model used for verification")
+    analysis_mode: Optional[str] = Field(None, description="Analysis mode: rag, ai, or hybrid")
+    rag_version: Optional[str] = Field(None, description="RAG security knowledge base version or digest")
+    compiler_version: Optional[str] = Field(None, description="Solidity compiler version / pragma extracted from source")
+    git_commit: Optional[str] = Field(None, description="Git commit hash of SMAI platform build if available")
+    user_id: Optional[str] = Field(None, description="ID of user or auditor requesting the analysis")
+

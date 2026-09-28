@@ -7,6 +7,18 @@ from backend.analyzer.code_extractor import CodeContextExtractor
 from backend.rag.knowledge_base import SecurityKnowledgeBase
 from backend.rag.retriever import RAGRetriever
 from backend.llm.reasoner import LLMReasoner
+from backend.core.integrity import (
+    hash_source_sha256,
+    hash_source_keccak256,
+    compute_finding_hash,
+    compute_findings_hash,
+    compute_findings_merkle_root,
+    compute_report_hash,
+    extract_solidity_pragma,
+    get_git_commit,
+    get_knowledge_base_version,
+    ANALYZER_VERSION
+)
 
 def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int, str]:
     score = 100.0
@@ -111,9 +123,20 @@ class SecurityPipeline:
         self.retriever = retriever or RAGRetriever(self.kb)
         self.reasoner = reasoner or LLMReasoner()
 
-    async def scan(self, source_code: str, contract_name: Optional[str] = None, mode: str = "hybrid") -> VulnerabilityReportPayload:
+    async def scan(
+        self,
+        source_code: str,
+        contract_name: Optional[str] = None,
+        mode: str = "hybrid",
+        user_id: Optional[str] = None
+    ) -> VulnerabilityReportPayload:
         analysis_id = f"analysis-{uuid.uuid4().hex[:12]}"
         timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Compute source integrity hashes and extract compiler pragma
+        source_hash = hash_source_sha256(source_code)
+        source_keccak256 = hash_source_keccak256(source_code)
+        compiler_version = extract_solidity_pragma(source_code)
 
         # Normalize mode: canonical modes are 'rag', 'ai', 'hybrid'
         # Legacy aliases: A -> rag, B -> ai, C -> hybrid
@@ -218,6 +241,25 @@ class SecurityPipeline:
             low = severity_counts.get("Low", 0)
             summary = f"Security analysis identified {total_vulns} findings ({crit} Critical, {high} High, {med} Medium, {low} Low). Security Score: {security_score}/100 ({risk_level})."
 
+        # Compute deterministic hashes for findings and full report
+        for verified in verified_findings:
+            verified.finding_hash = compute_finding_hash(verified)
+
+        findings_hash = compute_findings_hash(verified_findings)
+        findings_merkle_root = compute_findings_merkle_root(verified_findings)
+        report_hash = compute_report_hash(
+            source_hash=source_hash,
+            findings_hash=findings_hash,
+            security_score=security_score,
+            risk_level=risk_level,
+            analysis_mode=normalized_mode
+        )
+
+        if normalized_mode == "rag":
+            model_used = "RAG Only (No AI)"
+        else:
+            model_used = getattr(self.reasoner, "model", "Qwen2.5-Coder")
+
         return VulnerabilityReportPayload(
             analysis_id=analysis_id,
             contract_name=contract_name or "Contract.sol",
@@ -228,5 +270,20 @@ class SecurityPipeline:
             findings=verified_findings,
             summary=summary,
             security_score=security_score,
-            risk_level=risk_level
+            risk_level=risk_level,
+            source_code=source_code,
+            source_hash=source_hash,
+            source_keccak256=source_keccak256,
+            report_hash=report_hash,
+            findings_hash=findings_hash,
+            findings_merkle_root=findings_merkle_root,
+            analyzer_version=ANALYZER_VERSION,
+            analysis_timestamp=timestamp,
+            model_used=model_used,
+            analysis_mode=normalized_mode,
+            rag_version=get_knowledge_base_version(),
+            compiler_version=compiler_version,
+            git_commit=get_git_commit(),
+            user_id=user_id
         )
+

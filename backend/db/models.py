@@ -25,6 +25,7 @@ class Analysis(Base):
     user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
     contract_name = Column(String(255), nullable=False)
     source_code = Column(Text, nullable=False)
+    source_hash = Column(String(64), nullable=True)
     status = Column(String(50), default='COMPLETED')  # PENDING, RUNNING, COMPLETED, FAILED
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -42,6 +43,16 @@ class VulnerabilityReport(Base):
     severity_counts = Column(JSON, default=dict)
     raw_findings = Column(JSON, default=list)
     verified_findings = Column(JSON, default=list)
+    source_hash = Column(String(64), nullable=True)
+    report_hash = Column(String(64), nullable=True)
+    findings_hash = Column(String(64), nullable=True)
+    analyzer_version = Column(String(50), nullable=True)
+    model_used = Column(String(100), nullable=True)
+    analysis_mode = Column(String(50), nullable=True)
+    compiler_version = Column(String(100), nullable=True)
+    git_commit = Column(String(64), nullable=True)
+    trust_metadata = Column(JSON, default=dict)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     analysis = relationship('Analysis', back_populates='report')
+

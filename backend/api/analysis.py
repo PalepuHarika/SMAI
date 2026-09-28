@@ -27,16 +27,18 @@ class AnalysisListItem(BaseModel):
     total_findings: int
     is_vulnerable: bool
     severity_counts: Dict[str, int]
+    source_hash: Optional[str] = None
+    report_hash: Optional[str] = None
 
 class ScanResponse(BaseModel):
     analysis_id: str
     status: str
     message: str
 
-async def process_analysis_background(analysis_id: str, source_code: str, contract_name: str, mode: str = "C"):
+async def process_analysis_background(analysis_id: str, source_code: str, contract_name: str, mode: str = "C", user_id: Optional[str] = None):
     try:
         # Run the core security pipeline
-        report_payload = await pipeline.scan(source_code, contract_name, mode=mode)
+        report_payload = await pipeline.scan(source_code, contract_name, mode=mode, user_id=user_id)
         
         async with AsyncSessionLocal() as db:
             stmt = select(Analysis).where(Analysis.id == analysis_id)
@@ -44,6 +46,7 @@ async def process_analysis_background(analysis_id: str, source_code: str, contra
             analysis = res.scalar_one_or_none()
             if analysis:
                 analysis.status = "COMPLETED"
+                analysis.source_hash = report_payload.source_hash
                 report = VulnerabilityReport(
                     analysis_id=analysis.id,
                     summary=report_payload.summary,
@@ -51,7 +54,22 @@ async def process_analysis_background(analysis_id: str, source_code: str, contra
                     is_vulnerable=report_payload.is_vulnerable,
                     severity_counts=report_payload.severity_counts,
                     raw_findings=[],
-                    verified_findings=[f.model_dump() for f in report_payload.findings]
+                    verified_findings=[f.model_dump() for f in report_payload.findings],
+                    source_hash=report_payload.source_hash,
+                    report_hash=report_payload.report_hash,
+                    findings_hash=report_payload.findings_hash,
+                    analyzer_version=report_payload.analyzer_version,
+                    model_used=report_payload.model_used,
+                    analysis_mode=report_payload.analysis_mode,
+                    compiler_version=report_payload.compiler_version,
+                    git_commit=report_payload.git_commit,
+                    trust_metadata={
+                        "source_keccak256": report_payload.source_keccak256,
+                        "findings_merkle_root": report_payload.findings_merkle_root,
+                        "rag_version": report_payload.rag_version,
+                        "analysis_timestamp": report_payload.analysis_timestamp,
+                        "user_id": analysis.user_id,
+                    }
                 )
                 db.add(report)
                 await db.commit()
@@ -80,18 +98,22 @@ async def create_analysis(
 
     analysis_id = f"analysis-{uuid.uuid4().hex[:12]}"
     
+    from backend.core.integrity import hash_source_sha256
+    initial_source_hash = hash_source_sha256(req.source_code)
+
     # Persist initial pending state in DB
     analysis = Analysis(
         id=analysis_id,
         user_id=current_user.id,
         contract_name=req.contract_name or "Contract.sol",
         source_code=req.source_code,
+        source_hash=initial_source_hash,
         status="PENDING"
     )
     db.add(analysis)
     await db.commit()
 
-    background_tasks.add_task(process_analysis_background, analysis_id, req.source_code, req.contract_name, req.mode or "C")
+    background_tasks.add_task(process_analysis_background, analysis_id, req.source_code, req.contract_name, req.mode or "C", current_user.id)
 
     return ScanResponse(
         analysis_id=analysis_id,
@@ -123,7 +145,9 @@ async def get_analysis_history(
             created_at=a.created_at.isoformat() if a.created_at else "",
             total_findings=rep.total_findings if rep else 0,
             is_vulnerable=rep.is_vulnerable if rep else False,
-            severity_counts=rep.severity_counts if rep and rep.severity_counts else {}
+            severity_counts=rep.severity_counts if rep and rep.severity_counts else {},
+            source_hash=rep.source_hash if (rep and rep.source_hash) else a.source_hash,
+            report_hash=rep.report_hash if (rep and rep.report_hash) else None
         ))
     return items
 
@@ -168,6 +192,7 @@ async def get_analysis_by_id(
     findings_list = [VerifiedVulnerability(**f) if isinstance(f, dict) else f for f in (rep.verified_findings or [])]
     score, risk = calculate_security_score(findings_list)
 
+    trust_meta = rep.trust_metadata or {}
     return VulnerabilityReportPayload(
         analysis_id=analysis.id,
         contract_name=analysis.contract_name,
@@ -179,5 +204,19 @@ async def get_analysis_by_id(
         summary=rep.summary,
         security_score=score,
         risk_level=risk,
-        source_code=analysis.source_code
+        source_code=analysis.source_code,
+        source_hash=rep.source_hash or analysis.source_hash,
+        source_keccak256=trust_meta.get("source_keccak256"),
+        report_hash=rep.report_hash,
+        findings_hash=rep.findings_hash,
+        findings_merkle_root=trust_meta.get("findings_merkle_root"),
+        analyzer_version=rep.analyzer_version,
+        analysis_timestamp=trust_meta.get("analysis_timestamp") or (analysis.created_at.isoformat() if analysis.created_at else ""),
+        model_used=rep.model_used,
+        analysis_mode=rep.analysis_mode,
+        rag_version=trust_meta.get("rag_version"),
+        compiler_version=rep.compiler_version,
+        git_commit=rep.git_commit,
+        user_id=analysis.user_id
     )
+

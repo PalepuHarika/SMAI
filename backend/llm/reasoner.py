@@ -129,7 +129,8 @@ class LLMReasoner:
         for key in [
             "fallback_used", "fallback_reason", "static_confidence", "model_used",
             "raw_response", "contract", "function", "swc_id", "fix_verified", "verification_status",
-            "static_evidence", "retrieved_knowledge", "rag_similarity_score", "rag_explanation"
+            "static_evidence", "retrieved_knowledge", "rag_similarity_score", "rag_explanation",
+            "finding_hash"
         ]:
             schema["properties"].pop(key, None)
             if key in schema.get("required", []):
