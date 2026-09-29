@@ -35,6 +35,24 @@ class ScanResponse(BaseModel):
     status: str
     message: str
 
+class VerifyFixRequest(BaseModel):
+    analysis_id: str = Field(..., description="ID of the analysis containing the target finding")
+    finding_id: Optional[str] = Field(None, description="Unique ID of the finding being fixed")
+    vulnerability_category: Optional[str] = Field(None, description="Category of the target finding if finding_id is not provided")
+    fixed_code: str = Field(..., description="Proposed Solidity fixed code")
+
+class VerifyFixResponse(BaseModel):
+    fix_verified: bool
+    category_resolved: bool
+    has_new_severe: bool
+    syntax_valid: bool
+    original_category: str
+    remaining_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    new_severe_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    verification_reason: str
+    compiler_verification: str = "not_performed"
+
+
 async def process_analysis_background(analysis_id: str, source_code: str, contract_name: str, mode: str = "C", user_id: Optional[str] = None):
     try:
         # Run the core security pipeline
@@ -150,6 +168,89 @@ async def get_analysis_history(
             report_hash=rep.report_hash if (rep and rep.report_hash) else None
         ))
     return items
+
+@router.post("/verify-fix", response_model=VerifyFixResponse)
+async def verify_fix(
+    req: VerifyFixRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = (
+        select(Analysis)
+        .where(Analysis.id == req.analysis_id)
+        .options(selectinload(Analysis.report))
+    )
+    res = await db.execute(stmt)
+    analysis = res.scalar_one_or_none()
+
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found"
+        )
+
+    # RBAC check: Only owner or ADMIN can verify fixes
+    if analysis.user_id != current_user.id and current_user.role != 'ADMIN':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this analysis report"
+        )
+
+    rep = analysis.report
+    if not rep:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report data unavailable"
+        )
+
+    verified_findings = rep.verified_findings or []
+    target_finding = None
+
+    for f in verified_findings:
+        f_id = f.get("finding_id") or f.get("id")
+        if req.finding_id and f_id == req.finding_id:
+            target_finding = f
+            break
+        elif not req.finding_id and req.vulnerability_category:
+            cat = f.get("vulnerability") or f.get("category") or ""
+            if cat.strip().lower().replace("_", "-") == req.vulnerability_category.strip().lower().replace("_", "-"):
+                target_finding = f
+                break
+
+    if target_finding is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Target finding '{req.finding_id or req.vulnerability_category}' not found in report"
+        )
+
+    orig_category = (
+        target_finding.get("vulnerability")
+        or target_finding.get("category")
+        or ""
+    )
+
+    from backend.llm.reasoner import verify_fix_details
+    verification_result = verify_fix_details(req.fixed_code, orig_category)
+
+    # Persist the latest verification result in the report finding
+    target_finding["fix_verified"] = verification_result["fix_verified"]
+    target_finding["fix_verification_reason"] = verification_result["verification_reason"]
+    rep.verified_findings = list(verified_findings)
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(rep, "verified_findings")
+    await db.commit()
+
+    return VerifyFixResponse(
+        fix_verified=verification_result["fix_verified"],
+        category_resolved=verification_result["category_resolved"],
+        has_new_severe=verification_result["has_new_severe"],
+        syntax_valid=verification_result["syntax_valid"],
+        original_category=orig_category,
+        remaining_findings=verification_result["remaining_findings"],
+        new_severe_findings=verification_result["new_severe_findings"],
+        verification_reason=verification_result["verification_reason"],
+        compiler_verification=verification_result.get("compiler_verification", "not_performed"),
+    )
 
 @router.get("/{analysis_id}")
 async def get_analysis_by_id(

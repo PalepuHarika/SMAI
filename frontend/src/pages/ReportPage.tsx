@@ -389,12 +389,43 @@ function FindingCard({
   index,
   isActive,
   onSelect,
+  analysisId,
+  onUpdateFinding,
 }: {
   f: VerifiedVulnerability;
   index: number;
   isActive: boolean;
   onSelect: () => void;
+  analysisId?: string;
+  onUpdateFinding?: (updated: VerifiedVulnerability) => void;
 }) {
+  const [verifying, setVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState('');
+
+  const handleVerifyFix = async () => {
+    if (!analysisId || !f.fixed_code || f.fixed_code === 'N/A') return;
+    setVerifying(true);
+    setVerifyError('');
+    try {
+      const res = await api.post('/api/analysis/verify-fix', {
+        analysis_id: analysisId,
+        finding_id: f.finding_id,
+        fixed_code: f.fixed_code,
+      });
+      if (onUpdateFinding) {
+        onUpdateFinding({
+          ...f,
+          fix_verified: res.data.fix_verified,
+          fix_verification_reason: res.data.verification_reason,
+        });
+      }
+    } catch (err: any) {
+      setVerifyError(err.response?.data?.detail || 'Fix verification failed');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   const isConfirmed = f.verification_status === 'CONFIRMED';
   const isRejected = f.verification_status === 'REJECTED';
   const isUnverified = !isConfirmed && !isRejected;
@@ -679,11 +710,56 @@ function FindingCard({
             </p>
           </div>
 
-          {/* Fixed code */}
+          {/* Fixed code & verification */}
           {f.fixed_code && f.fixed_code !== 'N/A' && (
-            <div>
-              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1.5">Example Corrected Code</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Example Corrected Code</p>
+                {analysisId && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVerifyFix();
+                    }}
+                    disabled={verifying}
+                    className="text-xs px-2.5 py-1 rounded bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                  >
+                    {verifying && <span className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />}
+                    {verifying ? 'Verifying...' : 'Re-verify Fix'}
+                  </button>
+                )}
+              </div>
               <CodeBlock code={f.fixed_code} />
+
+              {verifyError && (
+                <p className="text-xs text-red-400">{verifyError}</p>
+              )}
+
+              {/* Fix Verification Status */}
+              <div
+                className={`rounded-lg border p-3 ${
+                  f.fix_verified
+                    ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300'
+                    : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-xs tracking-wider">
+                  <span>{f.fix_verified ? '✓ FIX VERIFIED' : '⚠ FIX NOT VERIFIED'}</span>
+                </div>
+                <p className="text-xs mt-1 text-gray-300">
+                  {f.fix_verification_reason || (
+                    f.fix_verified
+                      ? 'Vulnerability resolved and no new High/Critical findings'
+                      : (f.fix_verified === false
+                          ? 'Target vulnerability still detected'
+                          : 'Verification unavailable')
+                  )}
+                </p>
+                <p className="text-[10px] text-gray-500 mt-1.5">
+                  Compiler verification: not performed (solc not available in runtime). Automated verification does not guarantee the contract is completely secure.
+                </p>
+              </div>
             </div>
           )}
 
@@ -891,6 +967,16 @@ export default function ReportPage() {
                     index={idx}
                     isActive={selectedFindingId === f.finding_id}
                     onSelect={() => handleSelectFinding(f.finding_id)}
+                    analysisId={report.analysis_id}
+                    onUpdateFinding={(updated) => {
+                      setReport(prev => {
+                        if (!prev) return prev;
+                        return {
+                          ...prev,
+                          findings: prev.findings.map(item => item.finding_id === updated.finding_id ? updated : item)
+                        };
+                      });
+                    }}
                   />
                 ))}
               </div>

@@ -46,22 +46,98 @@ def validate_solidity_syntax(code: str) -> bool:
         i += 1
     return brace_balance == 0 and paren_balance == 0
 
-def rescan_fix(fixed_code: str, category: str) -> bool:
+def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
+    """
+    Verifies a proposed Solidity fix by running syntax validation and the static analyzer.
+    Checks:
+    1. Syntax validity (validate_solidity_syntax)
+    2. Elimination of the target vulnerability category
+    3. Absence of newly introduced Critical or High vulnerabilities
+    4. Compiler verification status (reports 'not_performed' when solc unavailable)
+    """
+    category_clean = (category or "").strip().lower().replace("_", "-").replace(" ", "-")
+
+    if not validate_solidity_syntax(fixed_code):
+        return {
+            "fix_verified": False,
+            "category_resolved": False,
+            "has_new_severe": False,
+            "syntax_valid": False,
+            "original_category": category,
+            "remaining_findings": [],
+            "new_severe_findings": [],
+            "verification_reason": "Syntax validation failed",
+            "compiler_verification": "not_performed",
+        }
+
     try:
-        if not validate_solidity_syntax(fixed_code):
-            return False
         from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
         analyzer = SolidityStaticAnalyzer()
         findings = analyzer.analyze(fixed_code)
+
         # 1. Target vulnerability category must be completely eliminated
-        category_resolved = not any(f.category == category for f in findings)
-        if not category_resolved:
-            return False
+        category_matches = [
+            f for f in findings
+            if (f.category or "").strip().lower().replace("_", "-").replace(" ", "-") == category_clean
+            or f.category == category
+        ]
+        category_resolved = (len(category_matches) == 0)
+
         # 2. Fix must not introduce new Critical or High vulnerabilities
-        has_new_severe = any(f.severity in ['Critical', 'High'] and f.category != category for f in findings)
-        return not has_new_severe
+        new_severe = [
+            f.model_dump() if hasattr(f, "model_dump") else dict(f)
+            for f in findings
+            if f.severity in ["Critical", "High"]
+            and (f.category or "").strip().lower().replace("_", "-").replace(" ", "-") != category_clean
+            and f.category != category
+        ]
+        has_new_severe = (len(new_severe) > 0)
+
+        remaining = [
+            f.model_dump() if hasattr(f, "model_dump") else dict(f)
+            for f in findings
+        ]
+
+        fix_verified = category_resolved and not has_new_severe
+
+        if not category_resolved:
+            verification_reason = "Target vulnerability still detected"
+        elif has_new_severe:
+            verification_reason = "New High/Critical vulnerability introduced"
+        else:
+            verification_reason = "Vulnerability resolved and no new High/Critical findings"
+
+        return {
+            "fix_verified": fix_verified,
+            "category_resolved": category_resolved,
+            "has_new_severe": has_new_severe,
+            "syntax_valid": True,
+            "original_category": category,
+            "remaining_findings": remaining,
+            "new_severe_findings": new_severe,
+            "verification_reason": verification_reason,
+            "compiler_verification": "not_performed",
+        }
+    except Exception as e:
+        return {
+            "fix_verified": False,
+            "category_resolved": False,
+            "has_new_severe": False,
+            "syntax_valid": True,
+            "original_category": category,
+            "remaining_findings": [],
+            "new_severe_findings": [],
+            "verification_reason": f"Verification error: {str(e)}",
+            "compiler_verification": "not_performed",
+        }
+
+def rescan_fix(fixed_code: str, category: str) -> bool:
+    try:
+        details = verify_fix_details(fixed_code, category)
+        return bool(details.get("fix_verified", False))
     except Exception:
         return False
+
 
 def compute_calibrated_confidence(
     static_confidence: Optional[float],

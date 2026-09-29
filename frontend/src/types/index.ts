@@ -32,6 +32,7 @@ export interface VerifiedVulnerability {
   function?: string;
   swc_id?: string;
   fix_verified?: boolean;
+  fix_verification_reason?: string;
   fallback_used?: boolean;
   fallback_reason?: string;
   model_used?: string;
