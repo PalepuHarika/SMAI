@@ -10,6 +10,7 @@ from backend.db.models import User, Analysis, VulnerabilityReport
 from backend.core.security import get_current_user
 from backend.pipeline import SecurityPipeline
 from backend.core.finding import VulnerabilityReportPayload
+from backend.core.audit_registry import get_audit_registry_service
 
 router = APIRouter(prefix="/api/analysis", tags=["Analysis"])
 pipeline = SecurityPipeline()
@@ -51,6 +52,25 @@ class VerifyFixResponse(BaseModel):
     new_severe_findings: List[Dict[str, Any]] = Field(default_factory=list)
     verification_reason: str
     compiler_verification: str = "not_performed"
+
+class RegisterOnChainResponse(BaseModel):
+    registered: bool
+    audit_id: Optional[str] = None
+    tx_hash: Optional[str] = None
+    registry_address: Optional[str] = None
+    chain_id: Optional[int] = None
+    status: str
+    message: Optional[str] = None
+
+class VerifyOnChainResponse(BaseModel):
+    verified: bool
+    audit_id: Optional[str] = None
+    on_chain_contract_hash: Optional[str] = None
+    on_chain_report_hash: Optional[str] = None
+    local_contract_hash: Optional[str] = None
+    local_report_hash: Optional[str] = None
+    status: str
+    message: Optional[str] = None
 
 
 async def process_analysis_background(analysis_id: str, source_code: str, contract_name: str, mode: str = "C", user_id: Optional[str] = None):
@@ -319,5 +339,231 @@ async def get_analysis_by_id(
         compiler_version=rep.compiler_version,
         git_commit=rep.git_commit,
         user_id=analysis.user_id
+    )
+
+
+@router.post("/{analysis_id}/register-on-chain", response_model=RegisterOnChainResponse)
+async def register_analysis_on_chain(
+    analysis_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Register a completed security analysis on the blockchain audit registry.
+    
+    Requires:
+    - Authenticated user
+    - Owner or ADMIN authorization
+    - Analysis must exist and be completed
+    - Existing integrity hashes must be available
+    """
+    stmt = (
+        select(Analysis)
+        .where(Analysis.id == analysis_id)
+        .options(selectinload(Analysis.report))
+    )
+    res = await db.execute(stmt)
+    analysis = res.scalar_one_or_none()
+
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found"
+        )
+
+    # RBAC check: Only owner or ADMIN can register
+    if analysis.user_id != current_user.id and current_user.role != 'ADMIN':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this analysis report"
+        )
+
+    if analysis.status != "COMPLETED":
+        return RegisterOnChainResponse(
+            registered=False,
+            status="not_ready",
+            message="Analysis must be completed before registering on-chain"
+        )
+
+    rep = analysis.report
+    if not rep:
+        return RegisterOnChainResponse(
+            registered=False,
+            status="not_ready",
+            message="Report data unavailable"
+        )
+
+    # Check if already registered
+    if rep.audit_id and rep.on_chain_status == "registered":
+        return RegisterOnChainResponse(
+            registered=False,
+            audit_id=rep.audit_id,
+            tx_hash=rep.tx_hash,
+            registry_address=rep.registry_address,
+            chain_id=rep.chain_id,
+            status="already_registered",
+            message="Analysis is already registered on-chain"
+        )
+
+    # Check for required hashes
+    if not rep.source_hash or not rep.report_hash:
+        return RegisterOnChainResponse(
+            registered=False,
+            status="not_ready",
+            message="Integrity hashes not available. Ensure Phase 1 hashing is complete."
+        )
+
+    # Get blockchain service
+    registry_service = get_audit_registry_service()
+    
+    if not registry_service.is_configured():
+        return RegisterOnChainResponse(
+            registered=False,
+            status="not_configured",
+            message="Blockchain registration is not configured. Set AUDIT_REGISTRY_ADDRESS, AUDIT_REGISTRY_RPC_URL, AUDIT_REGISTRY_PRIVATE_KEY, and AUDIT_REGISTRY_CHAIN_ID environment variables."
+        )
+
+    # Calculate security score from findings
+    from backend.pipeline import calculate_security_score
+    from backend.core.finding import VerifiedVulnerability
+    findings_list = [VerifiedVulnerability(**f) if isinstance(f, dict) else f for f in (rep.verified_findings or [])]
+    security_score, _ = calculate_security_score(findings_list)
+
+    # Register on-chain
+    result = registry_service.register_audit(
+        contract_hash=rep.source_hash,
+        report_hash=rep.report_hash,
+        security_score=security_score,
+        findings_count=rep.total_findings or 0
+    )
+
+    if result["success"]:
+        # Persist blockchain registration information
+        from datetime import datetime, timezone
+        rep.audit_id = result["audit_id"]
+        rep.tx_hash = result["tx_hash"]
+        rep.registry_address = registry_service._registry_address
+        rep.chain_id = registry_service._chain_id
+        rep.on_chain_status = "registered"
+        rep.on_chain_timestamp = datetime.now(timezone.utc)
+        
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(rep, "audit_id")
+        flag_modified(rep, "tx_hash")
+        flag_modified(rep, "registry_address")
+        flag_modified(rep, "chain_id")
+        flag_modified(rep, "on_chain_status")
+        flag_modified(rep, "on_chain_timestamp")
+        
+        await db.commit()
+
+        return RegisterOnChainResponse(
+            registered=True,
+            audit_id=result["audit_id"],
+            tx_hash=result["tx_hash"],
+            registry_address=registry_service._registry_address,
+            chain_id=registry_service._chain_id,
+            status="registered",
+            message="Successfully registered audit on-chain"
+        )
+    else:
+        # Persist failed attempt
+        rep.on_chain_status = "failed"
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(rep, "on_chain_status")
+        await db.commit()
+
+        return RegisterOnChainResponse(
+            registered=False,
+            status="failed",
+            message=f"Registration failed: {result.get('error', 'Unknown error')}"
+        )
+
+
+@router.get("/{analysis_id}/verify-on-chain", response_model=VerifyOnChainResponse)
+async def verify_analysis_on_chain(
+    analysis_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Verify that on-chain audit data matches local hashes.
+    
+    Requires:
+    - Authenticated user
+    - Owner or ADMIN authorization
+    - Analysis must exist
+    """
+    stmt = (
+        select(Analysis)
+        .where(Analysis.id == analysis_id)
+        .options(selectinload(Analysis.report))
+    )
+    res = await db.execute(stmt)
+    analysis = res.scalar_one_or_none()
+
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found"
+        )
+
+    # RBAC check: Only owner or ADMIN can verify
+    if analysis.user_id != current_user.id and current_user.role != 'ADMIN':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this analysis report"
+        )
+
+    rep = analysis.report
+    if not rep:
+        return VerifyOnChainResponse(
+            verified=False,
+            status="not_ready",
+            message="Report data unavailable"
+        )
+
+    # Check if registered
+    if not rep.audit_id or rep.on_chain_status != "registered":
+        return VerifyOnChainResponse(
+            verified=False,
+            status="not_registered",
+            message="Analysis is not registered on-chain"
+        )
+
+    # Check for required hashes
+    if not rep.source_hash or not rep.report_hash:
+        return VerifyOnChainResponse(
+            verified=False,
+            status="not_ready",
+            message="Local integrity hashes not available"
+        )
+
+    # Get blockchain service
+    registry_service = get_audit_registry_service()
+    
+    if not registry_service.is_configured():
+        return VerifyOnChainResponse(
+            verified=False,
+            status="not_configured",
+            message="Blockchain verification is not configured"
+        )
+
+    # Verify integrity
+    result = registry_service.verify_audit_integrity(
+        audit_id=rep.audit_id,
+        expected_contract_hash=rep.source_hash,
+        expected_report_hash=rep.report_hash
+    )
+
+    return VerifyOnChainResponse(
+        verified=result["verified"],
+        audit_id=rep.audit_id,
+        on_chain_contract_hash=result.get("on_chain_contract_hash"),
+        on_chain_report_hash=result.get("on_chain_report_hash"),
+        local_contract_hash=rep.source_hash,
+        local_report_hash=rep.report_hash,
+        status="verified" if result["verified"] else "mismatch",
+        message=result.get("error") or ("Hashes match" if result["verified"] else "Hashes do not match")
     )
 

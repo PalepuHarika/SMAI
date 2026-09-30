@@ -50,6 +50,15 @@ export interface VulnerabilityReport {
   security_score?: number;
   risk_level?: string;
   source_code?: string;
+  // Phase 3: Blockchain Audit Registry fields
+  audit_id?: string;
+  tx_hash?: string;
+  registry_address?: string;
+  chain_id?: number;
+  on_chain_status?: string;
+  on_chain_timestamp?: string;
+  source_hash?: string;
+  report_hash?: string;
 }
 
 export interface AnalysisHistoryItem {

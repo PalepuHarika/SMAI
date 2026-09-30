@@ -812,6 +812,182 @@ function SafeBanner({ report }: { report: VulnerabilityReport }) {
   );
 }
 
+// ─────────────────────────────────────────── Phase 3: Blockchain Audit Integrity ──
+interface BlockchainSectionProps {
+  report: VulnerabilityReport;
+  analysisId: string;
+}
+
+function BlockchainSection({ report, analysisId }: BlockchainSectionProps) {
+  const [registering, setRegistering] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [registerResult, setRegisterResult] = useState<any>(null);
+  const [verifyResult, setVerifyResult] = useState<any>(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const isRegistered = report.on_chain_status === 'registered';
+
+  const handleRegister = async () => {
+    setRegistering(true);
+    setRegisterResult(null);
+    try {
+      const res = await api.post(`/api/analysis/${analysisId}/register-on-chain`);
+      setRegisterResult(res.data);
+    } catch (err: any) {
+      setRegisterResult({ error: err.response?.data?.detail || 'Registration failed' });
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    setVerifying(true);
+    setVerifyResult(null);
+    try {
+      const res = await api.get(`/api/analysis/${analysisId}/verify-on-chain`);
+      setVerifyResult(res.data);
+    } catch (err: any) {
+      setVerifyResult({ error: err.response?.data?.detail || 'Verification failed' });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  if (!isRegistered && !registerResult) {
+    // Show registration option
+    return (
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-400 text-lg">⛓</span>
+            <h3 className="text-sm font-bold text-white">Blockchain Audit Registry</h3>
+          </div>
+          <span className="text-[10px] text-gray-500 bg-gray-800 px-2 py-0.5 rounded">Optional</span>
+        </div>
+        <p className="text-gray-400 text-xs mb-4 leading-relaxed">
+          Register this audit's integrity hashes on-chain for verifiable provenance. This does NOT prove the security analysis is correct — only that these specific hashes were recorded.
+        </p>
+        <button
+          onClick={handleRegister}
+          disabled={registering}
+          className="text-xs px-4 py-2 rounded bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 disabled:opacity-50 transition-colors flex items-center gap-2"
+        >
+          {registering && <span className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />}
+          {registering ? 'Registering...' : 'Register on Blockchain'}
+        </button>
+        {registerResult && (
+          <div className={`mt-3 rounded-lg border p-3 ${
+            registerResult.registered
+              ? 'bg-green-950/20 border-green-500/30 text-green-300'
+              : 'bg-gray-800 border-gray-700 text-gray-400'
+          }`}>
+            <p className="text-xs font-semibold mb-1">
+              {registerResult.registered ? '✓ Registered' : 'Registration Unavailable'}
+            </p>
+            <p className="text-[10px]">{registerResult.message}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Show registered status
+  return (
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-green-400 text-lg">⛓</span>
+          <h3 className="text-sm font-bold text-white">Blockchain Audit Registry</h3>
+        </div>
+        {isRegistered && (
+          <span className="text-[10px] text-green-400 bg-green-500/10 border border-green-500/30 px-2 py-0.5 rounded-full">
+            ✓ Registered
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <div className="bg-gray-950/60 rounded-lg border border-gray-800 p-3">
+          <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Audit ID</p>
+          <p className="text-gray-300 text-xs font-mono break-all">{report.audit_id || '—'}</p>
+        </div>
+        <div className="bg-gray-950/60 rounded-lg border border-gray-800 p-3">
+          <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Transaction Hash</p>
+          <p className="text-gray-300 text-xs font-mono break-all">{report.tx_hash || '—'}</p>
+        </div>
+        <div className="bg-gray-950/60 rounded-lg border border-gray-800 p-3">
+          <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Registry Address</p>
+          <p className="text-gray-300 text-xs font-mono break-all">{report.registry_address || '—'}</p>
+        </div>
+        <div className="bg-gray-950/60 rounded-lg border border-gray-800 p-3">
+          <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Chain ID</p>
+          <p className="text-gray-300 text-xs font-mono">{report.chain_id || '—'}</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button
+          onClick={handleVerify}
+          disabled={verifying}
+          className="text-xs px-3 py-1.5 rounded bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/30 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+        >
+          {verifying && <span className="w-2.5 h-2.5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />}
+          {verifying ? 'Verifying...' : 'Verify Integrity'}
+        </button>
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="text-xs px-3 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-400 border border-gray-700 transition-colors"
+        >
+          {showDetails ? 'Hide Details' : 'Show Details'}
+        </button>
+      </div>
+
+      {verifyResult && (
+        <div className={`mb-3 rounded-lg border p-3 ${
+          verifyResult.verified
+            ? 'bg-green-950/20 border-green-500/30 text-green-300'
+            : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
+        }`}>
+          <p className="text-xs font-semibold mb-1">
+            {verifyResult.verified ? '✓ Integrity Verified' : '⚠ Integrity Check Failed'}
+          </p>
+          <p className="text-[10px]">{verifyResult.message}</p>
+        </div>
+      )}
+
+      {showDetails && (
+        <div className="border-t border-gray-800 pt-4 mt-4 space-y-3">
+          <p className="text-[11px] text-gray-500 italic leading-relaxed">
+            Blockchain registration proves that these hashes were recorded on-chain and can be checked later. It does NOT prove that the security analysis itself is correct.
+          </p>
+          <div className="grid grid-cols-1 gap-2">
+            <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+              <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Source Hash (Local)</p>
+              <p className="text-gray-400 text-[10px] font-mono break-all">{report.source_hash || '—'}</p>
+            </div>
+            <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+              <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Report Hash (Local)</p>
+              <p className="text-gray-400 text-[10px] font-mono break-all">{report.report_hash || '—'}</p>
+            </div>
+            {verifyResult && verifyResult.on_chain_contract_hash && (
+              <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+                <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Source Hash (On-Chain)</p>
+                <p className="text-gray-400 text-[10px] font-mono break-all">{verifyResult.on_chain_contract_hash}</p>
+              </div>
+            )}
+            {verifyResult && verifyResult.on_chain_report_hash && (
+              <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+                <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Report Hash (On-Chain)</p>
+                <p className="text-gray-400 text-[10px] font-mono break-all">{verifyResult.on_chain_report_hash}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────── Main Page ──
 export default function ReportPage() {
   const { id } = useParams<{ id: string }>();
@@ -932,6 +1108,9 @@ export default function ReportPage() {
 
         {/* Safe banner */}
         {isSafe && <SafeBanner report={report} />}
+
+        {/* Phase 3: Blockchain Audit Integrity section */}
+        <BlockchainSection report={report} analysisId={report.analysis_id} />
 
         {/* Phase 4: Two-column layout */}
         {!isSafe && (

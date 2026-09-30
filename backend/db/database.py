@@ -42,6 +42,13 @@ def run_sqlite_migrations(sync_conn):
                 ("compiler_version", "VARCHAR(100)"),
                 ("git_commit", "VARCHAR(64)"),
                 ("trust_metadata", "JSON"),
+                # Phase 3: Blockchain Audit Registry fields
+                ("audit_id", "VARCHAR(66)"),
+                ("tx_hash", "VARCHAR(66)"),
+                ("registry_address", "VARCHAR(42)"),
+                ("chain_id", "INTEGER"),
+                ("on_chain_status", "VARCHAR(50)"),
+                ("on_chain_timestamp", "DATETIME"),
             ]
             for col_name, col_type in new_cols:
                 if col_name not in existing_rep_cols:

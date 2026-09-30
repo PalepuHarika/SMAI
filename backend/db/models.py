@@ -52,6 +52,13 @@ class VulnerabilityReport(Base):
     compiler_version = Column(String(100), nullable=True)
     git_commit = Column(String(64), nullable=True)
     trust_metadata = Column(JSON, default=dict)
+    # Phase 3: Blockchain Audit Registry fields
+    audit_id = Column(String(66), nullable=True)
+    tx_hash = Column(String(66), nullable=True)
+    registry_address = Column(String(42), nullable=True)
+    chain_id = Column(Integer, nullable=True)
+    on_chain_status = Column(String(50), nullable=True)
+    on_chain_timestamp = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     analysis = relationship('Analysis', back_populates='report')
