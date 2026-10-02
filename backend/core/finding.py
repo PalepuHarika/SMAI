@@ -81,4 +81,6 @@ class VulnerabilityReportPayload(BaseModel):
     compiler_version: Optional[str] = Field(None, description="Solidity compiler version / pragma extracted from source")
     git_commit: Optional[str] = Field(None, description="Git commit hash of SMAI platform build if available")
     user_id: Optional[str] = Field(None, description="ID of user or auditor requesting the analysis")
+    execution_time_seconds: Optional[float] = Field(None, description="Total pipeline execution duration in seconds")
+    timing_metrics: Optional[Dict[str, float]] = Field(None, description="Detailed stage timing durations in seconds")
 

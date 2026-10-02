@@ -191,7 +191,10 @@ class LLMReasoner:
             self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         self.model = model
         self.prompt_mode = prompt_mode
-        self.client = httpx.AsyncClient(base_url=self.ollama_url, timeout=600.0)
+        self.client = httpx.AsyncClient(
+            base_url=self.ollama_url,
+            timeout=httpx.Timeout(120.0, connect=10.0)
+        )
 
     async def verify_finding(
         self,
@@ -289,7 +292,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             "options": {
                 "temperature": 0.2,
                 "repeat_penalty": 1.1,
-                "num_predict": 1024
+                "num_predict": 512
             }
         }
 
@@ -349,7 +352,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
 
                 fixed_sol = parsed_data.get("fixed_code", "")
                 if fixed_sol and fixed_sol != "N/A":
-                    parsed_data["fix_verified"] = rescan_fix(fixed_sol, finding.category)
+                    parsed_data["fix_verified"] = await asyncio.to_thread(rescan_fix, fixed_sol, finding.category)
                 else:
                     parsed_data["fix_verified"] = False
 
