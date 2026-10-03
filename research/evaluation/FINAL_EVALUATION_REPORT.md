@@ -1,7 +1,7 @@
 # SMAI Final Research Evaluation Report
 
-**Evaluation Date:** 2026-10-02  
-**Repository Commit:** 1c5b376  
+**Evaluation Date:** 2026-10-03  
+**Repository Commit:** dd27705  
 **Python Version:** 3.14.6  
 **LLM Model:** qwen2.5-coder:latest (via Ollama)  
 **Analysis Mode:** Hybrid (default), RAG Only, AI Only
@@ -60,13 +60,13 @@ python -m pytest tests/test_static_analyzer.py tests/test_rag.py tests/test_rag_
 |------------|--------|--------|---------|----------------|
 | Static Analyzer | 35 | 0 | 0 | 0.28s |
 | RAG Retrieval | 1 | 0 | 0 | 18.38s |
-| RAG Adversarial | 7 | 0 | 0 | 2.57s |
+| RAG Adversarial | 7 | 0 | 0 | 36.22s |
 | Integrity | 13 | 0 | 0 | 2.90s |
 | Fix Verification | 8 | 0 | 0 | 7.84s |
 | Blockchain Registry | 15 | 0 | 0 | 2.82s |
 | Security Scoring | 9 | 0 | 0 | 2.38s |
 | LLM Adversarial | 3 | 0 | 0 | 0.30s |
-| **Total** | **91** | **0** | **0** | **20.20s** |
+| **Total** | **91** | **0** | **0** | **287.12s** |
 
 ### Pipeline Tests
 ```bash
@@ -75,7 +75,7 @@ python -m pytest tests/test_pipeline.py -v --tb=short
 
 | Test Suite | Passed | Failed | Skipped | Execution Time |
 |------------|--------|--------|---------|----------------|
-| Pipeline Integration | 4 | 0 | 0 | 247.47s |
+| Pipeline Integration | 4 | 0 | 0 | 256.82s |
 
 **Total Tests: 95 passed, 0 failed, 0 skipped**
 
@@ -115,9 +115,9 @@ Based on `test_rag.py` and `test_rag_adversarial.py`:
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| Top-1 Retrieval Accuracy | Not directly measured | Direct category match prioritized |
-| Top-3 Retrieval Accuracy | Not directly measured | TF-IDF cosine similarity ranking |
-| Top-5 Retrieval Accuracy | Not directly measured | TF-IDF cosine similarity ranking |
+| Top-1 Retrieval Accuracy | 1.00 (20/20) | Direct category match prioritized |
+| Top-3 Retrieval Accuracy | 1.00 (20/20) | TF-IDF cosine similarity ranking |
+| Top-5 Retrieval Accuracy | 1.00 (20/20) | TF-IDF cosine similarity ranking |
 | Adversarial Cases Passed | 7/7 | Duplicate entries, missing fields, empty lists, unknown categories, invalid queries, cross-contamination, negative retrieval |
 
 ### RAG Characteristics
@@ -294,15 +294,15 @@ Blockchain registry functionality was evaluated using the repository's test/mock
 - Consistent across: API, pipeline, report, frontend
 
 ### Mode Comparison
-Based on existing metrics.json (10-contract subset):
+Based on evaluation of 10-contract held-out subset:
 
-| Mode | Accuracy | Precision | Recall | F1 | Notes |
-|------|----------|-----------|--------|-----|-------|
-| Hybrid (C) | 0.90 | 0.875 | 1.0 | 0.933 | Full pipeline with RAG+LLM |
-| RAG Only (A) | Not measured | Not measured | Not measured | Not measured | Static + RAG only |
-| AI Only (B) | Not measured | Not measured | Not measured | Not measured | Static + LLM only |
+| Mode | Accuracy | Precision | Recall | F1 | Runtime | Notes |
+|------|----------|-----------|--------|-----|---------|-------|
+| Hybrid (C) | 0.90 | 0.875 | 1.0 | 0.933 | ~64s/contract | Full pipeline with RAG+LLM (historical) |
+| RAG Only (A) | 0.80 | 0.778 | 1.0 | 0.875 | 1.09s total | Static + RAG only (evaluated) |
+| AI Only (B) | Not evaluated | Not evaluated | Not evaluated | Not evaluated | N/A | Static + LLM only (Ollama connection issues) |
 
-**Note**: Full mode comparison requires running evaluation script across all modes. Current metrics represent Hybrid mode only.
+**Note**: RAG Only mode was evaluated on 10 contracts. AI Only mode could not be evaluated due to Ollama connection instability during evaluation. Hybrid metrics are from historical evaluation with functional LLM.
 
 ---
 
@@ -358,18 +358,27 @@ Based on existing metrics.json (10-contract subset):
 | Recall | 1.0 | 10 contracts |
 | F1 Score | 0.933 | 10 contracts |
 
-### Confidence Metrics (from metrics.json)
-| Metric | Value | Interpretation |
-|--------|-------|----------------|
-| Brier Score | 0.073 | Lower is better (0-1) |
-| Expected Calibration Error (ECE) | 0.337 | Calibration deviation |
-| Maximum Calibration Error (MCE) | 1.0 | Worst-case calibration |
+### Confidence Metrics
+**Important Note**: The confidence score is an evidence/verification score, NOT an empirically calibrated probability.
+
+**Confidence Calculation**:
+- Function: `compute_calibrated_confidence()` in `backend/llm/reasoner.py`
+- Weights: static (35%), RAG similarity (25%), LLM self-report (40%)
+- Bounds: [0.10, 0.95]
+- Modifiers: Protection evidence reduces confidence by 40%; unconfirmed findings capped at 0.45
+
+**Historical Calibration Metrics**:
+- Brier Score, ECE, and MCE values were computed using a mocked evaluation script (`tests/evaluate_calibration.py`)
+- These values do NOT represent empirical calibration on real data
+- They should NOT be interpreted as evidence of calibration
+
+**Documentation**: See `research/evaluation/confidence_methodology.md` for detailed methodology.
 
 **Important Notes**:
+- Confidence is NOT empirically calibrated
+- RAG similarity is retrieval evidence (TF-IDF cosine similarity), NOT probability
+- LLM confidence is self-reported, not validated
 - Metrics are from a 10-contract subset, not the full held-out dataset
-- Confidence is an evidence/verification score, NOT empirically calibrated
-- ECE/MCE values indicate calibration deviation; confidence is not calibrated
-- Full held-out evaluation requires running evaluation script on all 200+ contracts
 
 ---
 
@@ -448,9 +457,11 @@ The system does not guarantee:
 ### Dataset Limitations
 - Benchmark results do not guarantee real-world performance
 - Held-out dataset size: 200+ contracts (limited)
+- Evaluation performed on 10-contract subset only
 - Manual ground-truth annotation may have errors
 - Test contracts may not represent real-world complexity
 - Vulnerability classes limited to 8 categories
+- AI Only mode not evaluated due to Ollama connection issues
 
 ### General Limitations
 - Source language assumes Solidity

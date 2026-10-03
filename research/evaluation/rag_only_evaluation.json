@@ -1,0 +1,478 @@
+{
+  "evaluation_metadata": {
+    "evaluation_date": "2026-10-03",
+    "repository_commit": "dd27705",
+    "dataset": "held_out_10_contract_subset",
+    "contracts": [
+      "Eval_Reentrancy_01.sol",
+      "Eval_Safe_01.sol",
+      "Eval_TxOrigin_01.sol",
+      "Eval_Timestamp_01.sol",
+      "Eval_UncheckedCall_01.sol",
+      "Eval_MissingAccessControl_01.sol",
+      "Eval_Safe_MissingAccessControl_02.sol",
+      "Eval_Delegatecall_01.sol",
+      "Eval_Selfdestruct_01.sol",
+      "Eval_Safe_02.sol"
+    ],
+    "mode": "rag_only"
+  },
+  "results": {
+    "mode": "A",
+    "metrics": {
+      "true_positives": 7,
+      "true_negatives": 1,
+      "false_positives": 2,
+      "false_negatives": 0,
+      "accuracy": 0.8,
+      "precision": 0.7777777777777778,
+      "recall": 1.0,
+      "f1_score": 0.8750000000000001,
+      "total_runtime_seconds": 1.0867536067962646,
+      "dataset_size": 10
+    },
+    "results": [
+      {
+        "contract_id": "Eval_Reentrancy_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "reentrancy"
+          ],
+          "expected_severities": [
+            "High"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 3,
+        "security_score": 71,
+        "risk_level": "High Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "reentrancy",
+            "swc_id": "SWC-107",
+            "severity": "High",
+            "confidence": 0.88,
+            "static_confidence": 0.88,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "missing-access-control",
+            "swc_id": "SWC-105",
+            "severity": "High",
+            "confidence": 0.85,
+            "static_confidence": 0.85,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.17703652381896973
+      },
+      {
+        "contract_id": "Eval_Safe_01.sol",
+        "ground_truth": {
+          "is_vulnerable": false,
+          "expected_vulnerabilities": [],
+          "expected_severities": []
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 85,
+        "risk_level": "High Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "missing-access-control",
+            "swc_id": "SWC-105",
+            "severity": "High",
+            "confidence": 0.85,
+            "static_confidence": 0.85,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.09117770195007324
+      },
+      {
+        "contract_id": "Eval_TxOrigin_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "tx-origin"
+          ],
+          "expected_severities": [
+            "High"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 84,
+        "risk_level": "High Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "tx-origin",
+            "swc_id": "SWC-115",
+            "severity": "High",
+            "confidence": 0.88,
+            "static_confidence": 0.88,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.09234952926635742
+      },
+      {
+        "contract_id": "Eval_Timestamp_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "timestamp-dependence"
+          ],
+          "expected_severities": [
+            "Medium"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 90,
+        "risk_level": "Moderate Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "timestamp-dependence",
+            "swc_id": "SWC-116",
+            "severity": "Medium",
+            "confidence": 0.88,
+            "static_confidence": 0.88,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.08661961555480957
+      },
+      {
+        "contract_id": "Eval_UncheckedCall_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "unchecked-call"
+          ],
+          "expected_severities": [
+            "Medium"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 90,
+        "risk_level": "Moderate Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "unchecked-call",
+            "swc_id": "SWC-104",
+            "severity": "Medium",
+            "confidence": 0.85,
+            "static_confidence": 0.85,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.09073257446289062
+      },
+      {
+        "contract_id": "Eval_MissingAccessControl_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "missing-access-control"
+          ],
+          "expected_severities": [
+            "High"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 3,
+        "security_score": 82,
+        "risk_level": "High Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "missing-zero-check",
+            "swc_id": "SWC-136",
+            "severity": "Low",
+            "confidence": 0.75,
+            "static_confidence": 0.75,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "missing-access-control",
+            "swc_id": "SWC-105",
+            "severity": "High",
+            "confidence": 0.85,
+            "static_confidence": 0.85,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.10260128974914551
+      },
+      {
+        "contract_id": "Eval_Safe_MissingAccessControl_02.sol",
+        "ground_truth": {
+          "is_vulnerable": false,
+          "expected_vulnerabilities": [],
+          "expected_severities": []
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 95,
+        "risk_level": "Low Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "missing-zero-check",
+            "swc_id": "SWC-136",
+            "severity": "Low",
+            "confidence": 0.75,
+            "static_confidence": 0.75,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.10688090324401855
+      },
+      {
+        "contract_id": "Eval_Delegatecall_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "dangerous-delegatecall"
+          ],
+          "expected_severities": [
+            "Critical"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 3,
+        "security_score": 68,
+        "risk_level": "Critical Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "unchecked-call",
+            "swc_id": "SWC-104",
+            "severity": "Medium",
+            "confidence": 0.85,
+            "static_confidence": 0.85,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "dangerous-delegatecall",
+            "swc_id": "SWC-112",
+            "severity": "Critical",
+            "confidence": 0.9,
+            "static_confidence": 0.92,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.09756731986999512
+      },
+      {
+        "contract_id": "Eval_Selfdestruct_01.sol",
+        "ground_truth": {
+          "is_vulnerable": true,
+          "expected_vulnerabilities": [
+            "unprotected-selfdestruct"
+          ],
+          "expected_severities": [
+            "Critical"
+          ]
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 75,
+        "risk_level": "Critical Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "unprotected-selfdestruct",
+            "swc_id": "SWC-106",
+            "severity": "Critical",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.14523649215698242
+      },
+      {
+        "contract_id": "Eval_Safe_02.sol",
+        "ground_truth": {
+          "is_vulnerable": false,
+          "expected_vulnerabilities": [],
+          "expected_severities": []
+        },
+        "mode": "A",
+        "predicted_vulnerability": true,
+        "total_findings": 2,
+        "security_score": 84,
+        "risk_level": "High Risk",
+        "findings": [
+          {
+            "vulnerability": "floating-pragma",
+            "swc_id": "SWC-103",
+            "severity": "Low",
+            "confidence": 0.9,
+            "static_confidence": 0.95,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          },
+          {
+            "vulnerability": "tx-origin",
+            "swc_id": "SWC-115",
+            "severity": "High",
+            "confidence": 0.88,
+            "static_confidence": 0.88,
+            "is_vulnerable": true,
+            "verification_status": "CONFIRMED",
+            "fallback_used": false,
+            "model_used": "RAG Only (No AI)"
+          }
+        ],
+        "runtime_seconds": 0.09169340133666992
+      }
+    ]
+  }
+}

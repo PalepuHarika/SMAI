@@ -1,7 +1,7 @@
 {
   "evaluation_metadata": {
-    "evaluation_date": "2026-10-02",
-    "repository_commit": "1c5b376",
+    "evaluation_date": "2026-10-03",
+    "repository_commit": "dd27705",
     "python_version": "3.14.6",
     "llm_model": "qwen2.5-coder:latest",
     "analysis_mode": "hybrid",
@@ -24,7 +24,7 @@
       "passed": 7,
       "failed": 0,
       "skipped": 0,
-      "execution_time_seconds": 2.57
+      "execution_time_seconds": 36.22
     },
     "integrity": {
       "passed": 13,
@@ -60,13 +60,13 @@
       "passed": 4,
       "failed": 0,
       "skipped": 0,
-      "execution_time_seconds": 247.47
+      "execution_time_seconds": 256.82
     },
     "total": {
       "passed": 95,
       "failed": 0,
       "skipped": 0,
-      "execution_time_seconds": 267.67
+      "execution_time_seconds": 287.12
     }
   },
   "held_out_metrics": {
@@ -78,18 +78,17 @@
     "accuracy": 0.9,
     "precision": 0.875,
     "recall": 1.0,
-    "f1_score": 0.9333333333333333
+    "f1_score": 0.933
   },
   "confidence_metrics": {
-    "brier_score": 0.07304029999999997,
-    "expected_calibration_error": 0.3369,
-    "maximum_calibration_error": 1.0,
-    "note": "Confidence is an evidence/verification score, not empirically calibrated"
+    "note": "Confidence is an evidence/verification score computed from static analysis, RAG similarity, and LLM self-report. It is NOT empirically calibrated. Historical Brier/ECE/MCE values were from a mocked evaluation script and do not represent actual calibration.",
+    "methodology_document": "research/evaluation/confidence_methodology.md"
   },
   "rag_metrics": {
-    "top1_accuracy": "not_measured",
-    "top3_accuracy": "not_measured",
-    "top5_accuracy": "not_measured",
+    "top1_accuracy": 1.0,
+    "top3_accuracy": 1.0,
+    "top5_accuracy": 1.0,
+    "benchmark_queries": 20,
     "adversarial_cases_passed": 7,
     "adversarial_cases_total": 7,
     "note": "Direct category match prioritized; TF-IDF cosine similarity ranking"
@@ -97,7 +96,7 @@
   "runtime_metrics": {
     "static_analysis_avg_ms_per_test": 8.0,
     "rag_retrieval_total_seconds": 18.38,
-    "pipeline_avg_seconds_per_contract": 61.87,
+    "pipeline_avg_seconds_per_contract": 64.21,
     "llm_verification_dominant_factor": true,
     "concurrency": "sequential_for_ollama_stability"
   },
@@ -136,27 +135,31 @@
       "precision": 0.875,
       "recall": 1.0,
       "f1": 0.933,
-      "components": ["static", "rag", "llm"]
+      "components": ["static", "rag", "llm"],
+      "note": "From historical evaluation with LLM"
     },
     "rag_only": {
-      "accuracy": "not_measured",
-      "precision": "not_measured",
-      "recall": "not_measured",
-      "f1": "not_measured",
-      "components": ["static", "rag"]
+      "accuracy": 0.8,
+      "precision": 0.778,
+      "recall": 1.0,
+      "f1": 0.875,
+      "components": ["static", "rag"],
+      "runtime_seconds": 1.09,
+      "note": "Evaluated on 10-contract subset"
     },
     "ai_only": {
-      "accuracy": "not_measured",
-      "precision": "not_measured",
-      "recall": "not_measured",
-      "f1": "not_measured",
-      "components": ["static", "llm"]
+      "accuracy": "not_evaluated",
+      "precision": "not_evaluated",
+      "recall": "not_evaluated",
+      "f1": "not_evaluated",
+      "components": ["static", "llm"],
+      "note": "Ollama connection issues prevented evaluation"
     }
   },
   "limitations": [
     "Benchmark results from 10-contract subset only",
     "Full held-out evaluation (200+ contracts) not performed",
-    "RAG Only and AI Only modes not fully evaluated",
+    "AI Only mode not evaluated due to Ollama connection issues",
     "LLM confidence is self-reported, not empirically calibrated",
     "Fix verification does not perform formal verification",
     "Blockchain registry evaluated using mocks only",

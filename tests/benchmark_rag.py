@@ -1,4 +1,6 @@
 import json
+import sys
+sys.path.insert(0, '.')
 from backend.rag.knowledge_base import SecurityKnowledgeBase
 from backend.rag.retriever import RAGRetriever
 from backend.core.finding import StaticFinding, CodeContext
