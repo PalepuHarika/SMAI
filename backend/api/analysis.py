@@ -51,7 +51,7 @@ class VerifyFixResponse(BaseModel):
     remaining_findings: List[Dict[str, Any]] = Field(default_factory=list)
     new_severe_findings: List[Dict[str, Any]] = Field(default_factory=list)
     verification_reason: str
-    compiler_verification: str = "not_performed"
+    compiler_verification: str  # Deterministic: "verified", "failed", or "not_performed"
 
 class RegisterOnChainResponse(BaseModel):
     registered: bool

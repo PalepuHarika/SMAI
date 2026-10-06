@@ -1,0 +1,2689 @@
+{
+  "summary": {
+    "dataset": "datasets/held_out/",
+    "total_contracts_in_dataset": 140,
+    "contracts_with_labels": 140,
+    "TP": 92,
+    "TN": 15,
+    "FP": 28,
+    "FN": 5,
+    "Accuracy": 0.7643,
+    "Precision": 0.7667,
+    "Recall": 0.9485,
+    "F1": 0.8479,
+    "mode": "AI-Only (Static Analyzer)",
+    "note": "Additional evaluation on the held-out 140-contract dataset. The original 10-contract evaluation results are preserved unchanged."
+  },
+  "raw_results": [
+    {
+      "contract": "Eval_Delegatecall_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.011931,
+      "num_findings": 3
+    },
+    {
+      "contract": "Eval_MissingAccessControl_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.002234,
+      "num_findings": 3
+    },
+    {
+      "contract": "Eval_Reentrancy_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00176,
+      "num_findings": 3
+    },
+    {
+      "contract": "Eval_Safe_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001326,
+      "num_findings": 2
+    },
+    {
+      "contract": "Eval_Safe_02.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000851,
+      "num_findings": 2
+    },
+    {
+      "contract": "Eval_Safe_MissingAccessControl_02.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001925,
+      "num_findings": 2
+    },
+    {
+      "contract": "Eval_Selfdestruct_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000506,
+      "num_findings": 2
+    },
+    {
+      "contract": "Eval_Timestamp_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001865,
+      "num_findings": 2
+    },
+    {
+      "contract": "Eval_TxOrigin_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001535,
+      "num_findings": 2
+    },
+    {
+      "contract": "Eval_UncheckedCall_01.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000894,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_AccessControl_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000874,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_AccessControl_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.00087,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_AccessControl_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000608,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_AccessControl_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000662,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_AccessControl_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000652,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000716,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000984,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000877,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000721,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000738,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000705,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001133,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000838,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000731,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_AccessControl_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "missing-access-control"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control",
+        "missing-zero-check"
+      ],
+      "pred_severities": [
+        "Low",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000762,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001179,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000631,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000654,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000577,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000594,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000769,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00111,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000678,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00083,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000653,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00046,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000647,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000733,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000703,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Delegatecall_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "dangerous-delegatecall"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call",
+        "dangerous-delegatecall"
+      ],
+      "pred_severities": [
+        "Medium",
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00071,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_FloatingPragma_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "floating-pragma"
+      ],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": false,
+      "outcome": "FN",
+      "inference_time_s": 8.5e-05,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_FloatingPragma_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "floating-pragma"
+      ],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": false,
+      "outcome": "FN",
+      "inference_time_s": 7.6e-05,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_FloatingPragma_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "floating-pragma"
+      ],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": false,
+      "outcome": "FN",
+      "inference_time_s": 7.8e-05,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_FloatingPragma_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "floating-pragma"
+      ],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": false,
+      "outcome": "FN",
+      "inference_time_s": 6.7e-05,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_FloatingPragma_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "floating-pragma"
+      ],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": false,
+      "outcome": "FN",
+      "inference_time_s": 6.7e-05,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_MultiVuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00184,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.0016,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001587,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001487,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001452,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001348,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001304,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001348,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000913,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_MultiVuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin",
+        "reentrancy",
+        "unchecked-call",
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "High",
+        "Critical",
+        "High",
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001216,
+      "num_findings": 5
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001155,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000859,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000897,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000747,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.00097,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001081,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.002203,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001322,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001283,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Safe_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001308,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.0022,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001443,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_10.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001401,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_11.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001328,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_12.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00129,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_13.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001701,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_14.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001665,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000933,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000731,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001357,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001305,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001326,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001559,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001333,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Reentrancy_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "reentrancy"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "reentrancy",
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High",
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.001326,
+      "num_findings": 3
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000548,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000526,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000509,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000506,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000501,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000606,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000905,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000536,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000468,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000442,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000441,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000447,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000532,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00047,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Selfdestruct_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unprotected-selfdestruct"
+      ],
+      "pred_severities": [
+        "Critical"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000708,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.003059,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.001017,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000983,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.00087,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "missing-access-control"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "FP",
+      "inference_time_s": 0.000854,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000783,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000643,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000685,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000619,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000662,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000678,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000609,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000583,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000732,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_Timestamp_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "timestamp-dependence"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "timestamp-dependence"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00098,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000754,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_TxOrigin_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.00066,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_TxOrigin_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000651,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_TxOrigin_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000624,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_TxOrigin_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000602,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000542,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000528,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000527,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000512,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000491,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000495,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00095,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000944,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000885,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_TxOrigin_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "tx-origin"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "tx-origin"
+      ],
+      "pred_severities": [
+        "High"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000821,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Safe_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.000787,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Safe_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.001116,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Safe_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.001319,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Safe_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.001292,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Safe_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": false,
+      "expected_vulnerabilities": [],
+      "pred_is_vulnerable": false,
+      "pred_categories": [],
+      "pred_severities": [],
+      "category_match": true,
+      "outcome": "TN",
+      "inference_time_s": 0.001136,
+      "num_findings": 1
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_0.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.00074,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_1.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000685,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_2.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000657,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_3.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000653,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_4.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000652,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_5.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000652,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_6.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000652,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_7.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000706,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_8.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000785,
+      "num_findings": 2
+    },
+    {
+      "contract": "Phase4_UncheckedCall_Vuln_9.sol",
+      "label_available": true,
+      "truth_is_vulnerable": true,
+      "expected_vulnerabilities": [
+        "unchecked-call"
+      ],
+      "pred_is_vulnerable": true,
+      "pred_categories": [
+        "unchecked-call"
+      ],
+      "pred_severities": [
+        "Medium"
+      ],
+      "category_match": true,
+      "outcome": "TP",
+      "inference_time_s": 0.000475,
+      "num_findings": 2
+    }
+  ]
+}

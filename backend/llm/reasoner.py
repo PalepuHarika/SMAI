@@ -46,6 +46,151 @@ def validate_solidity_syntax(code: str) -> bool:
         i += 1
     return brace_balance == 0 and paren_balance == 0
 
+
+def _extract_pragma_version(code: str) -> Optional[str]:
+    """
+    Extract Solidity pragma version from source code.
+    Returns version string like "0.8.0" or None if not found.
+    """
+    import re
+    # Match pragma solidity ^0.8.0; or pragma solidity >=0.8.0 <0.9.0; etc.
+    pragma_match = re.search(r'pragma\s+solidity\s+([^;]+);', code)
+    if pragma_match:
+        version_spec = pragma_match.group(1).strip()
+        # Simple extraction: take the version number after ^, >=, or nothing
+        # For complex ranges, we'll use a default
+        if '^' in version_spec:
+            version = version_spec.replace('^', '').strip()
+        elif '>=' in version_spec:
+            version = version_spec.split('>=')[1].split('<')[0].strip()
+        else:
+            version = version_spec.strip()
+        # Clean up any range operators
+        version = re.sub(r'[<>=\s]', '', version).split(',')[0]
+        return version
+    return None
+
+
+def _check_solc_available() -> bool:
+    """
+    Check if solc compiler is available via py-solc-x.
+    Returns True if py-solc-x can be used, False otherwise.
+    """
+    try:
+        import solcx
+        # Try to get installed versions or install a default one
+        installed = solcx.get_installed_solc_versions()
+        if installed:
+            return True
+        # If no versions installed, check if we can install one
+        # This doesn't actually install, just checks capability
+        return True
+    except ImportError:
+        return False
+    except Exception:
+        return False
+
+
+def _compile_with_solc(code: str) -> Dict[str, Any]:
+    """
+    Attempt to compile Solidity code using py-solc-x (actual Solidity compiler).
+    Returns a dict with 'success' (bool) and optionally 'error' (str).
+    """
+    try:
+        import solcx
+        import tempfile
+        import os
+
+        # Extract pragma version
+        pragma_version = _extract_pragma_version(code)
+        
+        # Default to 0.8.0 if no pragma found
+        target_version = pragma_version if pragma_version else "0.8.0"
+        
+        # Normalize version (handle ^0.8.0 -> 0.8.0)
+        target_version = target_version.replace('^', '').strip()
+        
+        # Check if version is installed, if not try to install it
+        try:
+            installed_versions = solcx.get_installed_solc_versions()
+        except Exception:
+            installed_versions = []
+        
+        # Find the best match: exact version or closest compatible
+        solc_version = None
+        for v in installed_versions:
+            v_str = str(v)
+            if target_version in v_str or v_str.startswith(target_version):
+                solc_version = v_str
+                break
+        
+        if not solc_version:
+            try:
+                # Try to install the target version
+                solcx.install_solc(target_version)
+                solc_version = target_version
+            except Exception:
+                # If exact version fails, try to install a common version
+                try:
+                    solcx.install_solc('0.8.0')
+                    solc_version = '0.8.0'
+                except Exception as e:
+                    return {
+                        "success": False,
+                        "error": f"Failed to install solc compiler: {str(e)}"
+                    }
+        
+        # Set the solc version
+        try:
+            solcx.set_solc_version(solc_version)
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Failed to set solc version: {str(e)}"
+            }
+        
+        # Write code to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.sol', delete=False) as f:
+            f.write(code)
+            temp_path = f.name
+        
+        try:
+            # Compile the contract directly from code (no temp file needed)
+            compiled = solcx.compile_source(
+                code,
+                output_values=['abi', 'bin']
+            )
+            
+            # Check if compilation produced any output
+            if compiled and len(compiled) > 0:
+                # Success - at least one contract compiled
+                return {
+                    "success": True,
+                    "solc_version": solc_version,
+                    "compiled_contracts": len(compiled)
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": "Compilation produced no output"
+                }
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+                
+    except solcx.exceptions.SolcError as e:
+        # Compilation error - invalid Solidity
+        return {
+            "success": False,
+            "error": f"Compilation error: {str(e)}"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Compiler error: {str(e)}"
+        }
+
 def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
     """
     Verifies a proposed Solidity fix by running syntax validation and the static analyzer.
@@ -53,9 +198,23 @@ def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
     1. Syntax validity (validate_solidity_syntax)
     2. Elimination of the target vulnerability category
     3. Absence of newly introduced Critical or High vulnerabilities
-    4. Compiler verification status (reports 'not_performed' when solc unavailable)
+    4. Compiler verification status (deterministic: verified/failed/not_performed)
     """
     category_clean = (category or "").strip().lower().replace("_", "-").replace(" ", "-")
+
+    # Determine compiler verification status deterministically
+    compiler_available = _check_solc_available()
+    compiler_verification = "not_performed"
+    solc_version = None
+    compile_error = None
+    if compiler_available:
+        compile_result = _compile_with_solc(fixed_code)
+        if compile_result.get("success"):
+            compiler_verification = "verified"
+            solc_version = compile_result.get("solc_version")
+        else:
+            compiler_verification = "failed"
+            compile_error = compile_result.get("error")
 
     if not validate_solidity_syntax(fixed_code):
         return {
@@ -67,7 +226,9 @@ def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
             "remaining_findings": [],
             "new_severe_findings": [],
             "verification_reason": "Syntax validation failed",
-            "compiler_verification": "not_performed",
+            "compiler_verification": compiler_verification,
+            "solc_version": solc_version,
+            "compile_error": compile_error,
         }
 
     try:
@@ -116,7 +277,9 @@ def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
             "remaining_findings": remaining,
             "new_severe_findings": new_severe,
             "verification_reason": verification_reason,
-            "compiler_verification": "not_performed",
+            "compiler_verification": compiler_verification,
+            "solc_version": solc_version,
+            "compile_error": compile_error,
         }
     except Exception as e:
         return {
@@ -128,7 +291,9 @@ def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
             "remaining_findings": [],
             "new_severe_findings": [],
             "verification_reason": f"Verification error: {str(e)}",
-            "compiler_verification": "not_performed",
+            "compiler_verification": compiler_verification,
+            "solc_version": solc_version,
+            "compile_error": compile_error,
         }
 
 def rescan_fix(fixed_code: str, category: str) -> bool:
