@@ -403,6 +403,7 @@ function FindingCard({
 }) {
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState('');
+  const [copyStatus, setCopyStatus] = useState('');
 
   const handleVerifyFix = async () => {
     if (!analysisId || !f.fixed_code || f.fixed_code === 'N/A') return;
@@ -429,10 +430,20 @@ function FindingCard({
     }
   };
 
-  const hasRealFix = Boolean(f.fixed_code && f.fixed_code !== 'N/A' && !/^manual fix required/i.test(f.fixed_code));
-  const fixedFilename = `${(contractName || f.contract || 'Contract.sol').replace(/\.sol$/i, '')}_fixed.sol`;
+  const hasRealFix = Boolean(
+    f.fixed_code && f.fixed_code !== 'N/A' && f.fixed_code !== 'Manual remediation required' &&
+    f.fix_verified && f.compiler_verification === 'verified'
+  );
+  const sourceFilename = contractName || f.contract || 'Contract.sol';
+  const fixedFilename = `${sourceFilename.replace(/\.sol$/i, '')}_fixed.sol`;
   const copyFixedContract = async () => {
-    if (hasRealFix) await navigator.clipboard.writeText(f.fixed_code);
+    if (!hasRealFix) return;
+    try {
+      await navigator.clipboard.writeText(f.fixed_code);
+      setCopyStatus('Fixed contract copied.');
+    } catch {
+      setCopyStatus('Clipboard access failed. Copy the source manually.');
+    }
   };
   const downloadFixedContract = () => {
     if (!hasRealFix) return;
@@ -441,8 +452,10 @@ function FindingCard({
     const anchor = document.createElement('a');
     anchor.href = url;
     anchor.download = fixedFilename;
+    document.body.appendChild(anchor);
     anchor.click();
-    URL.revokeObjectURL(url);
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const isConfirmed = f.verification_status === 'CONFIRMED';
@@ -733,7 +746,7 @@ function FindingCard({
           {hasRealFix && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Corrected Contract</p>
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Fixed Contract / Corrected Solidity</p>
                 <div className="flex gap-2">
                   <button type="button" onClick={copyFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Copy Fixed Contract</button>
                   <button type="button" onClick={downloadFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Download Fixed Contract</button>
@@ -753,6 +766,7 @@ function FindingCard({
                   </button>
                 )}
               </div>
+              {copyStatus && <p role="status" className="text-xs text-gray-300">{copyStatus}</p>}
               <CodeBlock code={f.fixed_code} />
 
               {verifyError && (
@@ -780,10 +794,13 @@ function FindingCard({
                   )}
                 </p>
                 <p className="text-[10px] text-gray-500 mt-1.5">
-                  Compiler verification: {f.compiler_verification || 'not_performed'}. Automated verification does not guarantee the contract is completely secure.
+                  Compiler verification: {f.compiler_verification === 'verified' ? 'Compiler verified' : f.compiler_verification === 'failed' ? 'Compiler failed' : 'Verification unavailable'}. Automated verification does not guarantee the contract is completely secure.
                 </p>
               </div>
             </div>
+          )}
+          {!hasRealFix && (
+            <p className="text-xs text-amber-300">Manual remediation required. {f.compiler_verification === 'failed' ? 'Compiler verification failed.' : f.compiler_verification === 'not_performed' ? 'Compiler verification unavailable.' : ''}</p>
           )}
 
           <p className="text-[11px] text-gray-600 italic">

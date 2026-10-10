@@ -207,6 +207,7 @@ def _compile_with_solc(code: str) -> Dict[str, Any]:
                 except Exception as e:
                     return {
                         "success": False,
+                        "unavailable": True,
                         "error": f"Failed to install solc compiler: {str(e)}"
                     }
         
@@ -216,6 +217,7 @@ def _compile_with_solc(code: str) -> Dict[str, Any]:
         except Exception as e:
             return {
                 "success": False,
+                "unavailable": True,
                 "error": f"Failed to set solc version: {str(e)}"
             }
         
@@ -283,7 +285,7 @@ def verify_fix_details(fixed_code: str, category: str) -> Dict[str, Any]:
             compiler_verification = "verified"
             solc_version = compile_result.get("solc_version")
         else:
-            compiler_verification = "failed"
+            compiler_verification = "not_performed" if compile_result.get("unavailable") else "failed"
             compile_error = compile_result.get("error")
 
     if not validate_solidity_syntax(fixed_code):
@@ -372,6 +374,58 @@ def rescan_fix(fixed_code: str, category: str) -> bool:
         return bool(details.get("fix_verified", False))
     except Exception:
         return False
+
+
+def generate_floating_pragma_fix(source_code: str) -> Dict[str, Any]:
+    """Pin floating Solidity pragmas only when the complete source compiles and rescans cleanly."""
+    try:
+        import solcx
+        versions = sorted(solcx.get_installed_solc_versions(), reverse=True) or ["0.8.20"]
+    except Exception:
+        return {"fixed_code": "", "compiler_verification": "not_performed", "fix_verified": False}
+
+    pragma_pattern = re.compile(r"(?im)^(\s*pragma\s+solidity\s+)([^;]+)(;)")
+    def is_floating_pragma(spec: str) -> bool:
+        return bool(re.search(r"[~^]", spec) or (">" in spec and "<" not in spec))
+
+    specs = [m.group(2).strip() for m in pragma_pattern.finditer(source_code)]
+    floating = any(is_floating_pragma(spec) for spec in specs)
+    if not floating:
+        return {"fixed_code": "", "compiler_verification": "not_performed", "fix_verified": False}
+
+    last_status = "failed"
+    from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+    analyzer = SolidityStaticAnalyzer()
+    baseline_severe = {
+        (item.category, item.function, item.snippet)
+        for item in analyzer.analyze(source_code)
+        if item.severity in ("High", "Critical")
+    }
+    for version in versions:
+        version_text = str(version)
+        candidate = pragma_pattern.sub(
+            lambda m: m.group(1) + version_text + m.group(3)
+            if is_floating_pragma(m.group(2)) else m.group(0),
+            source_code,
+        )
+        verification = verify_fix_details(candidate, "floating-pragma")
+        last_status = verification.get("compiler_verification", "not_performed")
+        fixed_findings = analyzer.analyze(candidate)
+        fixed_severe = {
+            (item.category, item.function, item.snippet)
+            for item in fixed_findings
+            if item.severity in ("High", "Critical")
+        }
+        category_resolved = not any(item.category == "floating-pragma" for item in fixed_findings)
+        if last_status == "verified" and category_resolved and baseline_severe.issubset(fixed_severe):
+            return {
+                "fixed_code": candidate,
+                "compiler_verification": "verified",
+                "fix_verified": True,
+                "fix_verification_reason": "SWC-103 resolved; complete source compiled and no new High/Critical findings were introduced",
+                "solc_version": verification.get("solc_version"),
+            }
+    return {"fixed_code": "", "compiler_verification": last_status, "fix_verified": False}
 
 
 def compute_calibrated_confidence(

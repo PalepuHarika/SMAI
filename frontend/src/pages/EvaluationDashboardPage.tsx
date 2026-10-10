@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/api/client';
+import Navbar from '@/components/Navbar';
+
+function EvaluationPageShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0b0f19]">
+      <Navbar />
+      <main className="smai-evaluation max-w-7xl mx-auto p-5 sm:p-8">{children}</main>
+    </div>
+  );
+}
 
 export default function EvaluationDashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -25,14 +35,33 @@ export default function EvaluationDashboardPage() {
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        setError(err.response?.data?.detail || err.message);
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <div className="p-8">Loading evaluation data...</div>;
-  if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
-  if (!data) return <div className="p-8">No data available.</div>;
+  if (loading) return (
+    <EvaluationPageShell>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400 shadow-sm">
+        Loading benchmark metrics and ablation suite data...
+      </div>
+    </EvaluationPageShell>
+  );
+  if (error) return (
+    <EvaluationPageShell>
+      <div className="mx-auto max-w-md rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-950/30 p-12 text-center">
+        <h2 className="text-sm font-bold text-red-800 dark:text-red-300">Evaluation Data Unavailable</h2>
+        <p className="mt-1 text-xs text-red-700/80 dark:text-red-400">{error}</p>
+      </div>
+    </EvaluationPageShell>
+  );
+  if (!data) return (
+    <EvaluationPageShell>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400 shadow-sm">
+        No evaluation data available.
+      </div>
+    </EvaluationPageShell>
+  );
 
   // Derive unique filters
   const recordedDatasets = Array.from(new Set(Object.values(data).map((v: any) => v.dataset).filter(Boolean)));
@@ -47,40 +76,43 @@ export default function EvaluationDashboardPage() {
   );
   
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Smart Contract Scanner Evaluation Dashboard</h1>
+    <EvaluationPageShell>
+      <header className="mb-7">
+        <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">Evaluation Suite</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Empirical performance metrics, ablation studies, and confidence calibration.</p>
+      </header>
       
-      <div className="flex space-x-4 mb-8 bg-gray-100 p-4 rounded-lg items-center">
+      <div className="mb-6 flex flex-wrap items-center gap-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] p-5 shadow-sm">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold mb-1">Dataset</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Benchmark Dataset</label>
           <select 
             value={activeDataset}
             onChange={e => setSelectedDataset(e.target.value)}
-            className="border p-2 rounded"
+            className="min-w-56 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500"
           >
             {allDatasets.map(ds => <option key={ds} value={ds}>{ds}</option>)}
           </select>
         </div>
         
-        {allPrompts.length > 0 ? <div className="flex flex-col ml-4">
-          <label className="text-sm font-semibold mb-1">Prompt Condition</label>
+        {allPrompts.length > 0 ? <div className="flex flex-col">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Prompt Condition</label>
           <select 
             value={selectedPrompt} 
             onChange={e => setSelectedPrompt(e.target.value)}
-            className="border p-2 rounded"
+            className="min-w-48 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500"
           >
             {allPrompts.map(p => <option key={p} value={p}>{p === 'P0' ? 'P0 (Baseline)' : p === 'P1' ? 'P1 (Source-Grounding)' : p}</option>)}
           </select>
-        </div> : <p className="ml-4 text-sm text-gray-600">Prompt metadata is not present in these stored results.</p>}
+        </div> : <p className="text-sm text-gray-500 dark:text-gray-400">Prompt metadata is not present in these stored results.</p>}
       </div>
 
-      <div className="flex space-x-4 mb-8 border-b pb-4 overflow-x-auto">
-        <button onClick={() => setActiveTab('summary')} className={`px-4 py-2 rounded ${activeTab === 'summary' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Overall Metrics</button>
-        <button onClick={() => setActiveTab('comparison')} className={`px-4 py-2 rounded ${activeTab === 'comparison' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Model & RAG Ablation</button>
-        <button onClick={() => setActiveTab('prompt_ablation')} className={`px-4 py-2 rounded ${activeTab === 'prompt_ablation' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Prompt Ablation (P0 vs P1)</button>
-        <button onClick={() => setActiveTab('details')} className={`px-4 py-2 rounded ${activeTab === 'details' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Vulnerability & Severity</button>
-        <button onClick={() => setActiveTab('grounding')} className={`px-4 py-2 rounded ${activeTab === 'grounding' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Grounding & Confidence</button>
-        <button onClick={() => setActiveTab('contracts')} className={`px-4 py-2 rounded ${activeTab === 'contracts' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Contract-Level</button>
+      <div className="mb-6 flex gap-2 overflow-x-auto border-b border-gray-200 dark:border-gray-800 pb-3">
+        <button onClick={() => setActiveTab('summary')} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${activeTab === 'summary' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Overall Metrics</button>
+        <button onClick={() => setActiveTab('comparison')} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${activeTab === 'comparison' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Model & RAG Ablation</button>
+        <button onClick={() => setActiveTab('prompt_ablation')} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${activeTab === 'prompt_ablation' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Prompt Ablation (P0 vs P1)</button>
+        <button onClick={() => setActiveTab('details')} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${activeTab === 'details' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Vulnerability & Severity</button>
+        <button onClick={() => setActiveTab('grounding')} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${activeTab === 'grounding' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Grounding & Confidence</button>
+        <button onClick={() => setActiveTab('contracts')} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${activeTab === 'contracts' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>Contract-Level</button>
       </div>
       
       {activeTab === 'summary' && (
@@ -253,7 +285,7 @@ export default function EvaluationDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {rawData.filter(r => (r.dataset || 'Stored evaluation results') === activeDataset).map((r, i) => (
+              {rawData.filter(r => (r.dataset || 'Internal Diagnostic Suite') === activeDataset).map((r, i) => (
                 <tr key={i} className="border-b hover:bg-gray-50">
                   <td className="p-2 border">{r.contract}</td>
                   <td className="p-2 border">{r.mode}</td>
@@ -269,6 +301,6 @@ export default function EvaluationDashboardPage() {
           </table>
         </div>
       )}
-    </div>
+    </EvaluationPageShell>
   );
 }

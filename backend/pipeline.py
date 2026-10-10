@@ -9,7 +9,7 @@ from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
 from backend.analyzer.code_extractor import CodeContextExtractor
 from backend.rag.knowledge_base import SecurityKnowledgeBase
 from backend.rag.retriever import RAGRetriever
-from backend.llm.reasoner import LLMReasoner
+from backend.llm.reasoner import LLMReasoner, generate_floating_pragma_fix
 from backend.core.integrity import (
     hash_source_sha256,
     hash_source_keccak256,
@@ -241,6 +241,28 @@ class SecurityPipeline:
                          verified.rag_similarity_score = None
                          verified.rag_explanation = None
                     verified_findings.append(verified)
+
+        raw_findings_by_id = {finding.id: finding for finding in raw_findings}
+        for verified in verified_findings:
+            # The only deterministic auto-fix currently supported is SWC-103:
+            # pin floating pragmas, then compile and rescan the complete source.
+            # LLM snippets are not full-contract fixes and are never exposed as such.
+            raw_finding = raw_findings_by_id.get(verified.finding_id)
+            if raw_finding and raw_finding.category == "floating-pragma":
+                fix = generate_floating_pragma_fix(source_code)
+                verified.fixed_code = fix.get("fixed_code") or "Manual remediation required"
+                verified.fix_verified = bool(fix.get("fix_verified"))
+                verified.compiler_verification = fix.get("compiler_verification", "not_performed")
+                verified.fix_verification_reason = fix.get("fix_verification_reason") or (
+                    "Compiler verification failed; manual remediation required"
+                    if verified.compiler_verification == "failed"
+                    else "Compiler verification unavailable; manual remediation required"
+                )
+            else:
+                verified.fixed_code = "Manual remediation required"
+                verified.fix_verified = False
+                verified.compiler_verification = "not_performed"
+                verified.fix_verification_reason = "No safe deterministic automatic remediation is available"
 
         for verified in verified_findings:
             sev = str(verified.severity).title()

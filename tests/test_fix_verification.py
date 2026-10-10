@@ -1,17 +1,20 @@
 import pytest
 import uuid
+from sqlalchemy import select
 from httpx import AsyncClient, ASGITransport
 from backend.main import app
 from backend.db.database import init_db, AsyncSessionLocal
 from backend.db.models import User, Analysis, VulnerabilityReport
 from backend.core.security import hash_password, create_access_token
-from backend.llm.reasoner import verify_fix_details, rescan_fix, validate_solidity_syntax, _extract_pragma_version
+from backend.llm.reasoner import verify_fix_details, rescan_fix, validate_solidity_syntax, _extract_pragma_version, generate_floating_pragma_fix
 from backend.core.integrity import (
     compute_finding_hash,
     compute_findings_hash,
     compute_findings_merkle_root,
     compute_report_hash,
 )
+from backend.pipeline import SecurityPipeline
+from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
 
 _CLEAN_FIXED_CODE = """// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
@@ -78,11 +81,81 @@ def test_a_vulnerable_to_fixed_code():
     assert res["has_new_severe"] is False
     assert res["syntax_valid"] is True
     assert res["verification_reason"] == "Vulnerability resolved and no new High/Critical findings"
-    # compiler_verification is deterministic: not_performed (solc unavailable), verified, or failed
     assert res["compiler_verification"] in ["not_performed", "verified", "failed"]
-
-    # Verify existing rescan_fix function agrees
     assert rescan_fix(_CLEAN_FIXED_CODE, "reentrancy") is True
+
+
+@pytest.mark.asyncio
+async def test_swc103_full_source_fix_compiles_and_is_returned_by_api(api_fixture):
+    source = """// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract PragmaVault {
+    uint256 public value;
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+    raw = SolidityStaticAnalyzer().analyze(source, "PragmaVault")
+    finding = next(item for item in raw if item.swc_id == "SWC-103")
+    fix = generate_floating_pragma_fix(source)
+
+    assert fix["fixed_code"]
+    assert fix["fixed_code"] != source
+    assert "contract PragmaVault" in fix["fixed_code"]
+    assert "function setValue(uint256 next) external { value = next; }" in fix["fixed_code"]
+    assert fix["compiler_verification"] == "verified"
+    assert fix["fix_verified"] is True
+
+    report = await SecurityPipeline().scan(source, "PragmaVault.sol", mode="rag")
+    report_finding = next(item for item in report.findings if item.swc_id == finding.swc_id)
+    assert report_finding.fixed_code == fix["fixed_code"]
+    assert report_finding.compiler_verification == "verified"
+
+    async with AsyncSessionLocal() as db:
+        analysis = await db.get(Analysis, api_fixture["analysis_id"])
+        persisted_report_result = await db.execute(
+            select(VulnerabilityReport).where(VulnerabilityReport.analysis_id == api_fixture["analysis_id"])
+        )
+        persisted_report = persisted_report_result.scalar_one()
+        analysis.contract_name = "PragmaVault.sol"
+        analysis.source_code = source
+        persisted_report.verified_findings = [item.model_dump() for item in report.findings]
+        persisted_report.total_findings = report.total_findings
+        persisted_report.is_vulnerable = report.is_vulnerable
+        await db.commit()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get(
+            f"/api/analysis/{api_fixture['analysis_id']}",
+            headers={"Authorization": f"Bearer {api_fixture['user_a_token']}"},
+        )
+    assert response.status_code == 200
+    api_finding = next(item for item in response.json()["findings"] if item["swc_id"] == finding.swc_id)
+    assert api_finding["fixed_code"] == fix["fixed_code"]
+    assert api_finding["compiler_verification"] == "verified"
+
+
+@pytest.mark.asyncio
+async def test_unsupported_fix_returns_manual_remediation(api_fixture):
+    report = await SecurityPipeline().scan(_UNRESOLVED_VULNERABLE_CODE, "ReentrancyVault.sol", mode="rag")
+    finding = next(item for item in report.findings if item.vulnerability == "reentrancy")
+    assert finding.fixed_code == "Manual remediation required"
+    assert finding.fix_verified is False
+    assert finding.compiler_verification == "not_performed"
+
+
+def test_deterministic_fix_reports_compiler_failure_and_unavailability():
+    from unittest.mock import patch
+    source = "pragma solidity ^0.8.0; contract A { uint256 value; }"
+    with patch("backend.llm.reasoner._compile_with_solc", return_value={"success": False, "error": "compile error"}):
+        failed = generate_floating_pragma_fix(source)
+    assert failed["fixed_code"] == ""
+    assert failed["compiler_verification"] == "failed"
+
+    with patch("backend.llm.reasoner._check_solc_available", return_value=False):
+        unavailable = generate_floating_pragma_fix(source)
+    assert unavailable["fixed_code"] == ""
+    assert unavailable["compiler_verification"] == "not_performed"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

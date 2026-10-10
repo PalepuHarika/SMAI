@@ -1,1 +1,507 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --smai-bg-primary: #f8fafc;
+  --smai-bg-surface: #ffffff;
+  --smai-bg-panel: #ffffff;
+  --smai-bg-secondary: #f1f5f9;
+  --smai-border-primary: #e2e8f0;
+  --smai-border-secondary: #cbd5e1;
+  --smai-text-primary: #0f172a;
+  --smai-text-secondary: #334155;
+  --smai-text-muted: #64748b;
+  --smai-accent-primary: #2563eb;
+  --smai-accent-secondary: #4f46e5;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --smai-bg-primary: #0b0f19;
+  --smai-bg-surface: #111827;
+  --smai-bg-panel: #151e2d;
+  --smai-bg-secondary: #1e293b;
+  --smai-border-primary: #232f45;
+  --smai-border-secondary: #2e3d55;
+  --smai-text-primary: #f8fafc;
+  --smai-text-secondary: #cbd5e1;
+  --smai-text-muted: #94a3b8;
+  --smai-accent-primary: #3b82f6;
+  --smai-accent-secondary: #6366f1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--smai-bg-primary);
+  color: var(--smai-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.light [class~="bg-gray-950"] {
+  background-color: var(--smai-bg-primary);
+}
+
+html.light [class~="bg-gray-900"] {
+  background-color: var(--smai-bg-surface);
+}
+
+html.light [class~="bg-gray-800"],
+html.light [class~="bg-gray-100"],
+html.light [class~="bg-gray-50"] {
+  background-color: var(--smai-bg-secondary);
+}
+
+html.light [class~="bg-gray-700"] {
+  background-color: var(--smai-border-primary);
+}
+
+html.dark [class~="bg-gray-950"] {
+  background-color: var(--smai-bg-primary);
+}
+
+html.dark [class~="bg-gray-900"] {
+  background-color: var(--smai-bg-surface);
+}
+
+html.dark [class~="bg-gray-800"] {
+  background-color: var(--smai-bg-secondary);
+}
+
+html.light [class~="text-gray-900"] {
+  color: var(--smai-text-primary);
+}
+
+html.light [class~="text-gray-800"],
+html.light [class~="text-gray-700"],
+html.light [class~="text-gray-600"] {
+  color: var(--smai-text-secondary);
+}
+
+html.light [class~="text-gray-500"],
+html.light [class~="text-gray-400"] {
+  color: var(--smai-text-muted);
+}
+
+html.light [class~="border-gray-800"],
+html.light [class~="border-gray-700"],
+html.light [class~="border-gray-200"] {
+  border-color: var(--smai-border-primary);
+}
+
+html.light [class~="border-gray-300"] {
+  border-color: var(--smai-border-secondary);
+}
+
+/* Existing page components use Tailwind's dark gray utility palette. Remap
+   those tokens in light mode so the shared theme switch covers every route. */
+.light .text-white,
+.light .bg-gray-950 .text-white,
+.light .bg-gray-900 .text-white,
+.light .bg-gray-800 .text-white,
+.light .bg-gray-700 .text-white {
+  color: var(--smai-text-primary);
+}
+
+.light .bg-blue-500.text-white,
+.light .bg-blue-600.text-white,
+.light .bg-blue-700.text-white,
+.light .bg-blue-800.text-white,
+.light .bg-blue-900.text-white,
+.light .bg-blue-600 .text-white,
+.light .bg-blue-700 .text-white {
+  color: #ffffff;
+}
+
+.smai-nav {
+  position: fixed;
+  z-index: 40;
+  inset: 0 auto 0 0;
+  width: 16rem;
+  height: 100vh;
+}
+
+.smai-nav + * {
+  min-width: 0;
+  margin-left: 16rem;
+  padding-top: 3.5rem;
+}
+
+.smai-nav__toolbar {
+  position: fixed;
+  z-index: 35;
+  top: 0;
+  right: 0;
+  left: 16rem;
+  display: flex;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--smai-border-primary);
+  background: var(--smai-bg-surface);
+  padding: 0 1.5rem;
+}
+
+.smai-nav__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.smai-nav__new-scan {
+  display: inline-flex;
+  min-height: 2.1rem;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 0.6rem;
+  background: var(--smai-accent-primary);
+  padding: 0.45rem 0.75rem;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.smai-nav__new-scan:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.smai-nav__desktop-theme .smai-nav__theme {
+  min-height: 2.1rem;
+}
+
+.smai-nav__sidebar {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  border-right: 1px solid var(--smai-border-primary);
+  background: var(--smai-bg-surface);
+  padding: 1.25rem 1rem 1rem;
+}
+
+.smai-nav__brand,
+.smai-nav__mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--smai-text-primary);
+  text-decoration: none;
+}
+
+.smai-nav__brand {
+  min-height: 2.5rem;
+  padding: 0 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.smai-nav__brand-icon {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  background: var(--smai-accent-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px #2563eb30;
+}
+
+.smai-nav__brand-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.smai-nav__section-label {
+  margin: 0 0 0.6rem;
+  padding: 0 0.75rem;
+  color: var(--smai-text-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.smai-nav__links {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.smai-nav__link {
+  display: flex;
+  min-height: 2.55rem;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--smai-text-secondary);
+  font-size: 0.84rem;
+  font-weight: 550;
+  text-decoration: none;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.smai-nav__link:hover {
+  background: var(--smai-bg-secondary);
+  color: var(--smai-text-primary);
+}
+
+.smai-nav__link--active {
+  border-color: #3b82f626;
+  background: #3b82f614;
+  color: var(--smai-accent-primary);
+  font-weight: 700;
+}
+
+.smai-nav__footer {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: auto;
+}
+
+.smai-nav__theme,
+.smai-nav__icon-button,
+.smai-nav__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--smai-border-primary);
+  background: var(--smai-bg-surface);
+  color: var(--smai-text-secondary);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.smai-nav__theme {
+  min-height: 2.4rem;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.smai-nav__theme:hover,
+.smai-nav__icon-button:hover,
+.smai-nav__logout:hover {
+  background: var(--smai-bg-secondary);
+  color: var(--smai-text-primary);
+}
+
+.smai-nav__account {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+  border-top: 1px solid var(--smai-border-primary);
+  padding: 0.9rem 0.15rem 0;
+}
+
+.smai-nav__avatar {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #3b82f61a;
+  color: var(--smai-accent-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.smai-nav__account-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.1rem;
+}
+
+.smai-nav__account-email {
+  overflow: hidden;
+  color: var(--smai-text-primary);
+  font-size: 0.7rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smai-nav__account-role {
+  color: var(--smai-text-muted);
+  font-size: 0.62rem;
+  text-transform: lowercase;
+}
+
+.smai-nav__logout,
+.smai-nav__icon-button {
+  width: 2.15rem;
+  height: 2.15rem;
+  flex: 0 0 auto;
+  border-radius: 0.6rem;
+}
+
+.smai-nav__mobile {
+  display: none;
+}
+
+.smai-nav__mobile-drawer {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: flex;
+}
+
+.smai-nav__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: #02061780;
+  backdrop-filter: blur(2px);
+}
+
+.smai-nav__mobile-panel {
+  position: relative;
+  display: flex;
+  width: min(19rem, 86vw);
+  height: 100%;
+  flex-direction: column;
+  border-right: 1px solid var(--smai-border-primary);
+  background: var(--smai-bg-surface);
+  padding: 1rem;
+  box-shadow: 0 20px 50px #02061730;
+}
+
+.smai-nav__mobile-panel-head,
+.smai-nav__mobile-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.smai-nav__mobile-panel-head {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--smai-border-primary);
+  padding-bottom: 1rem;
+}
+
+.smai-nav__mobile-bottom {
+  display: grid;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+@media (max-width: 767px) {
+  .smai-nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 3.5rem;
+    background: var(--smai-bg-surface);
+    box-shadow: 0 1px 0 var(--smai-border-primary);
+  }
+
+  .smai-nav + * {
+    margin-left: 0;
+    padding-top: 0;
+  }
+
+  .smai-nav__sidebar {
+    display: none;
+  }
+
+  .smai-nav__mobile {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+  }
+
+  .smai-nav__toolbar {
+    position: static;
+    height: 2.8rem;
+    border-bottom: 0;
+    padding: 0 1rem 0.45rem;
+  }
+
+  .smai-nav__desktop-theme {
+    display: none;
+  }
+
+  .smai-nav__mobile-brand {
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .smai-nav__mobile-brand .smai-nav__brand-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 0.55rem;
+  }
+
+  .smai-nav__mobile-actions {
+    justify-content: flex-end;
+  }
+
+  .smai-nav__toolbar {
+    display: none;
+  }
+
+  .smai-evaluation > header {
+    display: none;
+  }
+}
+
+.smai-evaluation {
+  min-height: 100vh;
+  color: var(--smai-text-primary);
+}
+
+.dark .smai-evaluation .bg-white {
+  background-color: var(--smai-bg-surface);
+}
+
+.dark .smai-evaluation .bg-gray-100,
+.dark .smai-evaluation .bg-gray-50 {
+  background-color: var(--smai-bg-secondary);
+}
+
+.dark .smai-evaluation .border-gray-200 {
+  border-color: var(--smai-border-primary);
+}
+
+.dark .smai-evaluation .text-gray-900,
+.dark .smai-evaluation .text-gray-800 {
+  color: var(--smai-text-primary);
+}
+
+.dark .smai-evaluation .text-gray-700,
+.dark .smai-evaluation .text-gray-600 {
+  color: var(--smai-text-secondary);
+}
+
+.dark .smai-evaluation .text-gray-500,
+.dark .smai-evaluation .text-gray-400 {
+  color: var(--smai-text-muted);
+}

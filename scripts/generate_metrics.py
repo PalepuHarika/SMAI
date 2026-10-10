@@ -10,13 +10,17 @@ def compute_metrics(results, ground_truth):
         dataset = r.get("dataset", "Internal Diagnostic Suite")
         mode = r.get("mode", "A")
         model = r.get("model", "static")
-        prompt = r.get("prompt", "P1")
+        # Only report prompt ablations when the raw scientific record includes
+        # prompt metadata; do not infer P1 for older evaluations.
+        prompt = r.get("prompt")
         
         # Combine mode, model, prompt for the key
         if model == "static":
             key = f"{dataset} | Mode {mode} - {model}"
-        else:
+        elif prompt:
             key = f"{dataset} | Mode {mode} - {model} ({prompt})"
+        else:
+            key = f"{dataset} | Mode {mode} - {model}"
             
         if key not in summary:
             summary[key] = {
