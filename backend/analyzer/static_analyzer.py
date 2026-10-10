@@ -775,8 +775,10 @@ class SolidityStaticAnalyzer:
             clean = re.sub(r'//.*$', '', line).strip()
             # Find pragma solidity ...
             if clean.startswith("pragma solidity"):
-                # if contains ^ or > or <
-                if re.search(r'[\^\>\<\~]', clean):
+                # Check if pragma contains floating operators (^, >, <, ~)
+                # Examples of floating pragma: ^0.8.0, >=0.8.0, <0.9.0, ~0.8.0
+                # Examples of locked pragma: 0.8.20, =0.8.20
+                if re.search(r'[\^<>\~]', clean):
                     findings.append(StaticFinding(
                         id=f'finding-{uuid.uuid4().hex[:8]}',
                         contract="Global",

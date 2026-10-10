@@ -612,13 +612,38 @@ def test_swc103_floating_pragma():
     analyzer = SolidityStaticAnalyzer()
     findings = analyzer.analyze(src, 'Test')
     assert any(f.category == 'floating-pragma' for f in findings)
-    
+
+    # Test locked pragma should NOT be flagged
     src_fixed = '''
     pragma solidity 0.8.4;
     contract Test {}
     '''
     findings_fixed = analyzer.analyze(src_fixed, 'Test')
     assert not any(f.category == 'floating-pragma' for f in findings_fixed)
+
+    # Test other floating pragma patterns should be flagged
+    src_floating_2 = '''
+    pragma solidity >=0.8.0 <0.9.0;
+    contract Test {}
+    '''
+    findings_floating_2 = analyzer.analyze(src_floating_2, 'Test')
+    assert any(f.category == 'floating-pragma' for f in findings_floating_2)
+
+    src_floating_3 = '''
+    pragma solidity ~0.8.0;
+    contract Test {}
+    '''
+    findings_floating_3 = analyzer.analyze(src_floating_3, 'Test')
+    assert any(f.category == 'floating-pragma' for f in findings_floating_3)
+
+    # Test locked pragma with caret in comments should NOT be flagged
+    src_comment = '''
+    // pragma solidity ^0.8.0; // commented out
+    pragma solidity 0.8.20;
+    contract Test {}
+    '''
+    findings_comment = analyzer.analyze(src_comment, 'Test')
+    assert not any(f.category == 'floating-pragma' for f in findings_comment)
 
 def test_swc117_ecrecover():
     src = '''

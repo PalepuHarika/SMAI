@@ -12,6 +12,76 @@ from backend.core.finding import StaticFinding, CodeContext, VerifiedVulnerabili
 
 logger = logging.getLogger(__name__)
 
+
+def _get_safe_verification_error(error: Exception, error_type: str = "unknown") -> str:
+    """
+    Convert raw exceptions into safe, human-readable verification failure reasons.
+    Does not expose secrets, API keys, stack traces, or file paths.
+    
+    Args:
+        error: The exception that occurred
+        error_type: Category of error (connection, timeout, api, model, unknown)
+    
+    Returns:
+        Human-readable error message safe for display
+    """
+    error_str = str(error).strip()
+    
+    # Connection errors
+    if isinstance(error, (httpx.ConnectError, httpx.ConnectTimeout)):
+        if "refused" in error_str.lower() or "connection refused" in error_str.lower():
+            return "Ollama service is not reachable"
+        elif "timeout" in error_str.lower():
+            return "Connection to Ollama service timed out"
+        else:
+            return "Could not connect to Ollama service"
+    
+    # Timeout errors
+    if isinstance(error, (httpx.TimeoutException, httpx.ReadTimeout, httpx.WriteTimeout)):
+        return "AI service request timed out"
+    
+    # HTTP errors
+    if isinstance(error, httpx.HTTPStatusError):
+        try:
+            status_code = error.response.status_code
+            if status_code == 404:
+                return "AI model or endpoint not found"
+            elif status_code == 500:
+                return "AI service encountered an internal error"
+            elif status_code == 503:
+                return "AI service is temporarily unavailable"
+            else:
+                return f"AI service returned error code {status_code}"
+        except Exception:
+            return "AI service returned an error response"
+    
+    # Model-related errors
+    if isinstance(error, ValueError) and "model" in error_str.lower():
+        if "not found" in error_str.lower() or "does not exist" in error_str.lower():
+            return "AI model is not available"
+        else:
+            return "AI model error occurred"
+    
+    # JSON validation errors
+    if isinstance(error, (json.JSONDecodeError, ValidationError)):
+        return "AI service returned invalid response format"
+    
+    # Generic API errors
+    if isinstance(error, httpx.RequestError):
+        return "AI service communication failed"
+    
+    # Default safe message for unknown errors
+    if error_type == "connection":
+        return "AI service connection failed"
+    elif error_type == "timeout":
+        return "AI service request timed out"
+    elif error_type == "api":
+        return "AI service returned an error"
+    elif error_type == "model":
+        return "AI model is unavailable"
+    else:
+        return "AI verification could not be completed"
+
 def _clean_json_str(content: str) -> str:
     content = content.strip()
     if content.startswith("```"):
@@ -524,12 +594,17 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                 return VerifiedVulnerability(**parsed_data)
 
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                fallback_reason = f"API/Connection Error: {str(e)}"
-                logger.warning(f"LLM verification connection failed ({fallback_reason}).")
+                # Convert to safe human-readable error
+                if isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout, httpx.TimeoutException)):
+                    error_type = "connection" if isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout)) else "timeout"
+                else:
+                    error_type = "api"
+                fallback_reason = _get_safe_verification_error(e, error_type)
+                logger.warning(f"LLM verification failed: {fallback_reason} (raw: {str(e)})")
                 break
             except (json.JSONDecodeError, ValidationError) as e:
-                fallback_reason = f"JSON/Schema Validation Error: {str(e)}"
-                logger.warning(f"Attempt {attempt + 1} validation failed ({fallback_reason}).")
+                fallback_reason = _get_safe_verification_error(e, "api")
+                logger.warning(f"Attempt {attempt + 1} validation failed: {fallback_reason} (raw: {str(e)})")
                 if attempt < max_attempts - 1:
                     # Compact retry: preserve original system/user messages with security delimiters,
                     # and append the assistant turn + a compact user correction
@@ -540,13 +615,13 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                     payload["messages"].append({
                         "role": "user",
                         "content": (
-                            f"Correction required: Your previous output was not valid JSON matching the schema ({str(e)}).\n"
+                            f"Correction required: Your previous output was not valid JSON matching the schema.\n"
                             f"Return ONLY valid JSON matching this schema:\n{json.dumps(schema, separators=(',', ':'))}"
                         )
                     })
             except Exception as e:
-                fallback_reason = f"Unexpected Error: {str(e)}"
-                logger.error(f"Unexpected error in LLM verification: {fallback_reason}")
+                fallback_reason = _get_safe_verification_error(e, "unknown")
+                logger.error(f"Unexpected error in LLM verification: {fallback_reason} (raw: {str(e)})")
                 break
 
         # Controlled Fallback: Mark UNVERIFIED, do not falsely confirm vulnerabilities

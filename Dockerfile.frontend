@@ -1,10 +1,10 @@
-# Stage 1: Build React App with Bun
-FROM oven/bun:alpine AS builder
+# Stage 1: Build React App with Node.js
+FROM node:alpine AS builder
 WORKDIR /app
-COPY frontend/package.json ./
-RUN bun install
+COPY frontend/package*.json ./
+RUN npm ci
 COPY frontend/ ./
-RUN bun run build
+RUN npm run build
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
