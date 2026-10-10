@@ -1,3 +1,6 @@
+import asyncio
+import logging
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any, Tuple
@@ -19,6 +22,8 @@ from backend.core.integrity import (
     get_knowledge_base_version,
     ANALYZER_VERSION
 )
+
+logger = logging.getLogger(__name__)
 
 def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int, str]:
     score = 100.0
@@ -131,6 +136,7 @@ class SecurityPipeline:
         user_id: Optional[str] = None
     ) -> VulnerabilityReportPayload:
         analysis_id = f"analysis-{uuid.uuid4().hex[:12]}"
+        pipeline_started = time.perf_counter()
         timestamp = datetime.now(timezone.utc).isoformat()
 
         # Compute source integrity hashes and extract compiler pragma
@@ -151,22 +157,35 @@ class SecurityPipeline:
         }
         normalized_mode = mode_mapping.get(mode_str, "hybrid")
         
+        static_started = time.perf_counter()
         raw_findings = self.analyzer.analyze(source_code, contract_name)
+        static_seconds = time.perf_counter() - static_started
         verified_findings: List[VerifiedVulnerability] = []
         severity_counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0}
 
         if normalized_mode == "rag":
+            rag_started = time.perf_counter()
             for finding in raw_findings:
                 context = self.extractor.extract(source_code, finding)
                 knowledge = self.retriever.retrieve(finding, context, top_k=2)
                 
                 if knowledge:
-                    explanation = f"**RAG Context**: {knowledge[0].get('description', '')}"
+                    entry = knowledge[0]
+                    explanation = (
+                        f"What is wrong? {entry.get('description', finding.message)}\n\n"
+                        f"Why does it matter? {entry.get('exploit_pattern', 'The affected code can behave unsafely under adversarial input.')}\n\n"
+                        f"Where is it? {finding.contract}"
+                        f"{f'::{finding.function}' if finding.function else ''}, lines {finding.line_start}-{finding.line_end}."
+                    )
                     recommendation = knowledge[0].get('mitigation', '')
                     scenario = knowledge[0].get('exploit_pattern', '')
                     rag_score, rag_explain = self.retriever.get_explainability_summary(knowledge)
                 else:
-                    explanation = f"Static analyzer detection: {finding.message}"
+                    explanation = (
+                        f"What is wrong? {finding.message}\n\n"
+                        f"Where is it? {finding.contract}"
+                        f"{f'::{finding.function}' if finding.function else ''}, lines {finding.line_start}-{finding.line_end}."
+                    )
                     recommendation = f"Review and refactor function '{finding.function}' to address {finding.category}."
                     scenario = "Rule-based heuristic pattern flagged in static AST/regex analysis."
                     rag_score, rag_explain = None, None
@@ -200,7 +219,11 @@ class SecurityPipeline:
                     rag_explanation=rag_explain
                 )
                 verified_findings.append(verified)
+            rag_seconds = time.perf_counter() - rag_started
+            ai_seconds = 0.0
         else:
+            rag_seconds = 0.0
+            ai_started = time.perf_counter()
             async def verify_single_finding(finding):
                 context = self.extractor.extract(source_code, finding)
                 knowledge = None
@@ -208,10 +231,8 @@ class SecurityPipeline:
                     knowledge = self.retriever.retrieve(finding, context, top_k=2)
                 return await self.reasoner.verify_finding(finding, context, knowledge)
             
-            results = []
-            for f in raw_findings:
-                result = await verify_single_finding(f)
-                results.append(result)
+            results = await asyncio.gather(*(verify_single_finding(f) for f in raw_findings))
+            ai_seconds = time.perf_counter() - ai_started
             
             for verified in results:
                 if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
@@ -260,6 +281,14 @@ class SecurityPipeline:
         else:
             model_used = getattr(self.reasoner, "model", "Qwen2.5-Coder")
 
+        timing_metrics = {
+            "static_analysis": round(static_seconds, 4),
+            "rag_retrieval": round(rag_seconds, 4),
+            "ai_verification": round(ai_seconds, 4),
+        }
+        execution_time_seconds = round(time.perf_counter() - pipeline_started, 4)
+        logger.info("analysis_timing analysis_id=%s total=%.4fs stages=%s", analysis_id, execution_time_seconds, timing_metrics)
+
         return VulnerabilityReportPayload(
             analysis_id=analysis_id,
             contract_name=contract_name or "Contract.sol",
@@ -284,6 +313,8 @@ class SecurityPipeline:
             rag_version=get_knowledge_base_version(),
             compiler_version=compiler_version,
             git_commit=get_git_commit(),
-            user_id=user_id
+            user_id=user_id,
+            execution_time_seconds=execution_time_seconds,
+            timing_metrics=timing_metrics
         )
 

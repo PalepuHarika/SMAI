@@ -50,6 +50,7 @@ class VerifiedVulnerability(BaseModel):
     swc_id: Optional[str] = Field(None, description="SWC identifier")
     fix_verified: Optional[bool] = Field(None, description="True if rescanning fixed code confirms fix")
     fix_verification_reason: Optional[str] = Field(None, description="Reason for fix verification result")
+    compiler_verification: Optional[str] = Field(None, description="Compiler verification: verified, failed, or not_performed")
     static_evidence: Optional[str] = Field(None, description="Static code evidence snippet")
     retrieved_knowledge: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="RAG retrieved knowledge items")
     rag_similarity_score: Optional[float] = Field(None, description="Top RAG cosine similarity score")

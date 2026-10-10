@@ -9,6 +9,7 @@ import ReportPage from '@/pages/ReportPage';
 import HistoryPage from '@/pages/HistoryPage';
 import AdminPage from '@/pages/AdminPage';
 import EvaluationDashboardPage from '@/pages/EvaluationDashboardPage';
+import TrustRegistryPage from '@/pages/TrustRegistryPage';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
           <Route path="/evaluation" element={<ProtectedRoute><EvaluationDashboardPage /></ProtectedRoute>} />
+          <Route path="/trust-registry" element={<ProtectedRoute><TrustRegistryPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

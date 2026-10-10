@@ -21,6 +21,7 @@ export default function Navbar() {
             <Link to="/dashboard" className="text-gray-400 hover:text-white text-sm transition-colors">Dashboard</Link>
             <Link to="/scan" className="text-gray-400 hover:text-white text-sm transition-colors">New Scan</Link>
             <Link to="/history" className="text-gray-400 hover:text-white text-sm transition-colors">History</Link>
+            <Link to="/trust-registry" className="text-gray-400 hover:text-white text-sm transition-colors">Trust Registry</Link>
           </>
         )}
         {isAdmin && (

@@ -30,6 +30,13 @@ class AnalysisListItem(BaseModel):
     severity_counts: Dict[str, int]
     source_hash: Optional[str] = None
     report_hash: Optional[str] = None
+    source_keccak256: Optional[str] = None
+    findings_merkle_root: Optional[str] = None
+    analyzer_version: Optional[str] = None
+    model_used: Optional[str] = None
+    rag_version: Optional[str] = None
+    compiler_version: Optional[str] = None
+    on_chain_status: Optional[str] = None
 
 class ScanResponse(BaseModel):
     analysis_id: str
@@ -106,6 +113,8 @@ async def process_analysis_background(analysis_id: str, source_code: str, contra
                         "findings_merkle_root": report_payload.findings_merkle_root,
                         "rag_version": report_payload.rag_version,
                         "analysis_timestamp": report_payload.analysis_timestamp,
+                        "execution_time_seconds": report_payload.execution_time_seconds,
+                        "timing_metrics": report_payload.timing_metrics,
                         "user_id": analysis.user_id,
                     }
                 )
@@ -186,6 +195,13 @@ async def get_analysis_history(
             severity_counts=rep.severity_counts if rep and rep.severity_counts else {},
             source_hash=rep.source_hash if (rep and rep.source_hash) else a.source_hash,
             report_hash=rep.report_hash if (rep and rep.report_hash) else None
+            ,source_keccak256=(rep.trust_metadata or {}).get("source_keccak256") if rep else None
+            ,findings_merkle_root=(rep.trust_metadata or {}).get("findings_merkle_root") if rep else None
+            ,analyzer_version=rep.analyzer_version if rep else None
+            ,model_used=rep.model_used if rep else None
+            ,rag_version=(rep.trust_metadata or {}).get("rag_version") if rep else None
+            ,compiler_version=rep.compiler_version if rep else None
+            ,on_chain_status=rep.on_chain_status if rep else None
         ))
     return items
 
@@ -255,6 +271,7 @@ async def verify_fix(
     # Persist the latest verification result in the report finding
     target_finding["fix_verified"] = verification_result["fix_verified"]
     target_finding["fix_verification_reason"] = verification_result["verification_reason"]
+    target_finding["compiler_verification"] = verification_result.get("compiler_verification", "not_performed")
     rep.verified_findings = list(verified_findings)
     from sqlalchemy.orm.attributes import flag_modified
     flag_modified(rep, "verified_findings")
@@ -339,6 +356,8 @@ async def get_analysis_by_id(
         compiler_version=rep.compiler_version,
         git_commit=rep.git_commit,
         user_id=analysis.user_id
+        ,execution_time_seconds=trust_meta.get("execution_time_seconds")
+        ,timing_metrics=trust_meta.get("timing_metrics")
     )
 
 

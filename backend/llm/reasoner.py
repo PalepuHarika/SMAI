@@ -444,7 +444,7 @@ class LLMReasoner:
             "fallback_used", "fallback_reason", "static_confidence", "model_used",
             "raw_response", "contract", "function", "swc_id", "fix_verified", "verification_status",
             "static_evidence", "retrieved_knowledge", "rag_similarity_score", "rag_explanation",
-            "finding_hash"
+            "finding_hash", "compiler_verification"
         ]:
             schema["properties"].pop(key, None)
             if key in schema.get("required", []):
@@ -587,9 +587,13 @@ Return valid JSON matching the schema exactly. Do not output anything else.
 
                 fixed_sol = parsed_data.get("fixed_code", "")
                 if fixed_sol and fixed_sol != "N/A":
-                    parsed_data["fix_verified"] = await asyncio.to_thread(rescan_fix, fixed_sol, finding.category)
+                    fix_details = await asyncio.to_thread(verify_fix_details, fixed_sol, finding.category)
+                    parsed_data["fix_verified"] = fix_details.get("fix_verified", False)
+                    parsed_data["fix_verification_reason"] = fix_details.get("verification_reason")
+                    parsed_data["compiler_verification"] = fix_details.get("compiler_verification", "not_performed")
                 else:
                     parsed_data["fix_verified"] = False
+                    parsed_data["compiler_verification"] = "not_performed"
 
                 return VerifiedVulnerability(**parsed_data)
 
@@ -643,9 +647,16 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             static_confidence=finding.confidence,
             affected_lines=[finding.line_start],
             evidence=[],
-            explanation=f"Static analyzer flagged this candidate, but AI verification was unavailable ({fallback_reason}). This finding remains unverified.",
+            explanation=(
+                f"What was detected? The static analyzer reported {finding.category} at "
+                f"{finding.contract}"
+                f"{f'::{finding.function}' if finding.function else ''}, "
+                f"lines {finding.line_start}-{finding.line_end}.\n\n"
+                f"Why does it matter? AI verification was unavailable ({fallback_reason}), "
+                "so the source evidence was not independently confirmed. The finding remains UNVERIFIED."
+            ),
             attack_scenario="AI verification was not completed; no attack scenario could be confirmed from source evidence.",
-            recommendation="Review the affected lines manually.",
+            recommendation="Automatic fix unavailable — manual remediation required until the finding is reviewed.",
             original_code=context.function_source,
             fixed_code="",
             fallback_used=True,

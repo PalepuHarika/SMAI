@@ -390,6 +390,7 @@ function FindingCard({
   isActive,
   onSelect,
   analysisId,
+  contractName,
   onUpdateFinding,
 }: {
   f: VerifiedVulnerability;
@@ -397,6 +398,7 @@ function FindingCard({
   isActive: boolean;
   onSelect: () => void;
   analysisId?: string;
+  contractName?: string;
   onUpdateFinding?: (updated: VerifiedVulnerability) => void;
 }) {
   const [verifying, setVerifying] = useState(false);
@@ -417,6 +419,7 @@ function FindingCard({
           ...f,
           fix_verified: res.data.fix_verified,
           fix_verification_reason: res.data.verification_reason,
+          compiler_verification: res.data.compiler_verification,
         });
       }
     } catch (err: any) {
@@ -426,6 +429,22 @@ function FindingCard({
     }
   };
 
+  const hasRealFix = Boolean(f.fixed_code && f.fixed_code !== 'N/A' && !/^manual fix required/i.test(f.fixed_code));
+  const fixedFilename = `${(contractName || f.contract || 'Contract.sol').replace(/\.sol$/i, '')}_fixed.sol`;
+  const copyFixedContract = async () => {
+    if (hasRealFix) await navigator.clipboard.writeText(f.fixed_code);
+  };
+  const downloadFixedContract = () => {
+    if (!hasRealFix) return;
+    const blob = new Blob([f.fixed_code], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fixedFilename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   const isConfirmed = f.verification_status === 'CONFIRMED';
   const isRejected = f.verification_status === 'REJECTED';
   const isUnverified = !isConfirmed && !isRejected;
@@ -433,7 +452,7 @@ function FindingCard({
   const hasRag = Boolean(f.retrieved_knowledge && f.retrieved_knowledge.length > 0);
   const hasBeforeAfter = Boolean(
     f.original_code && f.original_code !== 'Code unavailable' && f.original_code !== 'N/A' &&
-    f.fixed_code && f.fixed_code !== 'N/A'
+    f.fixed_code && f.fixed_code !== 'N/A' && !/^manual fix required/i.test(f.fixed_code)
   );
 
   const statusChip = isConfirmed
@@ -711,10 +730,14 @@ function FindingCard({
           </div>
 
           {/* Fixed code & verification */}
-          {f.fixed_code && f.fixed_code !== 'N/A' && (
+          {hasRealFix && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Example Corrected Code</p>
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Corrected Contract</p>
+                <div className="flex gap-2">
+                  <button type="button" onClick={copyFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Copy Fixed Contract</button>
+                  <button type="button" onClick={downloadFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Download Fixed Contract</button>
+                </div>
                 {analysisId && (
                   <button
                     type="button"
@@ -757,7 +780,7 @@ function FindingCard({
                   )}
                 </p>
                 <p className="text-[10px] text-gray-500 mt-1.5">
-                  Compiler verification: not performed (solc not available in runtime). Automated verification does not guarantee the contract is completely secure.
+                  Compiler verification: {f.compiler_verification || 'not_performed'}. Automated verification does not guarantee the contract is completely secure.
                 </p>
               </div>
             </div>
@@ -1147,6 +1170,7 @@ export default function ReportPage() {
                     isActive={selectedFindingId === f.finding_id}
                     onSelect={() => handleSelectFinding(f.finding_id)}
                     analysisId={report.analysis_id}
+                    contractName={report.contract_name}
                     onUpdateFinding={(updated) => {
                       setReport(prev => {
                         if (!prev) return prev;

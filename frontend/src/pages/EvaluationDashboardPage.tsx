@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '@/api/client';
 
 export default function EvaluationDashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -8,13 +9,13 @@ export default function EvaluationDashboardPage() {
   const [activeTab, setActiveTab] = useState('summary');
   
   // Filters
-  const [selectedDataset, setSelectedDataset] = useState('Internal Diagnostic Suite');
+  const [selectedDataset, setSelectedDataset] = useState('Stored evaluation results');
   const [selectedPrompt, setSelectedPrompt] = useState('P1');
 
   useEffect(() => {
     Promise.all([
-      fetch('http://localhost:8000/api/evaluation/metrics').then(res => res.json()),
-      fetch('http://localhost:8000/api/evaluation/raw').then(res => res.json())
+      api.get('/api/evaluation/metrics').then(res => res.data),
+      api.get('/api/evaluation/raw').then(res => res.data)
     ])
       .then(([metricsData, rawResult]) => {
         if (metricsData.detail) setError(metricsData.detail);
@@ -34,13 +35,15 @@ export default function EvaluationDashboardPage() {
   if (!data) return <div className="p-8">No data available.</div>;
 
   // Derive unique filters
-  const allDatasets = Array.from(new Set(Object.values(data).map((v: any) => v.dataset)));
-  const allPrompts = Array.from(new Set(Object.values(data).map((v: any) => v.prompt).filter(p => p !== undefined)));
+  const recordedDatasets = Array.from(new Set(Object.values(data).map((v: any) => v.dataset).filter(Boolean)));
+  const allDatasets = recordedDatasets.length > 0 ? recordedDatasets : ['Stored evaluation results'];
+  const activeDataset = allDatasets.includes(selectedDataset) ? selectedDataset : allDatasets[0];
+  const allPrompts = Array.from(new Set(Object.values(data).map((v: any) => v.prompt).filter(Boolean)));
 
   // Filter keys based on selected dataset and prompt (Static mode is prompt-agnostic)
-  const modes = Object.keys(data).filter(key => 
-    data[key].dataset === selectedDataset && 
-    (data[key].model === "static" || data[key].prompt === selectedPrompt)
+  const modes = Object.keys(data).filter(key =>
+    (data[key].dataset || 'Stored evaluation results') === activeDataset &&
+    (!data[key].prompt || data[key].model === 'static' || data[key].prompt === selectedPrompt)
   );
   
   return (
@@ -51,26 +54,24 @@ export default function EvaluationDashboardPage() {
         <div className="flex flex-col">
           <label className="text-sm font-semibold mb-1">Dataset</label>
           <select 
-            value={selectedDataset} 
+            value={activeDataset}
             onChange={e => setSelectedDataset(e.target.value)}
             className="border p-2 rounded"
           >
             {allDatasets.map(ds => <option key={ds} value={ds}>{ds}</option>)}
-            {allDatasets.length === 1 && <option value="SmartBugs Curated">SmartBugs Curated (Pending)</option>}
           </select>
         </div>
         
-        <div className="flex flex-col ml-4">
+        {allPrompts.length > 0 ? <div className="flex flex-col ml-4">
           <label className="text-sm font-semibold mb-1">Prompt Condition</label>
           <select 
             value={selectedPrompt} 
             onChange={e => setSelectedPrompt(e.target.value)}
             className="border p-2 rounded"
           >
-            {allPrompts.map(p => <option key={p} value={p}>{p === 'P0' ? 'P0 (Baseline)' : 'P1 (Source-Grounding)'}</option>)}
-            {allPrompts.length === 1 && <option value="P0">P0 (Pending run)</option>}
+            {allPrompts.map(p => <option key={p} value={p}>{p === 'P0' ? 'P0 (Baseline)' : p === 'P1' ? 'P1 (Source-Grounding)' : p}</option>)}
           </select>
-        </div>
+        </div> : <p className="ml-4 text-sm text-gray-600">Prompt metadata is not present in these stored results.</p>}
       </div>
 
       <div className="flex space-x-4 mb-8 border-b pb-4 overflow-x-auto">
@@ -155,18 +156,19 @@ export default function EvaluationDashboardPage() {
                </tr>
              </thead>
              <tbody>
-               {Object.keys(data).filter(k => data[k].model !== 'static' && data[k].dataset === selectedDataset).map(key => (
-                 <tr key={key} className="border-b hover:bg-gray-50">
-                   <td className="p-3 border font-semibold">{data[key].mode} - {data[key].model}</td>
+              {Object.keys(data).filter(k => data[k].prompt && data[k].model !== 'static' && (data[k].dataset || 'Stored evaluation results') === activeDataset).map(key => (
+                <tr key={key} className="border-b hover:bg-gray-50">
+                  <td className="p-3 border font-semibold">{data[key].mode || key} - {data[key].model || 'Model not recorded'}</td>
                    <td className="p-3 border">{data[key].prompt}</td>
                    <td className="p-3 border">{(data[key].metrics.precision * 100).toFixed(1)}%</td>
                    <td className="p-3 border">{(data[key].metrics.recall * 100).toFixed(1)}%</td>
                    <td className="p-3 border">{(data[key].metrics.f1 * 100).toFixed(1)}%</td>
                    <td className="p-3 border">{(data[key].metrics.fpr * 100).toFixed(1)}%</td>
                  </tr>
-               ))}
-             </tbody>
+              ))}
+            </tbody>
            </table>
+           {allPrompts.length === 0 && <p className="mt-4 text-sm text-gray-600">Prompt-ablation comparisons are unavailable because the stored metrics do not include prompt metadata.</p>}
         </div>
       )}
 
@@ -251,12 +253,12 @@ export default function EvaluationDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {rawData.filter(r => (r.dataset || "Internal Diagnostic Suite") === selectedDataset).map((r, i) => (
+              {rawData.filter(r => (r.dataset || 'Stored evaluation results') === activeDataset).map((r, i) => (
                 <tr key={i} className="border-b hover:bg-gray-50">
                   <td className="p-2 border">{r.contract}</td>
                   <td className="p-2 border">{r.mode}</td>
                   <td className="p-2 border">{r.model}</td>
-                  <td className="p-2 border">{r.prompt || 'P1'}</td>
+                  <td className="p-2 border">{r.prompt || 'Not recorded'}</td>
                   <td className="p-2 border">{r.is_vulnerable !== null ? r.is_vulnerable.toString() : 'Error'}</td>
                   <td className="p-2 border">{r.vulnerability || '-'}</td>
                   <td className="p-2 border">{r.severity || '-'}</td>

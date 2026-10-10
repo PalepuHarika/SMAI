@@ -36,6 +36,7 @@ export interface VerifiedVulnerability {
   fallback_used?: boolean;
   fallback_reason?: string;
   model_used?: string;
+  compiler_verification?: string;
 }
 
 export interface VulnerabilityReport {
@@ -59,6 +60,14 @@ export interface VulnerabilityReport {
   on_chain_timestamp?: string;
   source_hash?: string;
   report_hash?: string;
+  source_keccak256?: string;
+  findings_merkle_root?: string;
+  analyzer_version?: string;
+  model_used?: string;
+  rag_version?: string;
+  compiler_version?: string;
+  execution_time_seconds?: number;
+  timing_metrics?: Record<string, number>;
 }
 
 export interface AnalysisHistoryItem {
@@ -69,6 +78,15 @@ export interface AnalysisHistoryItem {
   total_findings: number;
   is_vulnerable: boolean;
   severity_counts: Record<string, number>;
+  source_hash?: string;
+  report_hash?: string;
+  source_keccak256?: string;
+  findings_merkle_root?: string;
+  analyzer_version?: string;
+  model_used?: string;
+  rag_version?: string;
+  compiler_version?: string;
+  on_chain_status?: string;
 }
 
 export interface AdminUser {

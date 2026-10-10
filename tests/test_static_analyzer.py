@@ -621,13 +621,20 @@ def test_swc103_floating_pragma():
     findings_fixed = analyzer.analyze(src_fixed, 'Test')
     assert not any(f.category == 'floating-pragma' for f in findings_fixed)
 
-    # Test other floating pragma patterns should be flagged
+    # A closed compatibility range is intentionally not classified as SWC-103.
     src_floating_2 = '''
     pragma solidity >=0.8.0 <0.9.0;
     contract Test {}
     '''
     findings_floating_2 = analyzer.analyze(src_floating_2, 'Test')
-    assert any(f.category == 'floating-pragma' for f in findings_floating_2)
+    assert not any(f.category == 'floating-pragma' for f in findings_floating_2)
+
+    src_floating_open = '''
+    pragma solidity >=0.8.0;
+    contract Test {}
+    '''
+    findings_floating_open = analyzer.analyze(src_floating_open, 'Test')
+    assert any(f.category == 'floating-pragma' for f in findings_floating_open)
 
     src_floating_3 = '''
     pragma solidity ~0.8.0;
@@ -644,6 +651,16 @@ def test_swc103_floating_pragma():
     '''
     findings_comment = analyzer.analyze(src_comment, 'Test')
     assert not any(f.category == 'floating-pragma' for f in findings_comment)
+
+    src_multiple = '''
+    pragma solidity 0.8.20;
+    pragma solidity ^0.8.0;
+    contract Test {}
+    '''
+    findings_multiple = analyzer.analyze(src_multiple, 'Test')
+    floating = [f for f in findings_multiple if f.category == 'floating-pragma']
+    assert len(floating) == 1
+    assert floating[0].line_start == 3
 
 def test_swc117_ecrecover():
     src = '''
