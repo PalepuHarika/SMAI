@@ -37,6 +37,13 @@ export interface VerifiedVulnerability {
   fallback_reason?: string;
   model_used?: string;
   compiler_verification?: string;
+  // Remediation metadata
+  source_range_start?: number;
+  source_range_end?: number;
+  patch_applied?: boolean;
+  patch_description?: string;
+  manual_remediation_required?: boolean;
+  manual_remediation_reason?: string;
 }
 
 export interface VulnerabilityReport {
@@ -68,6 +75,23 @@ export interface VulnerabilityReport {
   compiler_version?: string;
   execution_time_seconds?: number;
   timing_metrics?: Record<string, number>;
+  // Syntax validation
+  syntax_validation?: {
+    is_valid: boolean;
+    errors: Array<{ line: number; column: number; message: string }>;
+    compiler_available: boolean;
+    solc_version?: string;
+  };
+  // Corrected contract
+  corrected_contract?: string;
+  corrected_contract_summary?: {
+    applied_patches_count: number;
+    skipped_findings_count: number;
+    resolved_categories: string[];
+    syntax_valid: boolean;
+    original_findings: number;
+    corrected_findings: number;
+  };
 }
 
 export interface AnalysisHistoryItem {

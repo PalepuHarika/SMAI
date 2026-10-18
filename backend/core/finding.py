@@ -13,6 +13,9 @@ class StaticFinding(BaseModel):
     snippet: str
     severity: Optional[str] = "High"
     swc_id: Optional[str] = None
+    # Source range for precise patching
+    source_range_start: Optional[int] = None
+    source_range_end: Optional[int] = None
 
 class CodeContext(BaseModel):
     contract_name: str
@@ -56,6 +59,13 @@ class VerifiedVulnerability(BaseModel):
     rag_similarity_score: Optional[float] = Field(None, description="Top RAG cosine similarity score")
     rag_explanation: Optional[str] = Field(None, description="Explanation of why RAG context supports finding")
     finding_hash: Optional[str] = Field(None, description="Deterministic cryptographic hash of the finding")
+    # Remediation metadata
+    source_range_start: Optional[int] = Field(None, description="Start line in original source for patching")
+    source_range_end: Optional[int] = Field(None, description="End line in original source for patching")
+    patch_applied: bool = Field(False, description="Whether a patch was successfully applied")
+    patch_description: Optional[str] = Field(None, description="Description of the applied patch")
+    manual_remediation_required: bool = Field(False, description="Whether manual remediation is required")
+    manual_remediation_reason: Optional[str] = Field(None, description="Reason manual remediation is required")
 
 class VulnerabilityReportPayload(BaseModel):
     analysis_id: str
@@ -84,4 +94,9 @@ class VulnerabilityReportPayload(BaseModel):
     user_id: Optional[str] = Field(None, description="ID of user or auditor requesting the analysis")
     execution_time_seconds: Optional[float] = Field(None, description="Total pipeline execution duration in seconds")
     timing_metrics: Optional[Dict[str, float]] = Field(None, description="Detailed stage timing durations in seconds")
+    # Syntax validation
+    syntax_validation: Optional[Dict[str, Any]] = Field(None, description="Syntax validation result with errors")
+    # Corrected contract
+    corrected_contract: Optional[str] = Field(None, description="Complete corrected Solidity contract with all compatible fixes applied")
+    corrected_contract_summary: Optional[Dict[str, Any]] = Field(None, description="Summary of corrections applied")
 

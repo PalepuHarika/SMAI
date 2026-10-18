@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import logging
 import re
@@ -581,7 +581,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             "options": {
                 "temperature": 0.2,
                 "repeat_penalty": 1.1,
-                "num_predict": 512
+                "num_predict": 256
             }
         }
 
@@ -610,6 +610,26 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                     raw_conf = 0.8  # Safe default if invalid type
 
                 is_vuln = bool(parsed_data.get("is_vulnerable", False))
+
+                # Conservative safeguard for conflicting reentrancy evidence.
+                reentrancy_conflict = False
+                if "reentrancy" in finding.category.lower() and not is_vuln:
+                    source = context.function_source
+                    external_call = re.search(
+                        r"\.\s*(?:call|delegatecall|staticcall|send|transfer)\s*(?:\{|\()",
+                        source,
+                    )
+                    state_update = re.search(
+                        r"\b(?:balances|balance|credit|credits)\s*\[[^\]]+\]\s*(?:[+\-*/]?=)",
+                        source,
+                    )
+                    if (
+                        external_call
+                        and state_update
+                        and external_call.start() < state_update.start()
+                    ):
+                        reentrancy_conflict = True
+
                 has_prot = bool(context.modifiers) or "require" in context.function_source
 
                 # Calibrated confidence calculation (RAG similarity decoupled per Phase 2B)
@@ -634,7 +654,16 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                 parsed_data["fallback_used"] = False
                 parsed_data["static_confidence"] = finding.confidence
                 parsed_data["static_evidence"] = finding.snippet
-                parsed_data["verification_status"] = "CONFIRMED" if is_vuln else "REJECTED"
+                if reentrancy_conflict:
+                    parsed_data["verification_status"] = "UNVERIFIED"
+                    parsed_data["explanation"] = (
+                        "AI rejected the finding, but the source contains an external call "
+                        "before a matching state update. Manual review is required."
+                    )
+                else:
+                    parsed_data["verification_status"] = (
+                        "CONFIRMED" if is_vuln else "REJECTED"
+                    )
                 parsed_data["retrieved_knowledge"] = retrieved_items
                 parsed_data["rag_similarity_score"] = rag_sim_score
                 parsed_data["rag_explanation"] = rag_expl
@@ -710,7 +739,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                 "so the source evidence was not independently confirmed. The finding remains UNVERIFIED."
             ),
             attack_scenario="AI verification was not completed; no attack scenario could be confirmed from source evidence.",
-            recommendation="Automatic fix unavailable — manual remediation required until the finding is reviewed.",
+            recommendation="Automatic fix unavailable â€” manual remediation required until the finding is reviewed.",
             original_code=context.function_source,
             fixed_code="",
             fallback_used=True,
@@ -725,3 +754,4 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             rag_explanation=rag_expl,
             raw_response=raw_content if raw_content else None
         )
+

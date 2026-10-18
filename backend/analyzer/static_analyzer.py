@@ -43,6 +43,139 @@ class SolidityStaticAnalyzer:
         self.contract_pattern = re.compile(r'\b(?:contract|library|interface)\s+([a-zA-Z0-9_]+)', re.MULTILINE)
         self.func_pattern = re.compile(r'\b(?:function\s+([a-zA-Z0-9_]+)|modifier\s+([a-zA-Z0-9_]+)|constructor\s*\(|fallback\s*\(|receive\s*\()', re.MULTILINE)
 
+    def validate_syntax(self, source_code: str) -> Dict[str, Any]:
+        """
+        Validate Solidity syntax using solc compiler.
+        Returns a dict with:
+        - is_valid: bool
+        - errors: list of syntax errors with line, column, message
+        - compiler_available: bool
+        """
+        # Try to import solc functions locally to avoid circular imports
+        try:
+            from backend.llm.reasoner import _check_solc_available, _compile_with_solc
+        except ImportError:
+            # If reasoner imports are not available, use basic checks only
+            basic_errors = self._basic_syntax_check(source_code)
+            return {
+                "is_valid": len(basic_errors) == 0,
+                "errors": basic_errors,
+                "compiler_available": False
+            }
+        
+        if not source_code or not source_code.strip():
+            return {
+                "is_valid": False,
+                "errors": [{"line": 0, "column": 0, "message": "Empty source code"}],
+                "compiler_available": False
+            }
+        
+        compiler_available = _check_solc_available()
+        
+        if not compiler_available:
+            # Fallback to basic syntax checks if compiler is unavailable
+            basic_errors = self._basic_syntax_check(source_code)
+            return {
+                "is_valid": len(basic_errors) == 0,
+                "errors": basic_errors,
+                "compiler_available": False
+            }
+        
+        # Use solc for comprehensive validation
+        try:
+            compile_result = _compile_with_solc(source_code)
+            if compile_result.get("success"):
+                return {
+                    "is_valid": True,
+                    "errors": [],
+                    "compiler_available": True,
+                    "solc_version": compile_result.get("solc_version")
+                }
+            else:
+                # Parse compiler error to extract line/column info
+                error_msg = compile_result.get("error", "Compilation failed")
+                error_line = self._extract_error_line(error_msg)
+                return {
+                    "is_valid": False,
+                    "errors": [{"line": error_line, "column": 0, "message": error_msg}],
+                    "compiler_available": True
+                }
+        except Exception as e:
+            return {
+                "is_valid": False,
+                "errors": [{"line": 0, "column": 0, "message": f"Compiler error: {str(e)}"}],
+                "compiler_available": True
+            }
+    
+    def _basic_syntax_check(self, source_code: str) -> List[Dict[str, Any]]:
+        """Basic syntax checks when solc is unavailable."""
+        errors = []
+        lines = source_code.splitlines()
+        
+        # Check for basic syntax issues
+        brace_balance = 0
+        paren_balance = 0
+        in_string = False
+        quote_char = ''
+        
+        for i, line in enumerate(lines, 1):
+            j = 0
+            while j < len(line):
+                ch = line[j]
+                
+                if not in_string and (ch == '"' or ch == "'"):
+                    in_string = True
+                    quote_char = ch
+                elif in_string and ch == quote_char and (j == 0 or line[j-1] != '\\'):
+                    in_string = False
+                elif not in_string:
+                    if ch == '{':
+                        brace_balance += 1
+                    elif ch == '}':
+                        brace_balance -= 1
+                        if brace_balance < 0:
+                            errors.append({
+                                "line": i,
+                                "column": j + 1,
+                                "message": "Unmatched closing brace '}'"
+                            })
+                    elif ch == '(':
+                        paren_balance += 1
+                    elif ch == ')':
+                        paren_balance -= 1
+                        if paren_balance < 0:
+                            errors.append({
+                                "line": i,
+                                "column": j + 1,
+                                "message": "Unmatched closing parenthesis ')'"
+                            })
+                j += 1
+        
+        if brace_balance > 0:
+            errors.append({
+                "line": len(lines),
+                "column": 0,
+                "message": f"Missing {brace_balance} closing brace(s)"
+            })
+        
+        if paren_balance > 0:
+            errors.append({
+                "line": len(lines),
+                "column": 0,
+                "message": f"Missing {paren_balance} closing parenthesis(s)"
+            })
+        
+        return errors
+    
+    def _extract_error_line(self, error_msg: str) -> int:
+        """Extract line number from solc error message."""
+        import re
+        # Common patterns: "Error: Expected identifier but got ... (line 5, column 3)"
+        match = re.search(r'line\s*(\d+)', error_msg)
+        if match:
+            return int(match.group(1))
+        return 0
+
     def analyze(self, source_code: str, contract_name: Optional[str] = None) -> List[StaticFinding]:
         if not source_code or not source_code.strip():
             return []

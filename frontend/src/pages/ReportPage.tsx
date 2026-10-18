@@ -812,6 +812,14 @@ function FindingCard({
       {/* Phase 9: Before / After diff */}
       {hasBeforeAfter && (
         <AccordionSection title="Before / After — Vulnerable vs. Fixed" icon="↔">
+          <div className="mb-3">
+            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">
+              {f.patch_applied ? 'Automatic Patch Applied' : 'Suggested Fix'}
+            </p>
+            {f.patch_description && (
+              <p className="text-xs text-blue-300 mb-2">{f.patch_description}</p>
+            )}
+          </div>
           <DiffViewer
             original={f.original_code}
             fixed={f.fixed_code}
@@ -820,6 +828,14 @@ function FindingCard({
           <p className="text-[11px] text-gray-600 italic mt-2">
             Red lines show the vulnerable code. Green lines show the suggested replacement. Fix requires manual review.
           </p>
+          {f.manual_remediation_required && (
+            <div className="mt-3 bg-amber-950/20 border border-amber-500/20 rounded p-2">
+              <p className="text-xs text-amber-300 font-semibold">Manual Remediation Required</p>
+              <p className="text-xs text-amber-200/70 mt-1">
+                {f.manual_remediation_reason || 'This vulnerability type cannot be automatically fixed. Manual review and modification is required.'}
+              </p>
+            </div>
+          )}
         </AccordionSection>
       )}
     </div>
@@ -847,6 +863,146 @@ function SafeBanner({ report }: { report: VulnerabilityReport }) {
       </div>
       <p className="text-gray-600 text-xs max-w-sm mx-auto">
         No automated scanner can guarantee a contract is completely secure. Manual audit is always recommended for financial code.
+      </p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────── Corrected Contract Section ──
+function CorrectedContractSection({ report }: { report: VulnerabilityReport }) {
+  const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleCopy = async () => {
+    if (!report.corrected_contract) return;
+    await navigator.clipboard.writeText(report.corrected_contract);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    if (!report.corrected_contract) return;
+    setDownloading(true);
+    const blob = new Blob([report.corrected_contract], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${report.contract_name.replace('.sol', '')}_corrected.sol`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setDownloading(false);
+  };
+
+  if (!report.corrected_contract || !report.corrected_contract_summary) {
+    return null;
+  }
+
+  const summary = report.corrected_contract_summary;
+
+  return (
+    <div className="bg-gray-900 border border-blue-500/20 rounded-xl p-5 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-blue-400 text-xl">🛠</span>
+          <h3 className="text-lg font-bold text-white">Corrected Contract</h3>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleCopy}
+            className="text-xs px-3 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition-colors"
+          >
+            {copied ? '✓ Copied' : 'Copy Code'}
+          </button>
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="text-xs px-3 py-1.5 rounded bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 transition-colors disabled:opacity-50"
+          >
+            {downloading ? 'Downloading...' : 'Download .sol'}
+          </button>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+          <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Patches Applied</p>
+          <p className="text-white text-sm font-semibold">{summary.applied_patches_count}</p>
+        </div>
+        <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+          <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Skipped Findings</p>
+          <p className="text-white text-sm font-semibold">{summary.skipped_findings_count}</p>
+        </div>
+        <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+          <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">Original Findings</p>
+          <p className="text-white text-sm font-semibold">{summary.original_findings}</p>
+        </div>
+        <div className="bg-gray-950/40 rounded border border-gray-800 p-2">
+          <p className="text-[10px] text-gray-600 uppercase font-bold mb-0.5">After Correction</p>
+          <p className="text-white text-sm font-semibold">{summary.corrected_findings}</p>
+        </div>
+      </div>
+
+      {/* Resolved categories */}
+      {summary.resolved_categories.length > 0 && (
+        <div className="mb-4">
+          <p className="text-[10px] text-gray-600 uppercase font-bold mb-1">Resolved Vulnerability Types</p>
+          <div className="flex flex-wrap gap-1.5">
+            {summary.resolved_categories.map((cat, idx) => (
+              <span key={idx} className="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                {getFriendlyName(cat)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Syntax validation */}
+      <div className={`mb-4 p-2 rounded border ${
+        summary.syntax_valid
+          ? 'bg-green-950/20 border-green-500/20'
+          : 'bg-red-950/20 border-red-500/20'
+      }`}>
+        <p className={`text-xs font-semibold ${
+          summary.syntax_valid ? 'text-green-400' : 'text-red-400'
+        }`}>
+          {summary.syntax_valid ? '✓ Syntax Valid' : '⚠ Syntax Invalid'}
+        </p>
+      </div>
+
+      {/* Code preview */}
+      <div className="bg-gray-950 rounded-lg border border-gray-800 overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-800">
+          <span className="text-[10px] text-gray-500 uppercase font-bold">Corrected Solidity Source</span>
+        </div>
+        <div className="max-h-96 overflow-y-auto">
+          <SyntaxHighlighter
+            language="solidity"
+            style={vscDarkPlus}
+            customStyle={{
+              margin: 0,
+              padding: '1rem',
+              fontSize: '11px',
+              lineHeight: '1.5',
+              background: '#0d1117',
+            }}
+            codeTagProps={{ style: { fontFamily: 'Consolas, Monaco, monospace' } }}
+          >
+            {report.corrected_contract}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+
+      {/* Warning */}
+      {summary.skipped_findings_count > 0 && (
+        <p className="text-[11px] text-amber-300 mt-3">
+          ⚠ {summary.skipped_findings_count} finding(s) could not be automatically fixed and require manual remediation.
+        </p>
+      )}
+      <p className="text-[11px] text-gray-500 italic mt-2">
+        This corrected contract includes automatic fixes for supported vulnerability types. Manual review and testing are required before deployment.
       </p>
     </div>
   );
@@ -1125,6 +1281,34 @@ export default function ReportPage() {
           unverifiedCount={unverifiedCount}
         />
 
+        {/* Syntax validation warning */}
+        {report.syntax_validation && !report.syntax_validation.is_valid && (
+          <div className="mb-6 flex items-start gap-3 bg-red-950/30 border border-red-500/30 rounded-xl px-5 py-4">
+            <span className="text-red-400 text-lg flex-shrink-0">⚠</span>
+            <div>
+              <p className="text-red-400 font-bold text-sm">Syntax Errors Detected</p>
+              <p className="text-red-200/70 text-sm mt-0.5 leading-relaxed">
+                The Solidity source code has syntax errors. Security analysis may be incomplete.
+                {report.syntax_validation.compiler_available ? ' Compiler validation failed.' : ' Compiler validation was not performed.'}
+              </p>
+              {report.syntax_validation.errors.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {report.syntax_validation.errors.slice(0, 3).map((err, idx) => (
+                    <p key={idx} className="text-red-300/80 text-xs font-mono">
+                      Line {err.line}: {err.message}
+                    </p>
+                  ))}
+                  {report.syntax_validation.errors.length > 3 && (
+                    <p className="text-red-300/60 text-xs">
+                      +{report.syntax_validation.errors.length - 3} more error(s)
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Unverified warning banner (issue 3) */}
         {!isSafe && unverifiedCount > 0 && confirmedCount === 0 && rejectedCount === 0 && (
           <div className="mb-6 flex items-start gap-3 bg-amber-950/30 border border-amber-500/30 rounded-xl px-5 py-4">
@@ -1148,6 +1332,9 @@ export default function ReportPage() {
 
         {/* Safe banner */}
         {isSafe && <SafeBanner report={report} />}
+
+        {/* Corrected Contract section */}
+        {!isSafe && <CorrectedContractSection report={report} />}
 
         {/* Phase 3: Blockchain Audit Integrity section */}
         <BlockchainSection report={report} analysisId={report.analysis_id} />

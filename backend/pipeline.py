@@ -157,6 +157,10 @@ class SecurityPipeline:
         }
         normalized_mode = mode_mapping.get(mode_str, "hybrid")
         
+        # Validate syntax before proceeding
+        syntax_validation = self.analyzer.validate_syntax(source_code)
+        
+        # If syntax is invalid, still attempt analysis but flag the issue
         static_started = time.perf_counter()
         raw_findings = self.analyzer.analyze(source_code, contract_name)
         static_seconds = time.perf_counter() - static_started
@@ -170,22 +174,12 @@ class SecurityPipeline:
                 knowledge = self.retriever.retrieve(finding, context, top_k=2)
                 
                 if knowledge:
-                    entry = knowledge[0]
-                    explanation = (
-                        f"What is wrong? {entry.get('description', finding.message)}\n\n"
-                        f"Why does it matter? {entry.get('exploit_pattern', 'The affected code can behave unsafely under adversarial input.')}\n\n"
-                        f"Where is it? {finding.contract}"
-                        f"{f'::{finding.function}' if finding.function else ''}, lines {finding.line_start}-{finding.line_end}."
-                    )
+                    explanation = f"**RAG Context**: {knowledge[0].get('description', '')}"
                     recommendation = knowledge[0].get('mitigation', '')
                     scenario = knowledge[0].get('exploit_pattern', '')
                     rag_score, rag_explain = self.retriever.get_explainability_summary(knowledge)
                 else:
-                    explanation = (
-                        f"What is wrong? {finding.message}\n\n"
-                        f"Where is it? {finding.contract}"
-                        f"{f'::{finding.function}' if finding.function else ''}, lines {finding.line_start}-{finding.line_end}."
-                    )
+                    explanation = f"Static analyzer detection: {finding.message}"
                     recommendation = f"Review and refactor function '{finding.function}' to address {finding.category}."
                     scenario = "Rule-based heuristic pattern flagged in static AST/regex analysis."
                     rag_score, rag_explain = None, None
@@ -297,6 +291,50 @@ class SecurityPipeline:
             risk_level=risk_level,
             analysis_mode=normalized_mode
         )
+        
+        # Generate combined corrected contract with all compatible fixes
+        corrected_contract = None
+        corrected_contract_summary = None
+        if is_vuln and syntax_validation.get("is_valid", True):
+            try:
+                from backend.remediation.patcher import apply_finding_patches
+                
+                # Convert findings to dict format for patcher
+                findings_dict = []
+                for f in verified_findings:
+                    findings_dict.append({
+                        "finding_id": f.finding_id,
+                        "category": f.vulnerability,
+                        "line_start": f.affected_lines[0] if f.affected_lines else f.line_start,
+                        "line_end": f.affected_lines[-1] if f.affected_lines else f.line_end,
+                        "function": f.function,
+                        "contract": f.contract
+                    })
+                
+                patch_result = apply_finding_patches(source_code, findings_dict)
+                
+                if patch_result.get("corrected_code") and patch_result.get("corrected_code") != source_code:
+                    corrected_contract = patch_result["corrected_code"]
+                    corrected_contract_summary = {
+                        "applied_patches_count": len(patch_result.get("applied_patches", [])),
+                        "skipped_findings_count": len(patch_result.get("skipped_findings", [])),
+                        "resolved_categories": patch_result.get("resolved_categories", []),
+                        "syntax_valid": patch_result.get("syntax_validation", {}).get("is_valid", False),
+                        "original_findings": patch_result.get("original_findings_count", 0),
+                        "corrected_findings": patch_result.get("corrected_findings_count", 0)
+                    }
+                    
+                    # Update individual findings with patch info
+                    for patch in patch_result.get("applied_patches", []):
+                        for f in verified_findings:
+                            if f.finding_id == patch.finding_id:
+                                f.patch_applied = True
+                                f.patch_description = patch.description
+                                f.source_range_start = patch.line_start
+                                f.source_range_end = patch.line_end
+                                break
+            except Exception as e:
+                logger.warning("Failed to generate corrected contract: %s", str(e))
 
         if normalized_mode == "rag":
             model_used = "RAG Only (No AI)"
@@ -337,6 +375,9 @@ class SecurityPipeline:
             git_commit=get_git_commit(),
             user_id=user_id,
             execution_time_seconds=execution_time_seconds,
-            timing_metrics=timing_metrics
+            timing_metrics=timing_metrics,
+            syntax_validation=syntax_validation,
+            corrected_contract=corrected_contract,
+            corrected_contract_summary=corrected_contract_summary
         )
 
