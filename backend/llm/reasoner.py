@@ -748,6 +748,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
             function=finding.function,
             swc_id=finding.swc_id,
             fix_verified=False,
+            compiler_verification="not_performed",
             static_evidence=finding.snippet,
             retrieved_knowledge=retrieved_items,
             rag_similarity_score=rag_sim_score,

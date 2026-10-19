@@ -202,6 +202,8 @@ class SecurityPipeline:
                     recommendation=recommendation,
                     original_code=finding.snippet,
                     fixed_code="Manual fix required (AI not used)",
+                    fix_verified=False,
+                    compiler_verification="not_performed",
                     fallback_used=False,
                     model_used="RAG Only (No AI)",
                     contract=finding.contract,
@@ -238,25 +240,65 @@ class SecurityPipeline:
 
         raw_findings_by_id = {finding.id: finding for finding in raw_findings}
         for verified in verified_findings:
-            # The only deterministic auto-fix currently supported is SWC-103:
-            # pin floating pragmas, then compile and rescan the complete source.
-            # LLM snippets are not full-contract fixes and are never exposed as such.
+            # Generate individual fixed code for each finding using the patcher system
             raw_finding = raw_findings_by_id.get(verified.finding_id)
-            if raw_finding and raw_finding.category == "floating-pragma":
-                fix = generate_floating_pragma_fix(source_code)
-                verified.fixed_code = fix.get("fixed_code") or "Manual remediation required"
-                verified.fix_verified = bool(fix.get("fix_verified"))
-                verified.compiler_verification = fix.get("compiler_verification", "not_performed")
-                verified.fix_verification_reason = fix.get("fix_verification_reason") or (
-                    "Compiler verification failed; manual remediation required"
-                    if verified.compiler_verification == "failed"
-                    else "Compiler verification unavailable; manual remediation required"
-                )
+            if raw_finding:
+                try:
+                    # Special handling for SWC-103 (floating pragma): use the full contract fix
+                    # from generate_floating_pragma_fix() when available and verified
+                    if verified.vulnerability == "floating-pragma" or verified.swc_id == "SWC-103":
+                        from backend.llm.reasoner import generate_floating_pragma_fix
+                        pragma_fix = generate_floating_pragma_fix(source_code)
+                        if pragma_fix.get("fix_verified") and pragma_fix.get("fixed_code"):
+                            verified.fixed_code = pragma_fix["fixed_code"]
+                            verified.fix_verified = pragma_fix["fix_verified"]
+                            verified.compiler_verification = pragma_fix.get("compiler_verification", "not_performed")
+                            verified.fix_verification_reason = pragma_fix.get("fix_verification_reason")
+                            verified.patch_applied = True
+                            verified.manual_remediation_required = False
+                            continue  # Skip the patcher system for this finding
+                    
+                    from backend.remediation.patcher import create_patch_for_finding
+                    
+                    finding_dict = {
+                        "finding_id": verified.finding_id,
+                        "category": verified.vulnerability,
+                        "line_start": verified.affected_lines[0] if verified.affected_lines else raw_finding.line_start,
+                        "line_end": verified.affected_lines[-1] if verified.affected_lines else raw_finding.line_end,
+                        "function": verified.function or raw_finding.function,
+                        "contract": verified.contract or raw_finding.contract
+                    }
+                    
+                    patch = create_patch_for_finding(source_code, finding_dict)
+                    
+                    if patch and not patch.manual_required and patch.patched_lines:
+                        # Convert patched lines to code snippet
+                        verified.fixed_code = "\n".join(patch.patched_lines)
+                        verified.patch_applied = True
+                        verified.patch_description = patch.description
+                        verified.source_range_start = patch.line_start
+                        verified.source_range_end = patch.line_end
+                        verified.manual_remediation_required = False
+                    else:
+                        verified.fixed_code = "Manual remediation required"
+                        verified.patch_applied = False
+                        verified.manual_remediation_required = True
+                        verified.manual_remediation_reason = patch.manual_reason if patch else "No safe automatic remediation available"
+                        verified.fix_verified = False
+                        verified.compiler_verification = "not_performed"
+                except Exception as e:
+                    logger.warning("Failed to generate fix for finding %s: %s", verified.finding_id, str(e))
+                    verified.fixed_code = "Manual remediation required"
+                    verified.manual_remediation_required = True
+                    verified.manual_remediation_reason = f"Fix generation failed: {str(e)}"
+                    verified.fix_verified = False
+                    verified.compiler_verification = "not_performed"
             else:
                 verified.fixed_code = "Manual remediation required"
+                verified.manual_remediation_required = True
+                verified.manual_remediation_reason = "Original finding not found"
                 verified.fix_verified = False
                 verified.compiler_verification = "not_performed"
-                verified.fix_verification_reason = "No safe deterministic automatic remediation is available"
 
         for verified in verified_findings:
             sev = str(verified.severity).title()
