@@ -1,5 +1,6 @@
 import pytest
 import uuid
+import asyncio
 from sqlalchemy import select
 from httpx import AsyncClient, ASGITransport
 from backend.main import app
@@ -421,6 +422,34 @@ contract Test {
 
     # They should be different
     assert individual_fix != combined_fix
+
+
+def test_pipeline_includes_corrected_contract_in_response():
+    """Test that the pipeline includes corrected_contract in the API response."""
+    import asyncio
+    from backend.pipeline import SecurityPipeline
+
+    async def test():
+        source = """pragma solidity ^0.8.0;
+contract Test {
+    uint256 public value;
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+        pipeline = SecurityPipeline()
+        report = await pipeline.scan(source, 'Test.sol', mode='A')
+
+        # Check that corrected_contract is in the response
+        response_dict = report.model_dump()
+        assert "corrected_contract" in response_dict
+        assert "corrected_contract_summary" in response_dict
+
+        # Check that it's not empty when patches are applied
+        if report.corrected_contract:
+            assert len(report.corrected_contract) > 0
+            assert "contract Test" in report.corrected_contract
+
+    asyncio.run(test())
 
 
 # ─────────────────────────────────────────────────────────────────────────────

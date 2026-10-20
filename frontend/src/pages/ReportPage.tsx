@@ -1337,9 +1337,6 @@ export default function ReportPage() {
         {/* Safe banner */}
         {isSafe && <SafeBanner report={report} />}
 
-        {/* Corrected Contract section */}
-        {!isSafe && <CorrectedContractSection report={report} />}
-
         {/* Phase 3: Blockchain Audit Integrity section */}
         <BlockchainSection report={report} analysisId={report.analysis_id} />
 
@@ -1414,6 +1411,9 @@ export default function ReportPage() {
             )}
           </>
         )}
+
+        {/* Complete Corrected Solidity Source Code section */}
+        {!isSafe && <CorrectedContractSection report={report} />}
       </div>
     </div>
   );
