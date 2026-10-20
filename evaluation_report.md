@@ -74,3 +74,79 @@ The following empirical results were derived directly from running `generate_and
 1. Target vulnerability is eliminated.
 2. No new Critical or High vulnerabilities are introduced.
 Fixes that fail either check receive `fix_verified = False`.
+
+---
+
+## Separate Mode A Validation Run
+
+**Date:** Not recorded
+**Full Test Suite:** 160 passed, 1 skipped in the latest recorded full-suite run. The skipped test was environment-dependent.
+**Frontend Build:** Passed
+
+### Results from Separate Mode A Run
+The following results are from a separate Mode A run after the safe-delegatecall detection change. They are separate from the committed four-mode benchmark in `test_suite_results.json`.
+
+| Approach Mode | TP | FP | TN | FN | Precision | Recall | F1-Score | Total Contracts |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Static-Only (Mode A)** | 13 | 0 | 9 | 0 | **100.00%** | **100.00%** | **100.00%** | 22 |
+
+### Confusion Matrix
+```
+                    Predicted
+                Vulnerable  Safe
+Actual Vulnerable    13         0
+Actual Safe          0          9
+```
+
+### Fix Applied
+**Issue:** TC4_SafeDelegatecall.sol was incorrectly flagged as vulnerable (1 false positive)
+
+**Root Cause:** The `_check_dangerous_delegatecall` regex pattern did not recognize type modifiers (e.g., `public`, `private`) before `immutable`.
+
+**Fix:** Updated regex in `backend/analyzer/static_analyzer.py` line 641:
+```python
+# Before:
+if re.search(rf'\b(?:constant|immutable)\s+{target_var}\b', l):
+
+# After:
+if re.search(rf'\b(?:constant|immutable)\s+(?:public|private|internal|external\s+)?{target_var}\b', l):
+```
+
+**Verification:** TC4_SafeDelegatecall.sol now correctly shows only Low severity (floating pragma) finding and is not classified as vulnerable. TC4_DangerousDelegatecall.sol still correctly detected as Critical.
+
+### Additional Validations
+- **Syntax Validation:** 11/11 tests passed (valid contracts, missing semicolons, unmatched braces, compiler fallback)
+- **Remediation:** 11/11 tests passed in the reported remediation test group (source-aware patching, non-overlapping patches, syntax validation, re-analysis)
+- **Pipeline:** 4/4 tests passed in the reported pipeline test group (end-to-end, LLM fallback, fix verification, severity consistency)
+- **Frontend:** TypeScript compilation passed, Vite build succeeded
+
+### Supported Automatic Remediation
+- Floating pragma: Pin to exact version
+- tx.origin: Replace with msg.sender
+- Unchecked calls: Add return value checking
+- Reentrancy: Manual review required; do not claim automatic CEI remediation without verified coverage
+- Unprotected selfdestruct: Add onlyOwner (if owner variable exists)
+
+### Manual Review Required
+- Missing access control: Cannot safely infer intended policy
+- Timestamp dependence: Requires architectural change (randomness oracle)
+- Other unsupported types: Specific patterns requiring human judgment
+
+### Known Limitations
+1. Compiler dependency: Full syntax validation requires py-solc-x installation
+2. Reentrancy: Automatic remediation is not claimed; review the specific implementation and tests before describing support
+3. Access control: Cannot automatically add authorization rules
+4. Ollama timeouts: AI verification frequently times out, but fallback preserves static findings
+5. Compiler verification on test system: Some integration tests skip due to compiler issues
+
+### Validation Summary
+- **Detection metrics:** 100% on this 22-contract evaluation set (Mode A only)
+- **False positives:** 0 in this evaluation set
+- **False negatives:** 0 in this evaluation set
+- **Syntax validation:** Tests reported as passing; compiler availability remains a limitation
+- **Remediation:** Source-aware patches; further independent verification is needed
+- **Fallback behavior:** Intended to preserve static findings when AI verification fails
+- **Full test suite:** 160 passed, 1 skipped in the latest recorded full-suite run
+- **Frontend build:** TypeScript compilation and Vite build reported successful
+
+The system has encouraging results on this specific 22-contract evaluation set. These results do not establish generalization to other datasets. Further independent benchmarking and verified remediation testing are needed before making broader research-readiness claims.
