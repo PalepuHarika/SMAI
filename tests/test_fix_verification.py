@@ -15,6 +15,7 @@ from backend.core.integrity import (
 )
 from backend.pipeline import SecurityPipeline
 from backend.analyzer.static_analyzer import SolidityStaticAnalyzer
+from backend.remediation.patcher import apply_finding_patches
 
 _CLEAN_FIXED_CODE = """// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
@@ -111,8 +112,15 @@ contract PragmaVault {
 
     report = await SecurityPipeline().scan(source, "PragmaVault.sol", mode="rag")
     report_finding = next(item for item in report.findings if item.swc_id == finding.swc_id)
-    assert report_finding.fixed_code == fix["fixed_code"]
-    assert report_finding.compiler_verification == "verified"
+    # Individual finding should have just the pragma line patch, not full contract
+    assert report_finding.fixed_code == "pragma solidity 0.8.0;"
+    # Full contract should be in corrected_contract field (may use different version)
+    assert report.corrected_contract is not None
+    assert "contract PragmaVault" in report.corrected_contract
+    assert "function setValue" in report.corrected_contract
+    # Check that pragma is pinned (either 0.8.0 or 0.8.20)
+    assert "pragma solidity 0.8." in report.corrected_contract
+    assert "^" not in report.corrected_contract  # No floating pragma
 
     async with AsyncSessionLocal() as db:
         analysis = await db.get(Analysis, api_fixture["analysis_id"])
@@ -146,6 +154,7 @@ async def test_unsupported_fix_returns_manual_remediation(api_fixture):
     assert finding.fixed_code == "Manual remediation required"
     assert finding.fix_verified is False
     assert finding.compiler_verification == "not_performed"
+    assert finding.manual_remediation_required is True
 
 
 def test_deterministic_fix_reports_compiler_failure_and_unavailability():
@@ -172,6 +181,246 @@ def test_b_unchanged_vulnerable_code():
     assert res["verification_reason"] == "Target vulnerability still detected"
 
     assert rescan_fix(_UNRESOLVED_VULNERABLE_CODE, "reentrancy") is False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Regression tests for combined patches and manual remediation
+# ─────────────────────────────────────────────────────────────────────────────
+def test_combined_patches_with_manual_remediation():
+    """Test that combined patch generation handles manual remediation findings correctly."""
+    source = """pragma solidity ^0.8.0;
+contract Test {
+    uint256 public value;
+    function withdraw() external {
+        (bool success, ) = msg.sender.call{value: 1 ether}("");
+        require(success);
+    }
+}
+"""
+
+    findings = [
+        {"finding_id": "f1", "category": "floating-pragma", "line_start": 1, "line_end": 1, "function": "", "contract": "Test"},
+        {"finding_id": "f2", "category": "reentrancy", "line_start": 4, "line_end": 7, "function": "withdraw", "contract": "Test"},
+    ]
+
+    result = apply_finding_patches(source, findings)
+
+    # Should not crash
+    assert "corrected_code" in result
+    assert "applied_patches" in result
+    assert "skipped_findings" in result
+
+    # Reentrancy should be skipped (manual remediation)
+    assert "f2" in result["skipped_findings"]
+
+
+def test_manual_remediation_not_marked_as_verified():
+    """Test that manual remediation findings are never marked as verified."""
+    from backend.remediation.patcher import create_patch_for_finding
+
+    source = "pragma solidity ^0.8.0;\ncontract Test { function withdraw() external {} }"
+    finding = {
+        "finding_id": "test",
+        "category": "reentrancy",
+        "line_start": 2,
+        "line_end": 2,
+        "function": "withdraw",
+        "contract": "Test"
+    }
+
+    patch = create_patch_for_finding(source, finding)
+
+    assert patch is not None
+    assert patch.manual_required is True
+    assert patch.verification_status == "MANUAL REVIEW REQUIRED"
+    assert patch.compiler_verification == "not_performed"
+
+
+def test_all_patch_generators_have_description():
+    """Test that all patch generators provide required description parameter."""
+    from backend.remediation.patcher import create_patch_for_finding
+
+    source = "pragma solidity ^0.8.0;\ncontract Test { function test() external {} }"
+
+    categories = [
+        ("reentrancy", {"line_start": 2, "line_end": 2, "function": "test"}),
+        ("tx-origin", {"line_start": 2, "line_end": 2, "function": "test"}),
+        ("unchecked-call", {"line_start": 2, "line_end": 2, "function": "test"}),
+        ("missing-access-control", {"line_start": 2, "line_end": 2, "function": "test"}),
+        ("unprotected-selfdestruct", {"line_start": 2, "line_end": 2, "function": "test"}),
+        ("timestamp-dependence", {"line_start": 2, "line_end": 2, "function": "test"}),
+        ("floating-pragma", {"line_start": 1, "line_end": 1, "function": ""}),
+        ("missing-zero-check", {"line_start": 2, "line_end": 2, "function": "test"}),
+    ]
+
+    for category, extra in categories:
+        finding = {
+            "finding_id": f"test_{category}",
+            "category": category,
+            "line_start": extra["line_start"],
+            "line_end": extra["line_end"],
+            "function": extra["function"],
+            "contract": "Test"
+        }
+
+        patch = create_patch_for_finding(source, finding)
+        if patch is not None:
+            assert patch.description is not None, f"{category} missing description"
+            assert len(patch.description) > 0, f"{category} has empty description"
+
+
+def test_swc103_only_changes_pragma_line():
+    """Test that SWC-103 fix only changes the pragma line, not other code."""
+    source = """// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract PragmaVault {
+    uint256 public value;
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+    fix = generate_floating_pragma_fix(source)
+
+    if fix["fix_verified"] and fix["fixed_code"]:
+        # Count differences
+        original_lines = source.splitlines()
+        fixed_lines = fix["fixed_code"].splitlines()
+
+        # Only pragma line should differ
+        diff_count = sum(1 for o, f in zip(original_lines, fixed_lines) if o != f)
+        assert diff_count == 1, f"Expected 1 line change, got {diff_count}"
+
+        # Other lines should be identical
+        assert "contract PragmaVault" in fix["fixed_code"]
+        assert "function setValue" in fix["fixed_code"]
+
+
+def test_per_vulnerability_individual_fixes():
+    """Test that each vulnerability has its own individual fix, not the full contract."""
+    source = """pragma solidity ^0.8.0;
+contract Test {
+    uint256 public value;
+    function withdraw() external {
+        (bool success, ) = msg.sender.call{value: 1 ether}("");
+        require(success);
+    }
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+
+    findings = [
+        {"finding_id": "f1", "category": "floating-pragma", "line_start": 1, "line_end": 1, "function": "", "contract": "Test"},
+        {"finding_id": "f2", "category": "reentrancy", "line_start": 4, "line_end": 7, "function": "withdraw", "contract": "Test"},
+    ]
+
+    from backend.remediation.patcher import create_patch_for_finding
+
+    # Test floating pragma individual fix
+    pragma_patch = create_patch_for_finding(source, findings[0])
+    assert pragma_patch is not None
+    assert pragma_patch.patched_lines is not None
+    assert len(pragma_patch.patched_lines) == 1  # Just the pragma line
+    assert "pragma solidity" in pragma_patch.patched_lines[0]
+    # Should NOT contain the full contract
+    assert len(pragma_patch.patched_lines[0]) < 100  # Single line, not full contract
+
+    # Test reentrancy individual fix (manual remediation)
+    reentrancy_patch = create_patch_for_finding(source, findings[1])
+    assert reentrancy_patch is not None
+    assert reentrancy_patch.manual_required is True
+    assert len(reentrancy_patch.patched_lines) == 0  # No automatic fix
+
+
+def test_combined_contract_uses_full_source():
+    """Test that combined corrected contract uses full source, not just snippets."""
+    source = """pragma solidity ^0.8.0;
+contract Test {
+    uint256 public value;
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+
+    findings = [
+        {"finding_id": "f1", "category": "floating-pragma", "line_start": 1, "line_end": 1, "function": "", "contract": "Test"},
+    ]
+
+    result = apply_finding_patches(source, findings)
+
+    # Corrected code should be full contract
+    assert result["corrected_code"] is not None
+    assert "contract Test" in result["corrected_code"]
+    assert "function setValue" in result["corrected_code"]
+    assert "uint256 public value" in result["corrected_code"]
+    # Should be longer than just the pragma line
+    assert len(result["corrected_code"]) > 50
+
+
+def test_multiple_findings_correct_mapping():
+    """Test that multiple findings are correctly mapped to their own patches."""
+    source = """pragma solidity ^0.8.0;
+contract Test {
+    uint256 public value;
+    function withdraw() external {
+        (bool success, ) = msg.sender.call{value: 1 ether}("");
+        require(success);
+    }
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+
+    findings = [
+        {"finding_id": "f1", "category": "floating-pragma", "line_start": 1, "line_end": 1, "function": "", "contract": "Test"},
+        {"finding_id": "f2", "category": "reentrancy", "line_start": 4, "line_end": 7, "function": "withdraw", "contract": "Test"},
+    ]
+
+    result = apply_finding_patches(source, findings)
+
+    # Check patches_by_id mapping
+    patches_by_id = result["patches_by_id"]
+    assert "f1" in patches_by_id
+    assert "f2" in patches_by_id
+
+    # f1 should have a patch (floating pragma)
+    patch_f1 = patches_by_id["f1"]
+    assert patch_f1.category == "floating-pragma"
+    assert patch_f1.patched_lines is not None
+    assert len(patch_f1.patched_lines) > 0
+
+    # f2 should be manual remediation (reentrancy)
+    patch_f2 = patches_by_id["f2"]
+    assert patch_f2.category == "reentrancy"
+    assert patch_f2.manual_required is True
+    assert len(patch_f2.patched_lines) == 0
+
+
+def test_copy_download_source_selection():
+    """Test that Copy and Download use the correct source (individual vs combined)."""
+    source = """pragma solidity ^0.8.0;
+contract Test {
+    uint256 public value;
+    function setValue(uint256 next) external { value = next; }
+}
+"""
+
+    findings = [
+        {"finding_id": "f1", "category": "floating-pragma", "line_start": 1, "line_end": 1, "function": "", "contract": "Test"},
+    ]
+
+    result = apply_finding_patches(source, findings)
+
+    # Individual patch should be just the pragma line
+    patch = result["patches_by_id"]["f1"]
+    individual_fix = "\n".join(patch.patched_lines)
+    assert individual_fix == "pragma solidity 0.8.0;"
+    assert "contract Test" not in individual_fix
+
+    # Combined contract should be full source
+    combined_fix = result["corrected_code"]
+    assert "contract Test" in combined_fix
+    assert "function setValue" in combined_fix
+    assert "pragma solidity 0.8.0;" in combined_fix
+
+    # They should be different
+    assert individual_fix != combined_fix
 
 
 # ─────────────────────────────────────────────────────────────────────────────

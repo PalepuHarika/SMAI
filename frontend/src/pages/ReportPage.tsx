@@ -430,17 +430,20 @@ function FindingCard({
     }
   };
 
-  const hasRealFix = Boolean(
-    f.fixed_code && f.fixed_code !== 'N/A' && f.fixed_code !== 'Manual remediation required' &&
-    f.fix_verified && f.compiler_verification === 'verified'
+  // Separate states for better clarity
+  const hasPatch = Boolean(
+    f.fixed_code && f.fixed_code !== 'N/A' && f.fixed_code !== 'Manual remediation required'
   );
+  const isVerified = Boolean(f.fix_verified === true && f.compiler_verification === 'verified');
+  const requiresManualRemediation = Boolean(f.manual_remediation_required);
+  const hasRealFix = hasPatch && !requiresManualRemediation;
   const sourceFilename = contractName || f.contract || 'Contract.sol';
   const fixedFilename = `${sourceFilename.replace(/\.sol$/i, '')}_fixed.sol`;
   const copyFixedContract = async () => {
     if (!hasRealFix) return;
     try {
       await navigator.clipboard.writeText(f.fixed_code);
-      setCopyStatus('Fixed contract copied.');
+      setCopyStatus('Individual fix copied.');
     } catch {
       setCopyStatus('Clipboard access failed. Copy the source manually.');
     }
@@ -451,7 +454,7 @@ function FindingCard({
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = fixedFilename;
+    anchor.download = `${f.vulnerability}_fix.sol`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -465,7 +468,8 @@ function FindingCard({
   const hasRag = Boolean(f.retrieved_knowledge && f.retrieved_knowledge.length > 0);
   const hasBeforeAfter = Boolean(
     f.original_code && f.original_code !== 'Code unavailable' && f.original_code !== 'N/A' &&
-    f.fixed_code && f.fixed_code !== 'N/A' && !/^manual fix required/i.test(f.fixed_code)
+    f.fixed_code && f.fixed_code !== 'N/A' && !/^manual fix required/i.test(f.fixed_code) &&
+    !f.manual_remediation_required
   );
 
   const statusChip = isConfirmed
@@ -746,10 +750,10 @@ function FindingCard({
           {hasRealFix && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Fixed Contract / Corrected Solidity</p>
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Corrected Code (Individual Finding)</p>
                 <div className="flex gap-2">
-                  <button type="button" onClick={copyFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Copy Fixed Contract</button>
-                  <button type="button" onClick={downloadFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Download Fixed Contract</button>
+                  <button type="button" onClick={copyFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Copy This Fix</button>
+                  <button type="button" onClick={downloadFixedContract} className="text-xs px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">Download This Fix</button>
                 </div>
                 {analysisId && (
                   <button
@@ -776,17 +780,17 @@ function FindingCard({
               {/* Fix Verification Status */}
               <div
                 className={`rounded-lg border p-3 ${
-                  f.fix_verified
+                  isVerified
                     ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300'
                     : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
                 }`}
               >
                 <div className="flex items-center gap-2 font-bold text-xs tracking-wider">
-                  <span>{f.fix_verified ? '✓ FIX VERIFIED' : '⚠ FIX NOT VERIFIED'}</span>
+                  <span>{isVerified ? '✓ FIX VERIFIED' : '⚠ FIX NOT VERIFIED'}</span>
                 </div>
                 <p className="text-xs mt-1 text-gray-300">
                   {f.fix_verification_reason || (
-                    f.fix_verified
+                    isVerified
                       ? 'Vulnerability resolved and no new High/Critical findings'
                       : (f.fix_verified === false
                           ? 'Target vulnerability still detected'
@@ -883,7 +887,7 @@ function CorrectedContractSection({ report }: { report: VulnerabilityReport }) {
   const handleDownload = () => {
     if (!report.corrected_contract) return;
     setDownloading(true);
-    const blob = new Blob([report.corrected_contract], { type: 'text/plain' });
+    const blob = new Blob([report.corrected_contract], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -906,7 +910,7 @@ function CorrectedContractSection({ report }: { report: VulnerabilityReport }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-blue-400 text-xl">🛠</span>
-          <h3 className="text-lg font-bold text-white">Corrected Contract</h3>
+          <h3 className="text-lg font-bold text-white">Complete Corrected Solidity Source Code</h3>
         </div>
         <div className="flex gap-2">
           <button

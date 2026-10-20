@@ -739,7 +739,7 @@ Return valid JSON matching the schema exactly. Do not output anything else.
                 "so the source evidence was not independently confirmed. The finding remains UNVERIFIED."
             ),
             attack_scenario="AI verification was not completed; no attack scenario could be confirmed from source evidence.",
-            recommendation="Automatic fix unavailable â€” manual remediation required until the finding is reviewed.",
+            recommendation="Automatic fix unavailable — manual remediation required until the finding is reviewed.",
             original_code=context.function_source,
             fixed_code="",
             fallback_used=True,

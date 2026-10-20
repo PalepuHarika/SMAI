@@ -57,18 +57,18 @@ def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int
 
     for f in findings:
         conf = f.confidence if f.confidence is not None else 0.8
-        
+
         # Safely handle NaN or invalid types
         if not isinstance(conf, (int, float)) or conf != conf:
             conf = 0.8
         conf = max(0.0, min(1.0, float(conf)))
-        
+
         weight = deduction_weights.get(f.severity, 8.0)
-        
+
         if f.verification_status in ["CONFIRMED", "UNVERIFIED"]:
             if f.severity in tier_deductions:
                 tier_deductions[f.severity] += weight * conf
-            
+
             if weight > max_severity_weight:
                 max_severity_weight = weight
                 highest_severity = str(f.severity).title()
@@ -79,7 +79,7 @@ def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int
         score -= min(total_deduction, cap)
 
     final_score = max(0, min(100, int(round(score))))
-    
+
     if final_score >= 90:
         base_risk = "Low Risk"
     elif final_score >= 70:
@@ -95,7 +95,7 @@ def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int
         "Moderate Risk": 2,
         "Low Risk": 1
     }
-    
+
     severity_floor = {
         "Critical": "Critical Risk",
         "High": "High Risk",
@@ -105,7 +105,7 @@ def calculate_security_score(findings: List[VerifiedVulnerability]) -> Tuple[int
     }
 
     floor_risk = severity_floor.get(highest_severity, "Low Risk")
-    
+
     if risk_hierarchy.get(floor_risk, 1) > risk_hierarchy.get(base_risk, 1):
         risk_level = floor_risk
     else:
@@ -156,10 +156,10 @@ class SecurityPipeline:
             "hybrid": "hybrid"
         }
         normalized_mode = mode_mapping.get(mode_str, "hybrid")
-        
+
         # Validate syntax before proceeding
         syntax_validation = self.analyzer.validate_syntax(source_code)
-        
+
         # If syntax is invalid, still attempt analysis but flag the issue
         static_started = time.perf_counter()
         raw_findings = self.analyzer.analyze(source_code, contract_name)
@@ -172,7 +172,7 @@ class SecurityPipeline:
             for finding in raw_findings:
                 context = self.extractor.extract(source_code, finding)
                 knowledge = self.retriever.retrieve(finding, context, top_k=2)
-                
+
                 if knowledge:
                     explanation = f"**RAG Context**: {knowledge[0].get('description', '')}"
                     recommendation = knowledge[0].get('mitigation', '')
@@ -226,10 +226,10 @@ class SecurityPipeline:
                 if normalized_mode == "hybrid":
                     knowledge = self.retriever.retrieve(finding, context, top_k=2)
                 return await self.reasoner.verify_finding(finding, context, knowledge)
-            
+
             results = await asyncio.gather(*(verify_single_finding(f) for f in raw_findings))
             ai_seconds = time.perf_counter() - ai_started
-            
+
             for verified in results:
                 if verified.is_vulnerable or verified.verification_status in ["CONFIRMED", "UNVERIFIED"]:
                     if normalized_mode == "ai":
@@ -244,22 +244,8 @@ class SecurityPipeline:
             raw_finding = raw_findings_by_id.get(verified.finding_id)
             if raw_finding:
                 try:
-                    # Special handling for SWC-103 (floating pragma): use the full contract fix
-                    # from generate_floating_pragma_fix() when available and verified
-                    if verified.vulnerability == "floating-pragma" or verified.swc_id == "SWC-103":
-                        from backend.llm.reasoner import generate_floating_pragma_fix
-                        pragma_fix = generate_floating_pragma_fix(source_code)
-                        if pragma_fix.get("fix_verified") and pragma_fix.get("fixed_code"):
-                            verified.fixed_code = pragma_fix["fixed_code"]
-                            verified.fix_verified = pragma_fix["fix_verified"]
-                            verified.compiler_verification = pragma_fix.get("compiler_verification", "not_performed")
-                            verified.fix_verification_reason = pragma_fix.get("fix_verification_reason")
-                            verified.patch_applied = True
-                            verified.manual_remediation_required = False
-                            continue  # Skip the patcher system for this finding
-                    
                     from backend.remediation.patcher import create_patch_for_finding
-                    
+
                     finding_dict = {
                         "finding_id": verified.finding_id,
                         "category": verified.vulnerability,
@@ -268,9 +254,9 @@ class SecurityPipeline:
                         "function": verified.function or raw_finding.function,
                         "contract": verified.contract or raw_finding.contract
                     }
-                    
+
                     patch = create_patch_for_finding(source_code, finding_dict)
-                    
+
                     if patch and not patch.manual_required and patch.patched_lines:
                         # Convert patched lines to code snippet
                         verified.fixed_code = "\n".join(patch.patched_lines)
@@ -333,14 +319,14 @@ class SecurityPipeline:
             risk_level=risk_level,
             analysis_mode=normalized_mode
         )
-        
+
         # Generate combined corrected contract with all compatible fixes
         corrected_contract = None
         corrected_contract_summary = None
         if is_vuln and syntax_validation.get("is_valid", True):
             try:
                 from backend.remediation.patcher import apply_finding_patches
-                
+
                 # Convert findings to dict format for patcher
                 findings_dict = []
                 for f in verified_findings:
@@ -352,9 +338,9 @@ class SecurityPipeline:
                         "function": f.function,
                         "contract": f.contract
                     })
-                
+
                 patch_result = apply_finding_patches(source_code, findings_dict)
-                
+
                 if patch_result.get("corrected_code") and patch_result.get("corrected_code") != source_code:
                     corrected_contract = patch_result["corrected_code"]
                     corrected_contract_summary = {
@@ -365,7 +351,7 @@ class SecurityPipeline:
                         "original_findings": patch_result.get("original_findings_count", 0),
                         "corrected_findings": patch_result.get("corrected_findings_count", 0)
                     }
-                    
+
                     # Update individual findings with patch info
                     for patch in patch_result.get("applied_patches", []):
                         for f in verified_findings:
